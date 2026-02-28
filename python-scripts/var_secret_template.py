@@ -12,4 +12,4 @@ DISCORD_BOT_TOKEN = None
 WIKI_CREDS = ('', '')
 
 # (string) Wiki session token; to be retrieved within on_ready()
-WIKI_CSRF_TOKEN = ''
+WIKI_CSRF_TOKEN = None

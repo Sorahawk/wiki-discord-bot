@@ -8,6 +8,6 @@ async def send_traceback(e, channel):
 	var_global.OPERATION_LOGGER.error(full_trace)
 
 	if len(full_trace) <= 1994:
-		await channel.send(f"```{full_trace}```")
+		await channel.send(f'```{full_trace}```')
 	else:
 		await channel.send(e, file=generate_file(full_trace, 'traceback.txt'))

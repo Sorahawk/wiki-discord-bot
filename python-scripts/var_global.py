@@ -48,16 +48,6 @@ FEED_CHANNEL = None
 
 ### MAIN ###
 
-# symbol to signify bot commands
-BOT_COMMAND_PREFIX = '.'
-
-# list of bot commands
-BOT_COMMAND_LIST = []
-
-# dictionary of command flags
-# each flag can only be a single letter
-BOT_COMMAND_FLAGS = { 'all': 'a' }
-
 # dictionary of the available Discord statuses for the bot
 # if activity (key) is meant to be a 'Streaming' activity, then corresponding value is a string URL
 # otherwise corresponding value is the respective ActivityType

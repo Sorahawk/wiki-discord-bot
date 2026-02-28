@@ -46,7 +46,7 @@ def make_http_request(endpoint, method='GET', payload={}, retry=False):
 	# if token expired, refresh token and retry request once
 	data = response.json()
 	if data.get('error') and not retry:
-		var_secret.WIKI_CSRF_TOKEN = get_wiki_token()
+		var_secret.WIKI_CSRF_TOKEN = wiki_login()
 		return make_http_request(endpoint, method, payload, True)
 
 	return data

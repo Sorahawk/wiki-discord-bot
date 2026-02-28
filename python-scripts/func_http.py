@@ -29,7 +29,7 @@ def wiki_login():
 		var_global.OPERATION_LOGGER.info(f'Successfully logged into Wiki as {data['lgusername']}.')
 		return get_wiki_token()
 	else:
-		raise Exception(f'Wiki login failed: {result} - {data.get('reason', 'no reason specified')}.')
+		raise Exception(f'Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}.')
 
 
 # standard function for HTTP requests

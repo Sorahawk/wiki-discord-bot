@@ -33,20 +33,21 @@ def wiki_login():
 
 
 # standard function for HTTP requests
-def make_http_request(endpoint, method='GET', payload={}):
+def make_http_request(endpoint, method='GET', payload={}, retry=False):
 	session = var_global.SESSION
 	payload['token'] = var_secret.WIKI_CSRF_TOKEN
 
+	var_global.OPERATION_LOGGER.info(f'Making {method} request to {endpoint} with payload {payload}.')
 	if method == 'POST':
 		response = session.request('POST', endpoint, data=payload)
 	else:
 		response = session.request(method, endpoint, params=payload)
 
-	# if token expired, refresh token and retry request
+	# if token expired, refresh token and retry request once
 	data = response.json()
-	if data.get('error', {}).get('code') in ['sessionlost', 'badtoken']:
+	if data.get('error') and not retry:
 		var_secret.WIKI_CSRF_TOKEN = get_wiki_token()
-		return make_http_request(endpoint, method, payload)
+		return make_http_request(endpoint, method, payload, True)
 
 	return data
 

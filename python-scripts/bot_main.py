@@ -27,6 +27,7 @@ async def on_ready():
 	# on_ready() may be called more than once, typically whenever the bot momentarily loses connection to Discord 
 	# check if this is first time bot is calling on_ready()
 	if var_global.MAIN_CHANNEL:
+		var_secret.WIKI_CSRF_TOKEN = wiki_login()
 		return
 
 	var_global.OPERATION_LOGGER = getLogger('Wiki Bot Operations Log')

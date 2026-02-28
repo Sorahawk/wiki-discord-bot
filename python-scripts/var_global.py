@@ -87,4 +87,4 @@ FEED_BLACKLIST = [
 ]
 
 # regex string to match delete-compatible messages and grab the corresponding page title
-DELETE_REGEX = '(?:created|edited)\\s+\\[([^\\]]+)\\]'
+DELETE_REGEX = '(?:created)\\s+\\[([^\\]]+)\\]'

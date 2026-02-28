@@ -22,9 +22,9 @@ async def feed_reverse_actions(payload):
 
 	# grab relevant page title
 	match = re.search(DELETE_REGEX, content)
-	if match:
-		title = match.group(1)
+	if not match:
+		return
 
 	# delete page
-	response = delete_wiki_page(title, f'Deleted via Discord by {member.global_name}')
+	response = delete_wiki_page(match.group(1), f'Deleted via Discord by {member.global_name}')
 	var_global.OPERATION_LOGGER.info(response)

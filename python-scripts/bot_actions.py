@@ -27,4 +27,4 @@ async def feed_reverse_actions(payload):
 
 	# delete page
 	response = delete_wiki_page(title, f'Deleted via Discord by {member.global_name}')
-	print(response)
+	var_global.OPERATION_LOGGER.info(response)

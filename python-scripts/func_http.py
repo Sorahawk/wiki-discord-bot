@@ -26,7 +26,7 @@ def wiki_login():
 	data = response.json()['login']
 
 	if data['result'] == 'Success':
-		print(f'Successfully logged into Wiki as {data['lgusername']}.')
+		var_global.OPERATION_LOGGER.info(f'Successfully logged into Wiki as {data['lgusername']}.')
 		return get_wiki_token()
 	else:
 		raise Exception(f'Wiki login failed: {result} - {data.get('reason', 'no reason specified')}.')

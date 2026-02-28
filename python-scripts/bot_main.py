@@ -29,7 +29,8 @@ async def on_ready():
 	if var_global.MAIN_CHANNEL:
 		return
 
-	print(f"{bot.user} is online.")
+	var_global.OPERATION_LOGGER = getLogger('Wiki Bot Operations Log')
+	var_global.OPERATION_LOGGER.info(f"{bot.user} is online.")
 
 	# initialise global main channel object
 	var_global.MAIN_CHANNEL = bot.get_channel(MAIN_CHANNEL_ID)
@@ -47,7 +48,6 @@ async def on_ready():
 
 		# login to wiki and store CSRF token
 		var_secret.WIKI_CSRF_TOKEN = wiki_login()
-		print()
 
 	except Exception as e:
 		await send_traceback(e, var_global.MAIN_CHANNEL)
@@ -86,6 +86,16 @@ async def on_message(message):
 	except Exception as e:
 		await send_traceback(e, message.channel)
 
+
+# get current directory
+filepath = os.getcwd()
+
+# check if script is running from Linux root directory (systemd service)
+if filepath == '/':
+	filepath = LINUX_ABSOLUTE_PATH
+
+# initialise logging module
+init_logger(filepath)
 
 # start bot
 bot.run(DISCORD_BOT_TOKEN)

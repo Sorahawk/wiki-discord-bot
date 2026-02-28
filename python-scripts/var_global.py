@@ -10,6 +10,8 @@ LINUX_ABSOLUTE_PATH = '/home/ubuntu/wiki-bot/python-scripts'
 # name of the bot service running on the Linux cloud instance
 LINUX_SERVICE_NAME = 'wiki-bot.service'
 
+# logger object to be instantiated at initialisation
+OPERATION_LOGGER = None
 
 
 ### HTTP ###

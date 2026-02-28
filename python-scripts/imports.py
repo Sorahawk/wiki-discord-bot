@@ -1,11 +1,13 @@
 
 # external libraries
+import os
 import re
 import random
 import discord
 import traceback
 
 from discord.ext.tasks import loop
+from logging import basicConfig, DEBUG, getLogger
 
 
 # internal scripts - order of import matters; load the scripts in order of lowest to highest dependency
@@ -18,6 +20,7 @@ from var_secret import *
 from func_utils import *
 from func_http import *
 
+from bot_logging import *
 from bot_messaging import *
 
 from bot_actions import *

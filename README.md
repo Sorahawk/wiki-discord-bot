@@ -7,3 +7,7 @@
     A Discord bot to provider staff of Dune: Awakening Community Wiki with QoL services.
   </p>
 </div>
+
+---
+
+Copyright © 2026, [Sorahawk](https://github.com/Sorahawk)

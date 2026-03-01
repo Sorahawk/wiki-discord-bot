@@ -21,7 +21,7 @@ async def feed_actions(payload):
 
 	# delete page action
 	if payload.emoji.name in ACCEPTED_EMOJIS['delete']:
-		# grab relevant page title
+		# grab page title
 		match = re.search('created\\s+\\[([^\\]]+)\\]', content)
 		if not match:
 			return
@@ -32,4 +32,9 @@ async def feed_actions(payload):
 
 	# revert edit action
 	elif payload.emoji.name in ACCEPTED_EMOJIS['revert']:
-		pass
+		# grab page title and oldid (change ID)
+		match = re.search('edited\\s+\\[([^\\]]+)\\][^\n]*?oldid=(\\d+)', content)
+		if not match:
+			return
+
+		print(match)

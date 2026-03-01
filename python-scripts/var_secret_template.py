@@ -1,15 +1,22 @@
-
-### Make a copy of this file, rename it var_secret.py, and fill it in
+import sys
 
 
 # (boolean) Toggle development/debug mode
 DEBUG_MODE = False
 
-# (string) Discord Bot Token
-DISCORD_BOT_TOKEN = None
+# (string) Discord bot token
+DISCORD_BOT_TOKEN = ''
 
-# (string) Wiki login credentials
-WIKI_CREDS = ('', '')
+# (dictionary of string tuples) Wiki login credentials
+WIKI_CREDS_LIST = {
+	'local': ('', ''),
+	'remote': ('', ''),
+}
 
-# (string) Wiki session token; to be retrieved within on_ready()
+if sys.platform == 'linux':
+	WIKI_CREDS = WIKI_CREDS_LIST['remote']
+else:
+	WIKI_CREDS = WIKI_CREDS_LIST['local']
+
+# (string) Wiki session token, to init during runtime
 WIKI_CSRF_TOKEN = None

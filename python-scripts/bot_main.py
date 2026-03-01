@@ -23,7 +23,7 @@ async def task_rotate_status():
 
 
 # automatically rotate bot's Discord status every 10 minutes
-@loop(minutes=1)
+@loop(minutes=3)
 async def task_refresh_wiki_session():
 	try:
 		check_wiki_session()

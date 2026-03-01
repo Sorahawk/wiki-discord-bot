@@ -2,7 +2,7 @@ from imports import *
 
 
 # standard function for HTTP requests
-def make_http_request(method='GET', endpoint=BASE_API_URL, payload={}):
+def make_http_request(method='GET', endpoint=BASE_API_URL, payload={}, retry=False):
 	session = var_global.SESSION
 	if var_secret.WIKI_CSRF_TOKEN and not payload.get('token'):
 		payload['token'] = var_secret.WIKI_CSRF_TOKEN
@@ -12,6 +12,11 @@ def make_http_request(method='GET', endpoint=BASE_API_URL, payload={}):
 		response = session.request('POST', endpoint, data=payload)
 	else:
 		response = session.request(method, endpoint, params=payload)
+
+	# retry once if token happened to expire before the periodic refresh
+	if response.json().get('error', {}).get('code') in ['badtoken'] and not retry:
+		check_wiki_session()
+		response = make_http_request(method, endpoint, payload, True)
 
 	return response
 

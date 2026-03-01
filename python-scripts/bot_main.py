@@ -48,16 +48,9 @@ async def on_ready():
 	# initialise global feed channel object
 	var_global.FEED_CHANNEL = bot.get_channel(FEED_CHANNEL_ID)
 
-	try:
-		# initialise requests session
-		var_global.SESSION = requests.Session()
-		var_global.SESSION.headers.update(STANDARD_HEADERS)
-
-		# login to wiki and store CSRF token
-		wiki_login()
-
-	except Exception as e:
-		await send_traceback(e, var_global.MAIN_CHANNEL)
+	# initialise requests session
+	var_global.SESSION = requests.Session()
+	var_global.SESSION.headers.update(STANDARD_HEADERS)
 
 	# start tasks
 	task_rotate_status.start()

@@ -4,12 +4,12 @@ import os
 import re
 import httpx
 import random
+import logging
 import asyncio
 import discord
 import traceback
 
 from discord.ext.tasks import loop
-from logging import basicConfig, DEBUG, getLogger
 
 
 # internal scripts - order of import matters; load the scripts in order of lowest to highest dependency

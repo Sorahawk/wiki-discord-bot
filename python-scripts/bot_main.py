@@ -39,14 +39,8 @@ async def on_ready():
 	if var_global.MAIN_CHANNEL:
 		return
 
-	# check if script is running from Linux root directory (systemd service)
-	filepath = os.getcwd()
-
-	if filepath == '/':
-		filepath = LINUX_ABSOLUTE_PATH
-
 	# init logger
-	var_global.OPERATION_LOGGER = init_logger(filepath)
+	var_global.OPERATION_LOGGER = init_logger()
 
 	# init main channel object
 	var_global.MAIN_CHANNEL = bot.get_channel(MAIN_CHANNEL_ID)

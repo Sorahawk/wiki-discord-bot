@@ -2,12 +2,11 @@ from imports import *
 
 
 def init_logger(filepath):
-	basicConfig(
-		filename=f'{filepath}/status.log',
-		filemode='w',
-		format='{asctime} {name} - [{levelname}] {message}',
-		datefmt='%d/%m/%Y %I:%M:%S %p',
-		style='{',
-		level=DEBUG,
-		encoding='utf-8'
-	)
+    handler_file = logging.FileHandler(f'{filepath}/status.log', mode='w', encoding='utf-8')
+    handler_file.setFormatter(logging.Formatter(fmt='{asctime} {name} - [{levelname}] {message}', datefmt='%d/%m/%Y %I:%M:%S %p', style='{'))
+
+    logger = logging.getLogger('Wiki Bot Operations Log')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler_file)
+    
+    return logger

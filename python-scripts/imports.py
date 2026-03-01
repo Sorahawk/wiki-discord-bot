@@ -2,7 +2,9 @@
 # external libraries
 import os
 import re
+import httpx
 import random
+import asyncio
 import discord
 import traceback
 

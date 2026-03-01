@@ -1,10 +1,9 @@
 from imports import *
 
 
-# acts on cross-mark emoji reactions by staff on messages in FEED_CHANNEL
-async def feed_reverse_actions(payload):
-	# only focus on FEED_CHANNEL and ignore all non-accepted emojis
-	if payload.channel_id != FEED_CHANNEL_ID or payload.emoji.name not in ACCEPTED_EMOJIS['CrossMarks']:
+# reacts to emoji responses in FEED_CHANNEL
+async def feed_actions(payload):
+	if payload.channel_id != FEED_CHANNEL_ID:
 		return
 
 	# verify user is staff
@@ -20,11 +19,17 @@ async def feed_reverse_actions(payload):
 		if blacklist_string in content:
 			return
 
-	# grab relevant page title
-	match = re.search(DELETE_REGEX, content)
-	if not match:
-		return
+	# delete page action
+	if payload.emoji.name in ACCEPTED_EMOJIS['delete']:
+		# grab relevant page title
+		match = re.search('created\\s+\\[([^\\]]+)\\]', content)
+		if not match:
+			return
 
-	# delete page
-	response = delete_wiki_page(match.group(1), f'Deleted via Discord by {member.global_name}')
-	var_global.OPERATION_LOGGER.info(response)
+		# delete page
+		response = await delete_wiki_page(match.group(1), f'Deleted via Discord by {member.global_name}')
+		var_global.OPERATION_LOGGER.info(response)
+
+	# revert edit action
+	elif payload.emoji.name in ACCEPTED_EMOJIS['revert']:
+		pass

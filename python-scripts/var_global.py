@@ -1,5 +1,3 @@
-import requests
-
 
 ### LINUX ###
 
@@ -10,20 +8,24 @@ LINUX_ABSOLUTE_PATH = '/home/ubuntu/wiki-bot/python-scripts'
 # name of the bot service running on the Linux cloud instance
 LINUX_SERVICE_NAME = 'wiki-bot.service'
 
-# logger object to be instantiated at initialisation
+# logger object
 OPERATION_LOGGER = None
+
 
 
 ### HTTP ###
 
-# requests session object, to be initialised within on_ready()
+# http session object
 SESSION = None
 
 # base URL for the API
 BASE_API_URL = 'https://awakening.wiki/api.php'
 
 # standard headers for HTTP requests
-STANDARD_HEADERS = {'User-Agent': f'Sorabot/1.0 python-requests/{requests.__version__}'}
+STANDARD_HEADERS = {'User-Agent': f'Sorabot/1.0 python-httpx'}
+
+# async lock object to prevent race condition over the session and token
+ASYNC_LOCK = None
 
 
 
@@ -38,10 +40,10 @@ MAIN_CHANNEL_ID = 1465756865127514162
 # ID of Discord server channel that logs all Recent Changes on the wiki
 FEED_CHANNEL_ID = 1465745673486995642
 
-# main channel object, to be initialised within on_ready()
+# main channel object
 MAIN_CHANNEL = None
 
-# feed channel object, to be initialised within on_ready()
+# feed channel object
 FEED_CHANNEL = None
 
 
@@ -63,7 +65,8 @@ BOT_ACTIVITY_STATUSES = {
 
 # dictionary of custom emojis
 ACCEPTED_EMOJIS = {
-	'CrossMarks': '❎❌',
+	'delete': '❌🗑',
+	'revert': '⏪⏮️',
 }
 
 # dictionary of blacklisted strings to prevent acting on certain pages or messages in FEED_CHANNEL
@@ -75,6 +78,3 @@ FEED_BLACKLIST = [
 	':lock:',					# page protection changed
 	'Discord verification:all.json',
 ]
-
-# regex string to match delete-compatible messages and grab the corresponding page title
-DELETE_REGEX = '(?:created)\\s+\\[([^\\]]+)\\]'

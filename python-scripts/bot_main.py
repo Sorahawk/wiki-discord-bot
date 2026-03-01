@@ -5,7 +5,7 @@ from imports import *
 # all() enables everything, including the privileged intents: presences, members and message_content
 intents = discord.Intents.all()
 
-# initialise client
+# init client
 bot = discord.Client(intents=intents)
 
 
@@ -26,7 +26,7 @@ async def task_rotate_status():
 @loop(minutes=3)
 async def task_refresh_wiki_session():
 	try:
-		check_wiki_session()
+		await check_wiki_session()
 
 	except Exception as e:
 		await send_traceback(e, var_global.MAIN_CHANNEL)
@@ -39,18 +39,26 @@ async def on_ready():
 	if var_global.MAIN_CHANNEL:
 		return
 
-	var_global.OPERATION_LOGGER = getLogger('Wiki Bot Operations Log')
-	var_global.OPERATION_LOGGER.info(f'{bot.user} is online.')
+	# check if script is running from Linux root directory (systemd service)
+	filepath = os.getcwd()
 
-	# initialise global main channel object
+	if filepath == '/':
+		filepath = LINUX_ABSOLUTE_PATH
+
+	# init logger
+	var_global.OPERATION_LOGGER = init_logger(filepath)
+
+	# init main channel object
 	var_global.MAIN_CHANNEL = bot.get_channel(MAIN_CHANNEL_ID)
 
-	# initialise global feed channel object
+	# init feed channel object
 	var_global.FEED_CHANNEL = bot.get_channel(FEED_CHANNEL_ID)
 
-	# initialise requests session
-	var_global.SESSION = requests.Session()
-	var_global.SESSION.headers.update(STANDARD_HEADERS)
+	# init async lock
+	var_global.ASYNC_LOCK = asyncio.Lock()
+
+	# init requests session
+	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS)
 
 	# start tasks
 	task_rotate_status.start()
@@ -60,21 +68,11 @@ async def on_ready():
 @bot.event
 async def on_raw_reaction_add(payload):
 	try:
-		await feed_reverse_actions(payload)
+		await feed_actions(payload)
 
 	except Exception as e:
 		await send_traceback(e, var_global.MAIN_CHANNEL)
 
-
-# get current directory
-filepath = os.getcwd()
-
-# check if script is running from Linux root directory (systemd service)
-if filepath == '/':
-	filepath = LINUX_ABSOLUTE_PATH
-
-# initialise logging module
-init_logger(filepath)
 
 # start bot
 bot.run(DISCORD_BOT_TOKEN)

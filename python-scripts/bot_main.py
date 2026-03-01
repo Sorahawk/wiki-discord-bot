@@ -41,6 +41,7 @@ async def on_ready():
 
 	# init logger
 	var_global.OPERATION_LOGGER = init_logger()
+	var_global.OPERATION_LOGGER.info(f'{bot.user} is online.')
 
 	# init main channel object
 	var_global.MAIN_CHANNEL = bot.get_channel(MAIN_CHANNEL_ID)

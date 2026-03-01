@@ -65,8 +65,8 @@ BOT_ACTIVITY_STATUSES = {
 
 # dictionary of custom emojis
 ACCEPTED_EMOJIS = {
-	'delete': '❌🗑',
-	'revert': '⏪⏮️',
+	'delete': '❌',
+	'rollback': '🔄',
 }
 
 # dictionary of blacklisted strings to prevent acting on certain pages or messages in FEED_CHANNEL

@@ -59,37 +59,50 @@ async def wiki_login():
 		data = response['login']
 
 		if data['result'] == 'Success':
-			var_global.OPERATION_LOGGER.info(f'Successfully logged into Wiki as {data['lgusername']}.')
+			var_global.OPERATION_LOGGER.info(f'Successfully logged into Wiki as {var_secret.WIKI_CREDS[0]}.')
 			var_secret.WIKI_CSRF_TOKEN = await get_wiki_token()
 		else:
-			raise Exception(f'Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}.')
+			raise Exception(f'Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}')
 
 
 # check if login session is still valid
 async def check_wiki_session():
-    response = await make_http_request(payload={
-        'action': 'query',
-        'meta': 'userinfo',
-        'format': 'json'
-    })
+	response = await make_http_request(payload={
+		'action': 'query',
+		'meta': 'userinfo',
+		'format': 'json'
+	})
 
-    user = response['query']['userinfo']
+	user = response['query']['userinfo']
 
-    # if session is expired, MediaWiki returns an anonymous user
-    if user.get('anon') is not None:
-        var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login.')
-        await wiki_login()
-    else:
-        var_global.OPERATION_LOGGER.info(f'Wiki session still active as: {user['name']}')
-        # refresh the CSRF token just in case
-        var_secret.WIKI_CSRF_TOKEN = await get_wiki_token()
+	# if session is expired, MediaWiki returns an anonymous user
+	if user.get('anon') is not None:
+		var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login.')
+		await wiki_login()
+	else:
+		var_global.OPERATION_LOGGER.info(f'Wiki session still active as: {user['name']}')
+		# refresh the CSRF token just in case
+		var_secret.WIKI_CSRF_TOKEN = await get_wiki_token()
 
 
 # API call to delete a page or file
 async def delete_wiki_page(title, reason=''):
 	return await make_http_request('POST', payload={
-        'action': 'delete',
-        'title': title,
-        'reason': reason,
-        'format': 'json'
+		'action': 'delete',
+		'title': title,
+		'reason': reason,
+		'format': 'json'
+	})
+
+# API call to rollback all consecutive edits from a single user if they are the latest revisions
+async def rollback_wiki_page(title, username, reason=''):
+	rollback_token = await get_wiki_token('rollback')
+
+	return await make_http_request('POST', payload={
+		'action': 'rollback',
+		'title': title,
+		'user': username,
+		'summary': reason,
+		'format': 'json',
+		'token': rollback_token
 	})

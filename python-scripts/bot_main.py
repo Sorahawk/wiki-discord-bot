@@ -53,7 +53,7 @@ async def on_ready():
 	var_global.ASYNC_LOCK = asyncio.Lock()
 
 	# init requests session
-	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS)
+	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS, timeout=15)
 
 	# start tasks
 	task_rotate_status.start()

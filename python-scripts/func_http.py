@@ -96,6 +96,7 @@ async def delete_wiki_page(title, reason=''):
 
 # API call to rollback all consecutive edits from a single user if they are the latest revisions
 async def rollback_wiki_page(title, username, reason=''):
+	await check_wiki_session()
 	rollback_token = await get_wiki_token('rollback')
 
 	return await make_http_request('POST', payload={

@@ -65,7 +65,7 @@ BOT_ACTIVITY_STATUSES = {
 
 # dictionary of custom emojis
 ACCEPTED_EMOJIS = {
-	'delete': '❌',
+	'delete': '🗑️',
 	'rollback': '🔄',
 }
 

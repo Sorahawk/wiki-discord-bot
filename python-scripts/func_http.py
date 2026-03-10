@@ -10,9 +10,6 @@ async def make_http_request(method='GET', endpoint=BASE_API_URL, payload=None, r
 	if not payload:
 		payload = {}
 
-	if var_secret.WIKI_CSRF_TOKEN and not payload.get('token'):
-		payload['token'] = var_secret.WIKI_CSRF_TOKEN
-
 	if method == 'POST':
 		raw_response = await session.request('POST', endpoint, data=payload)
 	else:
@@ -50,10 +47,10 @@ async def wiki_login():
 
 		response = await make_http_request('POST', payload={
 			'action': 'login',
+			'format': 'json',
 			'lgname': var_secret.WIKI_CREDS[0],
 			'lgpassword': var_secret.WIKI_CREDS[1],
-			'lgtoken': login_token,
-			'format': 'json'
+			'lgtoken': login_token
 		})
 
 		data = response['login']
@@ -91,7 +88,8 @@ async def delete_wiki_page(title, reason=''):
 		'action': 'delete',
 		'title': title,
 		'reason': reason,
-		'format': 'json'
+		'format': 'json',
+		'token': var_secret.WIKI_CSRF_TOKEN
 	})
 
 # API call to rollback all consecutive edits from a single user if they are the latest revisions

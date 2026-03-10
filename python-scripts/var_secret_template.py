@@ -11,6 +11,7 @@ DISCORD_BOT_TOKEN = ''
 WIKI_CREDS_LIST = {
 	'local': ('', ''),
 	'remote': ('', ''),
+	'scripts': ('', ''),
 }
 
 if sys.platform == 'linux':
@@ -18,5 +19,8 @@ if sys.platform == 'linux':
 else:
 	WIKI_CREDS = WIKI_CREDS_LIST['local']
 
-# (string) Wiki session token, to init during runtime
-WIKI_CSRF_TOKEN = None
+# (dictionary of strings) Wiki session tokens, to init during runtime
+WIKI_TOKENS = {
+	'csrf': None,
+	'rollback': None,
+}

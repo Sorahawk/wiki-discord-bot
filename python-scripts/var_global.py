@@ -24,7 +24,7 @@ BASE_API_URL = 'https://awakening.wiki/api.php'
 # standard headers for HTTP requests
 STANDARD_HEADERS = {'User-Agent': f'Sorabot/1.0 python-httpx'}
 
-# async lock object to prevent race condition over the session and token
+# async lock object to prevent race condition over the session
 ASYNC_LOCK = None
 
 

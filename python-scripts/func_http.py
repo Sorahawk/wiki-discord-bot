@@ -14,11 +14,11 @@ async def make_http_request(payload=None, method='GET', token_type=None, endpoin
 		payload['token'] = var_secret.WIKI_TOKENS[token_type]
 
 	if method == 'POST':
-		raw_response = await session.request('POST', endpoint, data=payload)
+		raw_response = await session.request(method, endpoint, data=payload)
 	else:
 		raw_response = await session.request(method, endpoint, params=payload)
 
-	response = raw_response.json()
+	response = await raw_response.json()
 	var_global.OPERATION_LOGGER.info(response)
 
 	# retry once if session or token happened to expire before the periodic refresh

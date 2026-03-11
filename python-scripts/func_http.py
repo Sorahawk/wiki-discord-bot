@@ -18,7 +18,7 @@ async def make_http_request(payload=None, method='GET', token_type=None, endpoin
 	else:
 		raw_response = await session.request(method, endpoint, params=payload)
 
-	response = await raw_response.json()
+	response = raw_response.json()
 	var_global.OPERATION_LOGGER.info(response)
 
 	# retry once if session or token happened to expire before the periodic refresh

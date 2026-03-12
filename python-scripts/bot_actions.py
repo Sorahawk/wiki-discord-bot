@@ -22,7 +22,7 @@ async def feed_actions(payload):
 	# delete page action
 	if payload.emoji.name in ACCEPTED_EMOJIS['delete']:
 		# grab page title
-		match = re.search(r'\) (?:created|uploaded) \[([^\]]+)\]', content)
+		match = re.search(r'\) created \[([^\]]+)\]', content)
 		if not match:
 			return
 

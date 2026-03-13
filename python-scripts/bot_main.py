@@ -69,5 +69,23 @@ async def on_raw_reaction_add(payload):
 		await send_traceback(e, var_global.MAIN_CHANNEL)
 
 
+@bot.event
+async def on_message(message):
+	try:
+		# ignore messages sent by the bot itself
+		if message.author == bot.user:
+			return
+
+		# only react to messages that mention the bot
+		if bot.user in message.mentions:
+			if 'tax' in message.content.lower():
+				await message.channel.send(BOT_VOICELINES['tax'])
+			else:
+				await message.channel.send(BOT_VOICELINES['hello'])
+
+	except Exception as e:
+		await send_traceback(e, var_global.MAIN_CHANNEL)
+
+
 # start bot
 bot.run(DISCORD_BOT_TOKEN)

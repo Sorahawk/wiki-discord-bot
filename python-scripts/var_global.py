@@ -63,6 +63,12 @@ BOT_ACTIVITY_STATUSES = {
 	"a staring competition": 5,
 }
 
+# dictionary of replies
+BOT_VOICELINES = {
+	'hello': "You again, what now?",
+	'tax': "Taxes? His Imperial Highness' has no want or need for your Solari. Now, leave me be, you nitwit."
+}
+
 # dictionary of custom emojis
 ACCEPTED_EMOJIS = {
 	'delete': '🗑️',

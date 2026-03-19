@@ -1,7 +1,8 @@
 from adhoc_common import *
 
 
-WILDCARD_SEARCH = '/User Claim'
+WILDCARD_SEARCH = '/en-ca'
+NAMESPACENUMBER = 1198
 
 async def main():
 	await setup()
@@ -9,8 +10,8 @@ async def main():
 	response = await make_http_request({
 		"action": "query",
 		"list": "search",
-		"srsearch": '"User Claim"',
-		"srnamespace": 2,
+		"srsearch": f'{WILDCARD_SEARCH}',
+		"srnamespace": NAMESPACENUMBER,
 		"srlimit": "max",
 		"format": "json"
 	}, 'POST')

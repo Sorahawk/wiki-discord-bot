@@ -1,8 +1,8 @@
 from adhoc_common import *
 
 
-WILDCARD_SEARCH = '/en-ca'
-NAMESPACENUMBER = 1198
+WILDCARD_SEARCH = 'Patent'
+NAMESPACENUMBER = 0
 
 async def main():
 	await setup()

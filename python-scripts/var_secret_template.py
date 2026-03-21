@@ -11,7 +11,6 @@ DISCORD_BOT_TOKEN = ''
 WIKI_CREDS_LIST = {
 	'local': ('', ''),
 	'remote': ('', ''),
-	'scripts': ('', ''),
 }
 
 if sys.platform == 'linux':

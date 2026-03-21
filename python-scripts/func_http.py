@@ -21,8 +21,8 @@ async def make_http_request(payload=None, method='GET', token_type=None, endpoin
 	response = raw_response.json()
 	var_global.OPERATION_LOGGER.info(response)
 
-	# retry once if session or token happened to expire before the periodic refresh
-	if response.get('error', {}).get('code') in ['badtoken', 'notloggedin'] and not retry:
+	# retry once if error
+	if response.get('error', {}) and not retry:
 		await check_wiki_session()
 		response = await make_http_request(payload, method, token_type, endpoint, True)
 

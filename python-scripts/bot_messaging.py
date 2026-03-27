@@ -26,4 +26,4 @@ async def message_handler(message):
 		else:
 			response = BOT_VOICELINES['hello']
 
-		await message.channel.send(response, suppress_embeds=True)
+		await message.channel.send(response)

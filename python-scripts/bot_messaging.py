@@ -22,7 +22,7 @@ async def message_handler(message):
 	# only react to messages that mention the bot
 	if bot.user in message.mentions:
 		if 'tax' in message.content.lower():
-			response BOT_VOICELINES['tax']
+			response = BOT_VOICELINES['tax']
 		else:
 			response = BOT_VOICELINES['hello']
 

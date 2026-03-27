@@ -66,7 +66,7 @@ BOT_ACTIVITY_STATUSES = {
 # dictionary of replies
 BOT_VOICELINES = {
 	'hello': "You again, what now?",
-	'tax': "Taxes? His Imperial Highness' has no want or need for your Solari. Now, leave me be, you nitwit."
+	'tax': "Taxes? [His Imperial Highness](https://awakening.wiki/Emperor) has no want or need for your [Solari](https://awakening.wiki/Solari). Now, leave me be, you nitwit."
 }
 
 # dictionary of custom emojis

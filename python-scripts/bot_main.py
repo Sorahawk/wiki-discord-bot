@@ -70,9 +70,9 @@ async def on_raw_reaction_add(payload):
 
 
 @bot.event
-async def on_message(message):
+async def on_message(bot, message):
 	try:
-		await message_handler(message)
+		await message_handler(bot, message)
 
 	except Exception as e:
 		await send_traceback(e, var_global.MAIN_CHANNEL)

@@ -14,7 +14,7 @@ async def send_traceback(e, channel):
 
 
 # respond to messages
-async def message_handler(message):
+async def message_handler(bot, message):
 	# ignore messages sent by the bot itself
 	if message.author == bot.user:
 		return

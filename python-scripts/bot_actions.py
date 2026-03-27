@@ -2,7 +2,7 @@ from imports import *
 
 
 # reacts to emoji responses in FEED_CHANNEL
-async def feed_actions(payload):
+async def reaction_handler(payload):
 	if payload.channel_id != FEED_CHANNEL_ID:
 		return
 

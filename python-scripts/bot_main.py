@@ -70,7 +70,7 @@ async def on_raw_reaction_add(payload):
 
 
 @bot.event
-async def on_message(bot, message):
+async def on_message(message):
 	try:
 		await message_handler(bot, message)
 

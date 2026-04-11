@@ -9,6 +9,7 @@ import logging
 import asyncio
 import discord
 import traceback
+import subprocess
 
 from discord.ext.tasks import loop
 

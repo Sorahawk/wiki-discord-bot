@@ -90,5 +90,17 @@ async def available_missions(interaction: discord.Interaction):
 	await interaction.followup.send(f"There are {num_messages}~ Wiki Missions left in <#{MISSIONS_CHANNEL_ID}>.")
 
 
+@tree.command(name="update_code", description="Pulls new code from GitHub and restarts bot")
+@discord.app_commands.default_permissions(administrator=True)
+async def update_code(interaction: discord.Interaction):
+	await interaction.response.send_message("Standby. Checking the mail for updates.")
+
+	# reset any changes that could have been made to the project folder and pull latest code
+	subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
+
+	# restart service
+	subprocess.run(['sudo', 'systemctl', 'restart', LINUX_SERVICE_NAME])
+
+
 # start bot
 bot.run(DISCORD_BOT_TOKEN)

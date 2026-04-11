@@ -68,7 +68,10 @@ BOT_ACTIVITY_STATUSES = {
 # dictionary of replies
 BOT_VOICELINES = {
 	'hello': "You again, what now?",
-	'tax': "Taxes? His Imperial Highness has no want or need for your Solari. Now, leave me be, you nitwit."
+	'intro': "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen.",
+	'tax': "Taxes? His Imperial Highness has no want or need for your Solari. Now, leave me be, you nitwit.",
+	'solari': "Your Solari is worthless here, peasant. Go about your own business and stop bothering me, you cretin.",
+	'cyprian': "My best mate Cyprian Io is our esteemed Imperial Planetologist right here on Arrakis."
 }
 
 # dictionary of custom emojis

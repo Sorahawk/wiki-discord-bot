@@ -84,10 +84,10 @@ async def on_message(message):
 async def available_missions(interaction: discord.Interaction):
 	await interaction.response.defer()
 
-	messages = [message async for message in var_global.MISSIONS_CHANNEL.history(limit=None)]
-	num_messages = len(messages)
+	# messages = [message async for message in var_global.MISSIONS_CHANNEL.history(limit=None)]
+	# num_messages = len(messages)
 
-	await interaction.followup.send(f"There are {num_messages}~ Wiki Missions left in <#{MISSIONS_CHANNEL_ID}>.")
+	await interaction.followup.send(f"There are 106~ Wiki Missions left in <#{MISSIONS_CHANNEL_ID}>.")
 
 
 # start bot

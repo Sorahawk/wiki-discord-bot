@@ -21,15 +21,11 @@ async def message_handler(bot, message):
 
 	# only react to messages that mention the bot
 	if bot.user in message.mentions:
-		if 'who are you' in message.content.lower():
-			response = BOT_VOICELINES['intro']
-		elif 'tax' in message.content.lower():
-			response = BOT_VOICELINES['tax']
-		elif any(word in message.content.lower() for word in ['solari', 'coin', 'money', 'cash']):
-			response = BOT_VOICELINES['solari']
-		elif any(word in message.content.lower() for word in ['planetologist', 'cyprian']):
-			response = BOT_VOICELINES['cyprian']
-		else:
-			response = BOT_VOICELINES['hello']
+
+		response = DEFAULT_VOICELINE
+		for voiceline_data in BOT_VOICELINES:
+			if any(word in message.content.lower() for word in voiceline_data[0]):
+				response = voiceline_data[1]
+				break
 
 		await message.channel.send(response)

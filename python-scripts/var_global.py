@@ -40,11 +40,13 @@ MAIN_CHANNEL_ID = 1465756865127514162
 # ID of Discord server channel that logs all Recent Changes on the wiki
 FEED_CHANNEL_ID = 1465745673486995642
 
-# main channel object
-MAIN_CHANNEL = None
+# ID of Discord server channel that displays all the available Wiki Missions
+MISSIONS_CHANNEL_ID = 1393625122916798565
 
-# feed channel object
+# channel objects
+MAIN_CHANNEL = None
 FEED_CHANNEL = None
+MISSIONS_CHANNEL = None
 
 
 

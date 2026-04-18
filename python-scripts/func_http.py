@@ -2,11 +2,11 @@ from imports import *
 
 
 # standard function for HTTP requests
-async def make_http_request(payload=None, method='GET', token_type=None, endpoint=BASE_API_URL, retry=False):
+async def make_http_request(payload=None, method='GET', token_type=None, headers=None, endpoint=BASE_API_URL, retry=False):
 	session = var_global.SESSION
 
 	var_global.OPERATION_LOGGER.info(f'Making {method} request to {endpoint} with payload {payload}.')
-	
+
 	if not payload:
 		payload = {}
 
@@ -14,11 +14,15 @@ async def make_http_request(payload=None, method='GET', token_type=None, endpoin
 		payload['token'] = var_secret.WIKI_TOKENS[token_type]
 
 	if method == 'POST':
-		raw_response = await session.request(method, endpoint, data=payload)
+		raw_response = await session.request(method, endpoint, data=payload, headers=headers)
 	else:
-		raw_response = await session.request(method, endpoint, params=payload)
+		raw_response = await session.request(method, endpoint, params=payload, headers=headers)
 
-	response = raw_response.json()
+	try:
+		response = raw_response.json()
+	except:
+		response = raw_response
+
 	var_global.OPERATION_LOGGER.info(response)
 
 	# retry wiki request once if error

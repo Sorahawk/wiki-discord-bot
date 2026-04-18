@@ -1,6 +1,8 @@
 __pycache__/
 
 python-scripts/var_secret.py
-python-scripts/*adhoc*.py
+
+python-scripts/wiki_adhoc*.py
+python-scripts/server_adhoc*.py
 
 status.log

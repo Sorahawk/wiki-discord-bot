@@ -103,4 +103,5 @@ async def update_code(interaction: discord.Interaction):
 
 
 # start bot
-bot.run(DISCORD_BOT_TOKEN)
+if __name__ == "__main__":
+	bot.run(DISCORD_BOT_TOKEN)

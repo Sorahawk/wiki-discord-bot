@@ -1,8 +1,8 @@
 import sys
 
 
-# (boolean) Toggle development/debug mode
-DEBUG_MODE = False
+# (boolean) Toggle thin mode for adhoc functions
+THIN_MODE = False
 
 # (string) Discord bot token
 DISCORD_BOT_TOKEN = ''
@@ -14,6 +14,7 @@ MENTAT_TOKEN = ''
 WIKI_CREDS_LIST = {
 	'local': ('', ''),
 	'remote': ('', ''),
+	'scripts': ('', ''),
 }
 
 if sys.platform == 'linux':

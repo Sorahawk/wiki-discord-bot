@@ -48,18 +48,19 @@ async def on_ready():
 	var_global.FEED_CHANNEL = bot.get_channel(FEED_CHANNEL_ID)
 	var_global.MISSIONS_CHANNEL = bot.get_channel(MISSIONS_CHANNEL_ID)
 
-	# init async lock
-	var_global.ASYNC_LOCK = asyncio.Lock()
-
 	# init requests session
 	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS, timeout=15)
 
-	# sync command tree
-	await tree.sync()
+	if not var_secret.THIN_MODE:
+		# sync command tree
+		await tree.sync()
 
-	# start tasks
-	task_rotate_status.start()
-	task_refresh_wiki_session.start()
+		# init async lock
+		var_global.ASYNC_LOCK = asyncio.Lock()
+
+		# start tasks
+		task_rotate_status.start()
+		task_refresh_wiki_session.start()
 
 
 @bot.event

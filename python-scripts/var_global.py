@@ -54,6 +54,9 @@ CHANNEL_IDS = {
 
 CHANNELS = { key: None for key in CHANNEL_IDS }
 
+# boolean toggle for sleep mode
+SLEEP_MODE = True
+
 
 
 ### MAIN ###

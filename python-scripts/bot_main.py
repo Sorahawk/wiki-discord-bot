@@ -61,12 +61,18 @@ async def on_app_command_error(interaction, e):
 # handle emoji reacts
 @bot.event
 async def on_raw_reaction_add(payload):
+	if var_global.SLEEP_MODE:
+		return
+
 	await reaction_handler(payload)
 
 
 # handle messages
 @bot.event
 async def on_message(message):
+	if var_global.SLEEP_MODE:
+		return
+
 	# check if message is a prefix command
 	context = await bot.get_context(message)
 

@@ -80,7 +80,7 @@ class CommandsCog(commands.Cog):
 			await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
 
 		else:
-			reply = f"Wiki Mission {mission_id} was already completed."
+			reply = f"Wiki Mission {mission_id} is not in progress."
 
 		await interaction.followup.send(reply)
 

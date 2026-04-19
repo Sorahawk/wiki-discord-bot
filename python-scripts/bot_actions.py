@@ -1,9 +1,9 @@
 from imports import *
 
 
-# reacts to emoji responses in FEED_CHANNEL
+# reacts to emoji responses in feed channel
 async def reaction_handler(payload):
-	if payload.channel_id != FEED_CHANNEL_ID:
+	if payload.channel_id != CHANNEL_IDS['feed']:
 		return
 
 	# verify user is staff
@@ -11,7 +11,7 @@ async def reaction_handler(payload):
 	if not check_user_elevation(member):
 		return
 
-	message = await var_global.FEED_CHANNEL.fetch_message(payload.message_id)
+	message = await var_global.CHANNELS['feed'].fetch_message(payload.message_id)
 	content = message.content
 
 	# ignore blacklisted messages
@@ -32,7 +32,7 @@ async def reaction_handler(payload):
 		response = await delete_wiki_page(title, f'Deleted via Discord by {member.display_name}')
 
 		if response.get('error', {}).get('code') == 'missingtitle':
-			await var_global.FEED_CHANNEL.send(f'<@{member.id}>, `{title}` no longer exists, thus cannot be deleted!')
+			await var_global.CHANNELS['feed'].send(f'<@{member.id}>, `{title}` no longer exists, thus cannot be deleted!')
 
 	# rollback consecutive edits action
 	elif payload.emoji.name in ACCEPTED_EMOJIS['rollback']:
@@ -48,4 +48,4 @@ async def reaction_handler(payload):
 		response = await rollback_wiki_page(title, username, f'Latest edits by {username} rolled back via Discord by {member.display_name}')
 
 		if response.get('error', {}).get('code') == 'alreadyrolled':
-			await var_global.FEED_CHANNEL.send(f'<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.')
+			await var_global.CHANNELS['feed'].send(f'<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.')

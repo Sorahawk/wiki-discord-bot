@@ -34,19 +34,22 @@ ASYNC_LOCK = None
 # list of elevated Discord roles
 ELEVATED_USER_ROLES = [1204925713631813642, 1473396748478054420, 1204925888567844965, 1473734896957657209]
 
-# ID of default Discord server channel that will receive notifications
-MAIN_CHANNEL_ID = 1465756865127514162
+# dictionaries of Discord server channel IDs and corresponding runtime objects
+CHANNEL_IDS = {
+	# Channel that will receive notifications
+	'main': 1465756865127514162,
 
-# ID of Discord server channel that logs all Recent Changes on the wiki
-FEED_CHANNEL_ID = 1465745673486995642
+	# Channel that logs all Recent Changes on the wiki
+	'feed': 1465745673486995642,
 
-# ID of Discord server channel that displays all the available Wiki Missions
-MISSIONS_CHANNEL_ID = 1393625122916798565
+	# Channel that displays all the available Wiki Missions
+	'available': 1393625122916798565,
 
-# channel objects
-MAIN_CHANNEL = None
-FEED_CHANNEL = None
-MISSIONS_CHANNEL = None
+	# Channel that displays all the ongoing Wiki Missions
+	'active': 1474360466003464243,
+}
+
+CHANNELS = { key: None for key in CHANNEL_IDS }
 
 
 
@@ -85,7 +88,7 @@ ACCEPTED_EMOJIS = {
 	'rollback': '🔄',
 }
 
-# dictionary of blacklisted strings to prevent acting on certain pages or messages in FEED_CHANNEL
+# dictionary of blacklisted strings to prevent acting on certain pages or messages in feed channel
 FEED_BLACKLIST = [
 	':wave:',					# user registered
 	':people_holding_hands:',	# user rights changed

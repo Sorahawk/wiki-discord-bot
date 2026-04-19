@@ -31,7 +31,7 @@ class TasksCog(commands.Cog):
 			await check_wiki_session()
 
 		except Exception as e:
-			await send_traceback(e, var_global.MAIN_CHANNEL)
+			await send_traceback(e, var_global.CHANNELS['main'])
 
 
 async def setup(bot):

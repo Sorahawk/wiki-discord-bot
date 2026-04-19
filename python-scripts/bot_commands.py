@@ -28,14 +28,19 @@ class CommandsCog(commands.Cog):
 
 	# slash commands
 
-	@discord.app_commands.command(name="available_missions", description="Counts number of missions left in #missions-board")
+	@discord.app_commands.command(name="available_missions", description="Counts number of available missions left")
 	async def available_missions(self, interaction: discord.Interaction):
 		await interaction.response.defer()
 
-		messages = [message async for message in var_global.MISSIONS_CHANNEL.history(limit=None)]
+		messages = [message async for message in var_global.CHANNELS['available'].history(limit=None)]
 		num_messages = len(messages)
 
-		await interaction.followup.send(f"There are {num_messages}~ Wiki Missions left in <#{MISSIONS_CHANNEL_ID}>.")
+		await interaction.followup.send(f"There are {num_messages}~ Wiki Missions left in <#{CHANNEL_IDS['available']}>.")
+
+
+	@discord.app_commands.command(name="cleanup_missions", description="Checks ongoing missions and ")
+	async def available_missions(self, interaction: discord.Interaction):
+		pass
 
 
 async def setup(bot):

@@ -40,26 +40,40 @@ async def on_ready():
 		await bot.load_extension("bot_tasks")
 
 
+# exception handlers
+
+# covers all bot.events
+@bot.event
+async def on_error(event, *args, **kwargs):
+	await send_traceback(sys.exc_info()[1])
+
+# covers prefix commands
+@bot.event
+async def on_command_error(context, e):
+	await send_traceback(getattr(e, 'original', e))
+
+# covers slash commands
+@tree.error
+async def on_app_command_error(interaction, e):
+	await send_traceback(getattr(e, 'original', e))
+
+
+# handle emoji reacts
 @bot.event
 async def on_raw_reaction_add(payload):
-	try:
-		await reaction_handler(payload)
-
-	except Exception as e:
-		await send_traceback(e, var_global.CHANNELS['main'])
+	await reaction_handler(payload)
 
 
+# handle messages
 @bot.event
 async def on_message(message):
-	try:
-		context = await bot.get_context(message)
-		if context.valid:
-			await bot.invoke(context)
-		else:
-			await message_handler(bot, message)
+	# check if message is a prefix command
+	context = await bot.get_context(message)
 
-	except Exception as e:
-		await send_traceback(e, var_global.CHANNELS['main'])
+	if context.valid:
+		await bot.invoke(context)
+	else:
+		await message_handler(bot, message)
 
 
 # start bot

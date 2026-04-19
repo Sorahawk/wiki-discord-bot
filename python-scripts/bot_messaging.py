@@ -2,10 +2,11 @@ from imports import *
 
 
 # obtains full traceback of given exception and outputs to specified channel
-async def send_traceback(e, channel):
-	full_trace = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+async def send_traceback(e, channel=None):
+	full_trace = log_traceback(e)
 
-	var_global.OPERATION_LOGGER.error(full_trace)
+	if not channel:
+		channel = var_global.CHANNELS['main']
 
 	if len(full_trace) <= 1994:
 		await channel.send(f'```{full_trace}```')

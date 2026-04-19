@@ -50,16 +50,19 @@ class CommandsCog(commands.Cog):
 			assignee = embed.fields[-1].value
 			user_id = re.search(r'<@(\d+)>', assignee).group(1)
 
-			if interaction.guild.get_member(user_id) is None:
+			try:
+				await interaction.guild.fetch_member(user_id)
 
+			except NotFound:
 				# abandon mission
 				title = embed.title
 				mission_id = re.search(r'\[(\d+)\]', title).group(1)
 
-				print(await mentat_request('/api/v1/missions/2873'))
+				print(user_id)
+				print(await mentat_request(f'/api/v1/missions/{mission_id}'))
 				break
 
-		await interaction.followup.send(f"hi", ephemeral=True)
+		await interaction.followup.send(f"hi")
 
 
 async def setup(bot):

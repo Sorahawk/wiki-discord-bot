@@ -5,7 +5,7 @@ from imports import *
 async def send_traceback(e, channel=None):
 	full_trace = log_traceback(e)
 
-	if not channel:
+	if not channel and var_global.CHANNELS['main']:
 		channel = var_global.CHANNELS['main']
 
 	if len(full_trace) <= 1994:

@@ -55,6 +55,9 @@ async def on_command_error(context, e):
 # covers slash commands
 @tree.error
 async def on_app_command_error(interaction, e):
+	if var_global.SLEEP_MODE:
+		return
+
 	await send_traceback(getattr(e, 'original', e))
 
 

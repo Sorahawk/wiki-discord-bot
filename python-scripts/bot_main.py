@@ -6,8 +6,8 @@ from imports import *
 intents = discord.Intents.all()
 
 # init client and slash command tree
-bot = discord.Client(intents=intents)
-tree = discord.app_commands.CommandTree(bot)
+bot = discord.ext.commands.Bot(command_prefix='.', intents=intents)
+tree = bot.tree
 
 # automatically rotate bot's Discord status every 10 minutes
 @loop(minutes=5)
@@ -53,6 +53,7 @@ async def on_ready():
 
 	if not var_secret.THIN_MODE:
 		# sync command tree
+		await bot.load_extension("bot_commands")  # import commands directly as an extension
 		await tree.sync()
 
 		# init async lock
@@ -75,32 +76,14 @@ async def on_raw_reaction_add(payload):
 @bot.event
 async def on_message(message):
 	try:
-		await message_handler(bot, message)
+		context = await bot.get_context(message)
+		if context.valid:
+			await bot.invoke(context)
+		else:
+			await message_handler(bot, message)
 
 	except Exception as e:
 		await send_traceback(e, var_global.MAIN_CHANNEL)
-
-
-@tree.command(name="available_missions", description="Counts number of missions left in #missions-board")
-async def available_missions(interaction: discord.Interaction):
-	await interaction.response.defer()
-
-	messages = [message async for message in var_global.MISSIONS_CHANNEL.history(limit=None)]
-	num_messages = len(messages)
-
-	await interaction.followup.send(f"There are {num_messages}~ Wiki Missions left in <#{MISSIONS_CHANNEL_ID}>.")
-
-
-@tree.command(name="update_code", description="Pulls new code from GitHub and restarts bot")
-@discord.app_commands.default_permissions(administrator=True)
-async def update_code(interaction: discord.Interaction):
-	await interaction.response.send_message("Standby. Checking the mail for updates.")
-
-	# reset any changes that could have been made to the project folder and pull latest code
-	subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
-
-	# restart service
-	subprocess.run(['sudo', 'systemctl', 'restart', LINUX_SERVICE_NAME])
 
 
 # start bot

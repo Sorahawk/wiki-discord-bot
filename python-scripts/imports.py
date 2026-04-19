@@ -2,6 +2,7 @@
 # external libraries
 import os
 import re
+import sys
 import json
 import httpx
 import random
@@ -11,6 +12,7 @@ import discord
 import traceback
 import subprocess
 
+from discord.ext import commands
 from discord.ext.tasks import loop
 
 

@@ -1,0 +1,42 @@
+from imports import *
+
+
+class CommandsCog(commands.Cog):
+	def __init__(self, bot):
+		self.bot = bot
+
+
+	# prefix commands
+
+	@commands.command(name="update")
+	@commands.has_permissions(administrator=True)
+	async def update_code(self, context):
+
+		# only need to update remote instance
+		if sys.platform == 'linux':
+			await context.send("Stand by. Checking the mail for updates.")
+
+			# reset any changes that could have been made to the project folder and pull latest code
+			subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
+
+			# restart service
+			subprocess.run(['sudo', 'systemctl', 'restart', LINUX_SERVICE_NAME])
+
+		else:
+			await context.send("No updates are required in this instance.")
+
+
+	# slash commands
+
+	@discord.app_commands.command(name="available_missions", description="Counts number of missions left in #missions-board")
+	async def available_missions(self, interaction: discord.Interaction):
+		await interaction.response.defer()
+
+		messages = [message async for message in var_global.MISSIONS_CHANNEL.history(limit=None)]
+		num_messages = len(messages)
+
+		await interaction.followup.send(f"There are {num_messages}~ Wiki Missions left in <#{MISSIONS_CHANNEL_ID}>.")
+
+
+async def setup(bot):
+	await bot.add_cog(CommandsCog(bot))

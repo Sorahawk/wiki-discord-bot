@@ -73,15 +73,13 @@ async def on_raw_reaction_add(payload):
 # handle messages
 @bot.event
 async def on_message(message):
-	if var_global.SLEEP_MODE:
-		return
-
 	# check if message is a prefix command
 	context = await bot.get_context(message)
 
 	if context.valid:
 		await bot.invoke(context)
-	else:
+
+	elif not var_global.SLEEP_MODE:
 		await message_handler(bot, message)
 
 

@@ -33,14 +33,33 @@ class CommandsCog(commands.Cog):
 		await interaction.response.defer()
 
 		messages = [message async for message in var_global.CHANNELS['available'].history(limit=None)]
-		num_messages = len(messages)
+		num_missions = len(messages)
 
-		await interaction.followup.send(f"There are {num_messages}~ Wiki Missions left in <#{CHANNEL_IDS['available']}>.")
+		await interaction.followup.send(f"There are {num_missions}~ Wiki Missions left in <#{CHANNEL_IDS['available']}>.")
 
 
-	@discord.app_commands.command(name="cleanup_missions", description="Checks ongoing missions and ")
-	async def available_missions(self, interaction: discord.Interaction):
-		pass
+	@discord.app_commands.command(name="cleanup_missions", description="Abandons ongoing missions whose assignees have left the server")
+	async def cleanup_missions(self, interaction: discord.Interaction):
+		await interaction.response.defer(ephemeral=True)
+
+		messages = [message async for message in var_global.CHANNELS['ongoing'].history(limit=None)]
+		for mission in messages:
+			embed = mission.embeds[0]
+
+			# check if user is still in the server
+			assignee = embed.fields[-1].value
+			user_id = re.search(r'<@(\d+)>', assignee).group(1)
+
+			if interaction.guild.get_member(user_id) is None:
+
+				# abandon mission
+				title = embed.title
+				mission_id = re.search(r'\[(\d+)\]', title).group(1)
+
+				print(await mentat_request('/api/v1/missions/2873'))
+				break
+
+		await interaction.followup.send(f"hi", ephemeral=True)
 
 
 async def setup(bot):

@@ -18,11 +18,14 @@ OPERATION_LOGGER = None
 # http session object
 SESSION = None
 
-# base URL for the API
-BASE_API_URL = 'https://awakening.wiki/api.php'
+# base URL for Wiki API
+WIKI_BASE_URL = 'https://awakening.wiki/api.php'
+
+# base URL for Mentat API
+MENTAT_BASE_URL = 'https://mentat.wiki'
 
 # standard headers for HTTP requests
-STANDARD_HEADERS = {'User-Agent': f'Sorabot/1.0 python-httpx'}
+STANDARD_HEADERS = { 'User-Agent': f'Sorabot/1.0 python-httpx' }
 
 # async lock object to prevent race condition over the session
 ASYNC_LOCK = None
@@ -46,7 +49,7 @@ CHANNEL_IDS = {
 	'available': 1393625122916798565,
 
 	# Channel that displays all the ongoing Wiki Missions
-	'active': 1474360466003464243,
+	'ongoing': 1474360466003464243,
 }
 
 CHANNELS = { key: None for key in CHANNEL_IDS }
@@ -54,6 +57,9 @@ CHANNELS = { key: None for key in CHANNEL_IDS }
 
 
 ### MAIN ###
+
+# ID of Awakening Wiki Discord server in Mentat
+GUILD_CONFIG_ID = 2
 
 # dictionary of the available Discord statuses for the bot
 # if activity (key) is meant to be a 'Streaming' activity, then corresponding value is a string URL

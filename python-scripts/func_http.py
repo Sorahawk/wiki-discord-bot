@@ -2,18 +2,16 @@ from imports import *
 
 
 # standard function for HTTP requests
-async def make_http_request(payload=None, method='GET', token_type=None, headers=None, endpoint=BASE_API_URL, retry=False):
+async def http_request(endpoint, payload=None, method='GET', headers=None):
 	session = var_global.SESSION
-
 	var_global.OPERATION_LOGGER.info(f'Making {method} request to {endpoint} with payload {payload}.')
 
-	if not payload:
+	if payload and method == 'GET':  # automatically set to POST if payload provided but method not specified
+		method = 'POST'
+	elif not payload:  # handle empty payload
 		payload = {}
 
-	if token_type:
-		payload['token'] = var_secret.WIKI_TOKENS[token_type]
-
-	if method == 'POST':
+	if method in ['POST', 'PUT', 'PATCH']:
 		raw_response = await session.request(method, endpoint, data=payload, headers=headers)
 	else:
 		raw_response = await session.request(method, endpoint, params=payload, headers=headers)
@@ -24,18 +22,33 @@ async def make_http_request(payload=None, method='GET', token_type=None, headers
 		response = raw_response
 
 	var_global.OPERATION_LOGGER.info(response)
+	return response
+
+
+# wiki request wrapper
+async def wiki_request(payload, method='GET', token_type=None, retry=False):
+	if token_type:
+		payload['token'] = var_secret.WIKI_TOKENS[token_type]
+
+	response = await http_request(WIKI_BASE_URL, payload, method)
 
 	# retry wiki request once if error
-	if token_type and response.get('error', {}) and not retry:
+	if response.get('error', {}) and not retry:
 		await check_wiki_session()
-		response = await make_http_request(payload, method, token_type, endpoint, True)
+		response = await wiki_request(payload, method, token_type, True)
 
 	return response
 
 
+# mentat request wrapper
+async def mentat_request(path, payload=None, method='GET'):
+	auth_header = { 'Authorization': f'Bearer {MENTAT_TOKEN}' }
+	return await http_request(f'{MENTAT_BASE_URL}/{path}', payload, method, auth_header)
+
+
 # retrieve token
 async def get_wiki_token(token_type='csrf'):
-	response = await make_http_request({
+	response = await wiki_request({
 		'action': 'query',
 		'meta': 'tokens',
 		'type': token_type,
@@ -64,7 +77,7 @@ async def wiki_login():
 	async with var_global.ASYNC_LOCK:
 		login_token = await get_wiki_token('login')
 
-		response = await make_http_request({
+		response = await wiki_request({
 			'action': 'login',
 			'format': 'json',
 			'lgname': var_secret.WIKI_CREDS[0],
@@ -83,7 +96,7 @@ async def wiki_login():
 
 # check if login session is still valid
 async def check_wiki_session():
-	response = await make_http_request({
+	response = await wiki_request({
 		'action': 'query',
 		'meta': 'userinfo',
 		'format': 'json'
@@ -104,7 +117,7 @@ async def check_wiki_session():
 
 # API call to delete a page or file
 async def delete_wiki_page(title, reason=''):
-	return await make_http_request({
+	return await wiki_request({
 		'action': 'delete',
 		'title': title,
 		'reason': reason,
@@ -113,7 +126,7 @@ async def delete_wiki_page(title, reason=''):
 
 # API call to rollback all consecutive edits from a single user if they are the latest revisions
 async def rollback_wiki_page(title, username, reason=''):
-	return await make_http_request({
+	return await wiki_request({
 		'action': 'rollback',
 		'title': title,
 		'user': username,

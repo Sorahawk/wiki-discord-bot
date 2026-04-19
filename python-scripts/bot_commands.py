@@ -74,15 +74,15 @@ class CommandsCog(commands.Cog):
 		if mission.get('error') == 'Mission not found':
 			reply = f"There is no Wiki Mission with ID {mission_id}."
 
-		# make sure mission is not already completed
-		elif mission.get('status') == 'completed':
-			reply = f"Wiki Mission {mission_id} was already completed."
-
-		else:
+		# make sure mission is active and claimed
+		elif mission.get('status') == 'active':
 			user_id = mission['assignee']
 			reply = f"User <@{user_id}> has been removed from Wiki Mission {mission_id}."
 
 			await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
+
+		else:
+			reply = f"Wiki Mission {mission_id} was already completed."
 
 		await interaction.followup.send(reply)
 

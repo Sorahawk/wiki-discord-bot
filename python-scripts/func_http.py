@@ -30,10 +30,7 @@ async def make_http_request(payload=None, method='GET', token_type=None, headers
 		await check_wiki_session()
 		response = await make_http_request(payload, method, token_type, endpoint, True)
 
-	try:
-		return json.dumps(response)
-	except:
-		return response
+	return response
 
 
 # retrieve token

@@ -118,6 +118,7 @@ class CommandsCog(commands.Cog):
 
 		# make sure mission is active and claimed
 		elif mission.get('status') == 'accepted':
+			reply = f"Wiki Mission {mission_id} has been sent for approval."
 			await mentat_request(f'/api/v1/missions/{mission_id}/submit', method='PUT')
 
 		else:

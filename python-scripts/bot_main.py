@@ -9,28 +9,6 @@ intents = discord.Intents.all()
 bot = discord.ext.commands.Bot(command_prefix='.', intents=intents)
 tree = bot.tree
 
-# automatically rotate bot's Discord status every 10 minutes
-@loop(minutes=5)
-async def task_rotate_status():
-	activity, activity_type = random.choice(list(BOT_ACTIVITY_STATUSES.items()))
-
-	if isinstance(activity_type, str):
-		activity_status = discord.Streaming(url=activity_type, name=activity)
-	else:
-		activity_status = discord.Activity(type=activity_type, name=activity)
-
-	await bot.change_presence(activity=activity_status)
-
-
-# automatically rotate bot's Discord status every 10 minutes
-@loop(minutes=10)
-async def task_refresh_wiki_session():
-	try:
-		await check_wiki_session()
-
-	except Exception as e:
-		await send_traceback(e, var_global.MAIN_CHANNEL)
-
 
 @bot.event
 async def on_ready():
@@ -52,16 +30,15 @@ async def on_ready():
 	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS, timeout=15)
 
 	if not var_secret.THIN_MODE:
-		# sync command tree
-		await bot.load_extension("bot_commands")  # import commands directly as an extension
-		await tree.sync()
-
 		# init async lock
 		var_global.ASYNC_LOCK = asyncio.Lock()
 
+		# sync command tree
+		await bot.load_extension("bot_commands")
+		await tree.sync()
+
 		# start tasks
-		task_rotate_status.start()
-		task_refresh_wiki_session.start()
+		await bot.load_extension("bot_tasks")
 
 
 @bot.event

@@ -68,8 +68,6 @@ class CommandsCog(commands.Cog):
 		await interaction.response.defer(ephemeral=True)
 
 		mission = await mentat_request(f'/api/v1/missions/{mission_id}')
-		print(mission)
-		return
 
 		if mission.get('error') == 'Mission not found':
 			reply = f"There is no Wiki Mission with ID {mission_id}."

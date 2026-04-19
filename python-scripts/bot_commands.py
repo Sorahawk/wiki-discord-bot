@@ -68,9 +68,15 @@ class CommandsCog(commands.Cog):
 		await interaction.response.defer(ephemeral=True)
 
 		mission = await mentat_request(f'/api/v1/missions/{mission_id}')
+		print(mission)
+		return
 
-		if 'error' in mission and mission['error'] == 'Mission not found':
+		if mission.get('error') == 'Mission not found':
 			reply = f"There is no Wiki Mission with ID {mission_id}."
+
+		# make sure mission is not already completed
+		elif mission.get('status') == 'completed':
+			reply = f"Wiki Mission {mission_id} was already completed."
 
 		else:
 			user_id = mission['assignee']

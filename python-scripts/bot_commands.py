@@ -60,7 +60,25 @@ class CommandsCog(commands.Cog):
 
 				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
 
-		await interaction.followup.send(f"Missions with assignees who are no longer in the server have been force-abandoned.")
+		await interaction.followup.send(f"Wiki Missions with assignees who are no longer in the server have been force-abandoned.")
+
+
+	@discord.app_commands.command(name="unassign_mission", description="Clears the active assignee from an ongoing mission")
+	async def unassign_mission(self, interaction: discord.Interaction, mission_id: int):
+		await interaction.response.defer(ephemeral=True)
+
+		mission = await mentat_request(f'/api/v1/missions/{mission_id}')
+
+		if 'error' in mission and mission['error'] == 'Mission not found':
+			reply = f"There is no Wiki Mission with ID {mission_id}."
+
+		else:
+			user_id = mission['assignee']
+			reply = f"User <@{user_id}> has been removed from Wiki Mission {mission_id}."
+
+			await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
+
+		await interaction.followup.send(reply)
 
 
 async def setup(bot):

@@ -53,16 +53,14 @@ class CommandsCog(commands.Cog):
 			try:
 				await interaction.guild.fetch_member(user_id)
 
-			except NotFound:
+			except discord.errors.NotFound:
 				# abandon mission
 				title = embed.title
 				mission_id = re.search(r'\[(\d+)\]', title).group(1)
 
-				print(user_id)
-				print(await mentat_request(f'/api/v1/missions/{mission_id}'))
-				break
+				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
 
-		await interaction.followup.send(f"hi")
+		await interaction.followup.send(f"Missions with assignees who are no longer in the server have been force-abandoned.")
 
 
 async def setup(bot):

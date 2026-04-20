@@ -118,12 +118,12 @@ class CommandsCog(commands.Cog):
 
 	@discord.app_commands.command(name="unassign_mission", description="Clears the active assignee from an ongoing mission")
 	async def unassign_mission(self, interaction: discord.Interaction, mission_id: int):
-		self.act_on_missions(interaction, mission_id, 'abandon')
+		await self.act_on_missions(interaction, mission_id, 'abandon')
 
 
 	@discord.app_commands.command(name="force_submit_mission", description="Manually send a mission for approval")
 	async def force_submit_mission(self, interaction: discord.Interaction, mission_id: int):
-		self.act_on_missions(interaction, mission_id, 'submit')
+		await self.act_on_missions(interaction, mission_id, 'submit')
 
 
 async def setup(bot):

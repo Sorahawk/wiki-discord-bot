@@ -68,18 +68,24 @@ class CommandsCog(commands.Cog):
 		for mission in messages:
 			embed = mission.embeds[0]
 
+			title = embed.title
+			mission_id = re.search(r'\[(\d+)\]', title).group(1)
+
+			# check if mission has been claimed for longer than 2 weeks
+			timestamp = embed.timestamp
+			two_weeks = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(weeks=2)
+
+			if timestamp < two_weeks:
+				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
+				continue
+
 			# check if user is still in the server
 			assignee = embed.fields[-1].value
 			user_id = re.search(r'<@(\d+)>', assignee).group(1)
 
 			try:
 				await interaction.guild.fetch_member(user_id)
-
 			except discord.errors.NotFound:
-				# abandon mission
-				title = embed.title
-				mission_id = re.search(r'\[(\d+)\]', title).group(1)
-
 				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
 
 		await interaction.followup.send(f"Wiki Missions with absent assignees (i.e. left the server or MIA >2 weeks) have been force-abandoned.")
@@ -118,7 +124,9 @@ class CommandsCog(commands.Cog):
 
 		# make sure mission is active and claimed
 		elif mission.get('status') == 'accepted':
+			user_id = mission['assignee']
 			reply = f"Wiki Mission {mission_id} has been sent for approval."
+
 			await mentat_request(f'/api/v1/missions/{mission_id}/submit', method='PUT')
 
 		else:

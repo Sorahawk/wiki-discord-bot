@@ -8,6 +8,9 @@ LINUX_ABSOLUTE_PATH = '/home/ubuntu/wiki-bot/python-scripts'
 # name of the bot service running on the Linux cloud instance
 LINUX_SERVICE_NAME = 'wiki-bot.service'
 
+# logger name
+LOGGER_NAME = 'Wiki Bot Operations Log'
+
 # logger object
 OPERATION_LOGGER = None
 

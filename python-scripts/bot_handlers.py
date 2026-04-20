@@ -24,7 +24,7 @@ async def reaction_handler(payload):
 	if payload.channel_id != CHANNEL_IDS['feed']:
 		return
 
-	# verify user is staff
+	# verify user is authorised
 	member = payload.member
 	if not check_user_elevation(member):
 		return

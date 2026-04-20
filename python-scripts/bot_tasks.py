@@ -6,14 +6,19 @@ class TasksCog(commands.Cog):
 		self.bot = bot
 
 
-	async def cog_load(self):
-		self.task_rotate_status.start()
-		self.task_refresh_wiki_session.start()
+	# load and unload all defined tasks dynamically
 
+	async def cog_load(self):
+		for name in dir(self):
+			method = getattr(self, name)
+			if hasattr(method, '_loop'):
+				method.start()
 
 	async def cog_unload(self):
-		self.task_rotate_status.cancel()
-		self.task_refresh_wiki_session.cancel()
+		for name in dir(self):
+			method = getattr(self, name)
+			if hasattr(method, '_loop'):
+				method.cancel()
 
 
 	# automatically rotate bot's Discord status

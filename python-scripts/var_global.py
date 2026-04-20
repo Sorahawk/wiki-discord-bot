@@ -84,9 +84,14 @@ BOT_ACTIVITY_STATUSES = {
 }
 
 # dictionary of replies
-DEFAULT_VOICELINE = "You again, what now?"
+BOT_VOICELINES = {
+	'default': "You again, what now?",
+	'update': "Stand by. Checking the mail for updates.",
+	'sleep': "Your dull chatter is putting me to sleep.",
+	'wake': "What did I miss? Wait, I don't care.",
+}
 
-BOT_VOICELINES = [
+BOT_REPLIES = [
 	(['image help'], "1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
 	(['who are you'], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen."),
 	(['tax'], "Taxes? His Imperial Highness has no want or need for your Solari. Now, leave me be, you nitwit."),

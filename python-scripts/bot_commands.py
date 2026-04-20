@@ -21,7 +21,7 @@ class CommandsCog(commands.Cog):
 		if sys.platform != 'linux':
 			return
 
-		await context.send("Stand by. Checking the mail for updates.")
+		await context.send(BOT_VOICELINES['update'])
 
 		# reset any changes that could have been made to the project folder and pull latest code
 		subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
@@ -43,12 +43,8 @@ class CommandsCog(commands.Cog):
 		# flip boolean
 		var_global.SLEEP_MODE = not var_global.SLEEP_MODE
 
-		if var_global.SLEEP_MODE:
-			reply = "Your dull chatter is putting me to sleep."
-		else:
-			reply = "What did I miss? Wait, I don't care."
-
-		await context.send(reply)
+		reply_key = 'sleep' if var_global.SLEEP_MODE else 'wake'
+		await context.send(BOT_VOICELINES[reply_key])
 
 
 	# slash commands

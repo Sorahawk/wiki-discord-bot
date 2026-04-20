@@ -10,8 +10,8 @@ async def message_handler(bot, message):
 	# only react to messages that mention the bot
 	if bot.user in message.mentions:
 
-		response = DEFAULT_VOICELINE
-		for voiceline_data in BOT_VOICELINES:
+		response = BOT_VOICELINES['default']
+		for voiceline_data in BOT_REPLIES:
 			if any(word in message.content.lower() for word in voiceline_data[0]):
 				response = voiceline_data[1]
 				break

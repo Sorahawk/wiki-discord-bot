@@ -1,3 +1,5 @@
+### Make a copy of this file, rename it var_secret.py, and fill it in
+
 import sys
 
 

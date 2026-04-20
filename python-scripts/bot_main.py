@@ -22,7 +22,7 @@ async def on_ready():
 	var_global.OPERATION_LOGGER.info(f'{bot.user} is online.')
 
 	# init channel objects
-	for key, item in var_global.CHANNELS.items():
+	for key in var_global.CHANNELS:
 		var_global.CHANNELS[key] = bot.get_channel(CHANNEL_IDS[key])
 
 	# init requests session
@@ -56,10 +56,8 @@ async def on_command_error(context, e):
 # covers slash commands
 @tree.error
 async def on_app_command_error(interaction, e):
-	if var_global.SLEEP_MODE:
-		return
-
-	await send_traceback(getattr(e, 'original', e))
+	if not var_global.SLEEP_MODE:
+		await send_traceback(getattr(e, 'original', e))
 
 
 # handle emoji reacts
@@ -72,12 +70,8 @@ async def on_raw_reaction_add(payload):
 # handle messages
 @bot.event
 async def on_message(message):
-	# check if message is a prefix command
-	context = await bot.get_context(message)
-
-	if context.valid:
+	if (context := await bot.get_context(message)).valid:  # check if message is a prefix command
 		await bot.invoke(context)
-
 	elif not var_global.SLEEP_MODE:
 		await message_handler(bot, message)
 

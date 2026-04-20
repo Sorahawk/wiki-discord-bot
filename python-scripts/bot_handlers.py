@@ -1,6 +1,24 @@
 from imports import *
 
 
+# respond to messages
+async def message_handler(bot, message):
+	# ignore messages sent by the bot itself
+	if message.author == bot.user:
+		return
+
+	# only react to messages that mention the bot
+	if bot.user in message.mentions:
+
+		response = DEFAULT_VOICELINE
+		for voiceline_data in BOT_VOICELINES:
+			if any(word in message.content.lower() for word in voiceline_data[0]):
+				response = voiceline_data[1]
+				break
+
+		await message.channel.send(response)
+
+
 # reacts to emoji responses in feed channel
 async def reaction_handler(payload):
 	if payload.channel_id != CHANNEL_IDS['feed']:

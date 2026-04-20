@@ -64,10 +64,8 @@ async def on_app_command_error(interaction, e):
 # handle emoji reacts
 @bot.event
 async def on_raw_reaction_add(payload):
-	if var_global.SLEEP_MODE:
-		return
-
-	await reaction_handler(payload)
+	if not var_global.SLEEP_MODE:
+		await reaction_handler(payload)
 
 
 # handle messages

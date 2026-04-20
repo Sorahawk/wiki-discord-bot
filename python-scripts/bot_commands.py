@@ -82,7 +82,7 @@ class CommandsCog(commands.Cog):
 
 				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
 
-		await interaction.followup.send(f"Wiki Missions with assignees who are no longer in the server have been force-abandoned.")
+		await interaction.followup.send(f"Wiki Missions with absent assignees (i.e. left the server or MIA >2 weeks) have been force-abandoned.")
 
 
 	@discord.app_commands.command(name="unassign_mission", description="Clears the active assignee from an ongoing mission")

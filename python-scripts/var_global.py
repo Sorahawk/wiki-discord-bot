@@ -54,12 +54,15 @@ CHANNEL_IDS = {
 
 CHANNELS = { key: None for key in CHANNEL_IDS }
 
-# boolean toggle for sleep mode
-SLEEP_MODE = False
-
 
 
 ### MAIN ###
+
+# boolean toggle for sleep mode
+SLEEP_MODE = False
+
+# boolean toggle for adhoc scripts to avoid loading extended modules
+THIN_MODE = False
 
 # ID of Awakening Wiki Discord server in Mentat
 GUILD_CONFIG_ID = 2

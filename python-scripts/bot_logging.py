@@ -25,8 +25,9 @@ async def send_traceback(e, channel=None):
 
 	var_global.OPERATION_LOGGER.error(full_trace)
 
-	if not channel and var_global.CHANNELS['main']:
-		channel = var_global.CHANNELS['main']
+	channel = channel or var_global.CHANNELS.get('main')
+	if not channel:
+		return
 
 	if len(full_trace) <= 1994:
 		await channel.send(f'```{full_trace}```')

@@ -1,9 +1,6 @@
 import sys
 
 
-# (boolean) Toggle thin mode for adhoc functions
-THIN_MODE = False
-
 # (string) Discord bot token
 DISCORD_BOT_TOKEN = ''
 

@@ -29,7 +29,7 @@ async def on_ready():
 	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS, timeout=15)
 
 	# skip non-essential modules if running server adhoc scripts
-	if not var_secret.THIN_MODE:
+	if not var_global.THIN_MODE:
 		# init async lock
 		var_global.ASYNC_LOCK = asyncio.Lock()
 

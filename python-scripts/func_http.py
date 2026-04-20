@@ -22,7 +22,11 @@ async def http_request(endpoint, payload=None, method='GET', headers=None):
 		response = raw_response
 
 	var_global.OPERATION_LOGGER.info(response)
-	return response
+
+	try:
+		return json.loads(json.dumps(response))
+	except:
+		return response
 
 
 # wiki request wrapper
@@ -56,11 +60,7 @@ async def get_wiki_token(token_type='csrf'):
 	})
 
 	tokens = response['query']['tokens']
-
-	if len(tokens) != 1:
-		return tokens
-
-	return tokens[f'{token_type}token']
+	return tokens if len(tokens) != 1 else tokens[f'{token_type}token']
 
 
 # refresh all wiki tokens

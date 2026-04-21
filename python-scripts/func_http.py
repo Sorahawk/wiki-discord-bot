@@ -4,7 +4,7 @@ from imports import *
 # standard function for HTTP requests
 async def http_request(endpoint, payload=None, method='GET', headers=None):
 	session = var_global.SESSION
-	var_global.OPERATION_LOGGER.info(f'Making {method} request to {endpoint} with payload {payload}.')
+	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {payload}.")
 
 	if payload and method == 'GET':  # automatically set to POST if payload provided but method not specified
 		method = 'POST'
@@ -88,10 +88,10 @@ async def wiki_login():
 		data = response['login']
 
 		if data['result'] == 'Success':
-			var_global.OPERATION_LOGGER.info(f'Successfully logged into Wiki as {var_secret.WIKI_CREDS[0]}.')
+			var_global.OPERATION_LOGGER.info(f"Successfully logged into Wiki as {var_secret.WIKI_CREDS[0]}.")
 			await refresh_tokens()
 		else:
-			raise Exception(f'Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}')
+			raise Exception(f"Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}")
 
 
 # check if login session is still valid
@@ -111,7 +111,7 @@ async def check_wiki_session():
 
 	# even if session is still valid, just refresh tokens to be safe
 	else:
-		var_global.OPERATION_LOGGER.info(f'Wiki session still active as: {user['name']}')
+		var_global.OPERATION_LOGGER.info(f"Wiki session still active as: {user['name']}")
 		await refresh_tokens()
 
 

@@ -37,8 +37,8 @@ ASYNC_LOCK = None
 
 ### DISCORD ###
 
-# list of elevated Discord roles
-ELEVATED_USER_ROLES = [1204925713631813642, 1473396748478054420, 1204925888567844965, 1473734896957657209]
+# Wiki Discord server ID
+SERVER_ID = 1204923645705855108
 
 # dictionary of Discord server channel IDs
 CHANNEL_IDS = {
@@ -57,6 +57,9 @@ CHANNEL_IDS = {
 
 # automatically generate dictionary of channel runtime objects
 CHANNELS = { key: None for key in CHANNEL_IDS }
+
+# list of elevated Discord roles
+ELEVATED_USER_ROLES = [1204925713631813642, 1473396748478054420, 1204925888567844965, 1473734896957657209]
 
 
 

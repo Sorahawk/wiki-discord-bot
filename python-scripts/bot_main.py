@@ -7,7 +7,6 @@ intents = discord.Intents.all()
 
 # init client and slash command tree
 bot = discord.ext.commands.Bot(command_prefix='.', intents=intents)
-tree = bot.tree
 
 
 @bot.event
@@ -19,7 +18,7 @@ async def on_ready():
 
 	# init logger
 	var_global.OPERATION_LOGGER = init_logger()
-	var_global.OPERATION_LOGGER.info(f'{bot.user} is online.')
+	var_global.OPERATION_LOGGER.info(f"{bot.user} is online.")
 
 	# init channel objects
 	for key in var_global.CHANNELS:
@@ -34,11 +33,11 @@ async def on_ready():
 		var_global.ASYNC_LOCK = asyncio.Lock()
 
 		# sync command tree
-		await bot.load_extension("bot_commands")
-		await tree.sync()
+		await bot.load_extension('bot_commands')
+		await bot.tree.sync(guild=bot.get_guild(SERVER_ID))
 
 		# start tasks
-		await bot.load_extension("bot_tasks")
+		await bot.load_extension('bot_tasks')
 
 
 # exception handlers
@@ -54,7 +53,7 @@ async def on_command_error(context, e):
 	await send_traceback(getattr(e, 'original', e))
 
 # covers slash commands
-@tree.error
+@bot.tree.error
 async def on_app_command_error(interaction, e):
 	if not var_global.SLEEP_MODE:
 		await send_traceback(getattr(e, 'original', e))
@@ -70,12 +69,18 @@ async def on_raw_reaction_add(payload):
 # handle messages
 @bot.event
 async def on_message(message):
-	if (context := await bot.get_context(message)).valid:  # check if message is a prefix command
+
+	# check if message is a prefix command
+	context = await bot.get_context(message)
+
+	# only act on remote instance
+	if context.valid and sys.platform == 'linux' and check_user_elevation(message.author):
 		await bot.invoke(context)
+
 	elif not var_global.SLEEP_MODE:
 		await message_handler(bot, message)
 
 
 # start bot
-if __name__ == "__main__":
+if __name__ == '__main__':
 	bot.run(DISCORD_BOT_TOKEN)

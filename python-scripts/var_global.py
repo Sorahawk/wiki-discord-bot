@@ -40,7 +40,7 @@ ASYNC_LOCK = None
 # list of elevated Discord roles
 ELEVATED_USER_ROLES = [1204925713631813642, 1473396748478054420, 1204925888567844965, 1473734896957657209]
 
-# dictionaries of Discord server channel IDs and corresponding runtime objects
+# dictionary of Discord server channel IDs
 CHANNEL_IDS = {
 	# Channel that will receive notifications
 	'main': 1465756865127514162,
@@ -55,6 +55,7 @@ CHANNEL_IDS = {
 	'ongoing': 1474360466003464243,
 }
 
+# automatically generate dictionary of channel runtime objects
 CHANNELS = { key: None for key in CHANNEL_IDS }
 
 

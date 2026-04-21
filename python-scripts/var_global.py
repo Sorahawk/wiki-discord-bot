@@ -116,5 +116,4 @@ FEED_BLACKLIST = [
 	':truck:',					# page moved
 	':wastebasket:',			# page deleted
 	':lock:',					# page protection changed
-	'Discord verification:all.json',
 ]

@@ -55,8 +55,7 @@ async def on_command_error(context, e):
 # covers slash commands
 @bot.tree.error
 async def on_app_command_error(interaction, e):
-	if not var_global.SLEEP_MODE:
-		await send_traceback(getattr(e, 'original', e))
+	await send_traceback(getattr(e, 'original', e))
 
 
 # handle emoji reacts

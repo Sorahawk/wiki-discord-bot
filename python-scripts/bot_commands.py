@@ -58,23 +58,23 @@ class CommandsCog(commands.Cog):
 		await interaction.followup.send(reply)
 
 
-	@discord.app_commands.command(name='unassign_mission', description='Clears the active assignee from an ongoing mission')
-	@discord.app_commands.default_permissions(manage_messages=True)
-	@discord.app_commands.guilds(SERVER_ID)
+	@app_commands.command(name='unassign_mission', description='Clears the active assignee from an ongoing mission')
+	@app_commands.default_permissions(manage_messages=True)
+	@app_commands.guilds(SERVER_ID)
 	async def unassign_mission(self, interaction: discord.Interaction, mission_id: int):
 		await self.act_on_missions(interaction, mission_id, 'abandon')
 
 
-	@discord.app_commands.command(name='force_submit_mission', description='Manually send a mission for approval')
-	@discord.app_commands.default_permissions(manage_messages=True)
-	@discord.app_commands.guilds(SERVER_ID)
+	@app_commands.command(name='force_submit_mission', description='Manually send a mission for approval')
+	@app_commands.default_permissions(manage_messages=True)
+	@app_commands.guilds(SERVER_ID)
 	async def force_submit_mission(self, interaction: discord.Interaction, mission_id: int):
 		await self.act_on_missions(interaction, mission_id, 'submit')
 
 
-	@discord.app_commands.command(name='available_missions', description='Counts number of available missions left')
-	@discord.app_commands.default_permissions(manage_messages=True)
-	@discord.app_commands.guilds(SERVER_ID)
+	@app_commands.command(name='available_missions', description='Counts number of available missions left')
+	@app_commands.default_permissions(manage_messages=True)
+	@app_commands.guilds(SERVER_ID)
 	async def available_missions(self, interaction: discord.Interaction):
 		await interaction.response.defer()
 
@@ -83,9 +83,9 @@ class CommandsCog(commands.Cog):
 		await interaction.followup.send(f"There are {len(messages)}~ Wiki Missions left in <#{CHANNEL_IDS['available']}>.")
 
 
-	@discord.app_commands.command(name='cleanup_missions', description='Abandons ongoing missions whose assignees have left the server')
-	@discord.app_commands.default_permissions(manage_messages=True)
-	@discord.app_commands.guilds(SERVER_ID)
+	@app_commands.command(name='cleanup_missions', description='Abandons ongoing missions whose assignees have left the server')
+	@app_commands.default_permissions(manage_messages=True)
+	@app_commands.guilds(SERVER_ID)
 	async def cleanup_missions(self, interaction: discord.Interaction):
 		await interaction.response.defer(ephemeral=True)
 

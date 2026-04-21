@@ -14,6 +14,7 @@ import datetime
 import traceback
 import subprocess
 
+from discord import app_commands
 from discord.ext import commands
 from discord.ext.tasks import loop
 

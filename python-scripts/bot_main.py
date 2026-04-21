@@ -55,7 +55,8 @@ async def on_command_error(context, e):
 # covers slash commands
 @bot.tree.error
 async def on_app_command_error(interaction, e):
-	await send_traceback(getattr(e, 'original', e))
+	if not isinstance(error, app_commands.errors.CheckFailure):
+		await send_traceback(getattr(e, 'original', e))
 
 
 # handle emoji reacts

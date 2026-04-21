@@ -26,8 +26,9 @@ class CommandsCog(commands.Cog):
 
 	# slash commands
 
-	# disable slash command execution during sleep mode
+	# disable slash command execution during sleep mode or from unauthorised users
 	async def interaction_check(self, interaction):
+		var_global.OPERATION_LOGGER.info(f'@{interaction.user.display_name} used /{interaction.command.name}')
 		return not var_global.SLEEP_MODE and check_user_elevation(interaction.user)
 
 

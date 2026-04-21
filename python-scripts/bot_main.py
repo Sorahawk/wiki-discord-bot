@@ -72,7 +72,7 @@ async def on_message(message):
 
 	# check if message is a prefix command, which are targeted at remote instance only
 	context = await bot.get_context(message)
-	if context.valid and sys.platform == 'linux':
+	if context.valid and sys.platform == 'linux' and message.author.guild_permissions.administrator:
 		await bot.invoke(context)
 
 	elif not var_global.SLEEP_MODE:

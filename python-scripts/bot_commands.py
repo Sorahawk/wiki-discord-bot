@@ -10,6 +10,7 @@ class CommandsCog(commands.Cog):
 
 	# pull latest code from GitHub and restart itself
 	@commands.command(name='update')
+	@commands.has_permissions(administrator=True)
 	async def update_code(self, context):
 		await context.send(BOT_VOICELINES['update'])
 		subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
@@ -19,6 +20,7 @@ class CommandsCog(commands.Cog):
 	# toggle sleep mode which disables slash commands as well as message and reaction handlers
 	# the goal is to avoid shutting down the remote instance during local testing which defeats the purpose of the update prefix command
 	@commands.command(name='sleep')
+	@commands.has_permissions(administrator=True)
 	async def sleep(self, context):
 		var_global.SLEEP_MODE = not var_global.SLEEP_MODE
 		await context.send(BOT_VOICELINES['sleep' if var_global.SLEEP_MODE else 'wake'])
@@ -28,7 +30,7 @@ class CommandsCog(commands.Cog):
 
 	# disable slash command execution during sleep mode
 	async def interaction_check(self, interaction):
-		return not var_global.SLEEP_MODE
+		return not var_global.SLEEP_MODE and check_user_elevation(interaction.user)
 
 
 	# common function for abandon and submit commands

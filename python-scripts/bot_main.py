@@ -70,11 +70,9 @@ async def on_raw_reaction_add(payload):
 @bot.event
 async def on_message(message):
 
-	# check if message is a prefix command
+	# check if message is a prefix command, which are targeted at remote instance only
 	context = await bot.get_context(message)
-
-	# only act on remote instance
-	if context.valid and sys.platform == 'linux' and check_user_elevation(message.author):
+	if context.valid and sys.platform == 'linux':
 		await bot.invoke(context)
 
 	elif not var_global.SLEEP_MODE:

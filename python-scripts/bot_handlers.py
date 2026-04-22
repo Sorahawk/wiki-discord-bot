@@ -79,7 +79,7 @@ async def removed_member_handler(user_id):
 
 	missions = await mentat_request(path, filters=filters)
 	if len(missions) > 5:
-		raise Exception('More than 5 missions returned in `removed_member_handler`. Query filters might not be working.')
+		raise Exception('List of missions returned in `removed_member_handler` might be too huge. Verify that query filters are working.')
 
 	for mission in missions:
 		await mentat_request(f'/api/v1/missions/{mission['id']}/abandon', 'PUT')

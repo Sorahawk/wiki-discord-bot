@@ -2,7 +2,7 @@ from imports import *
 
 
 # standard function for HTTP requests
-async def http_request(endpoint, payload=None, method='GET', headers=None):
+async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False):
 	session = var_global.SESSION
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {payload}.")
 
@@ -12,7 +12,10 @@ async def http_request(endpoint, payload=None, method='GET', headers=None):
 		payload = {}
 
 	if method in ['POST', 'PUT', 'PATCH']:
-		raw_response = await session.request(method, endpoint, json=payload, headers=headers)
+		if is_json:
+			raw_response = await session.request(method, endpoint, json=payload, headers=headers)
+		else:
+			raw_response = await session.request(method, endpoint, data=payload, headers=headers)
 	else:
 		raw_response = await session.request(method, endpoint, params=payload, headers=headers)
 
@@ -35,7 +38,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 	# retry wiki request once if error
 	if response.get('error', {}) and not retry:
 		await check_wiki_session()
-		response = await wiki_request(payload, method, token_type, True)
+		response = await wiki_request(payload, method, token_type, retry=True)
 
 	return response
 
@@ -43,7 +46,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 # mentat request wrapper
 async def mentat_request(path, payload=None, method='GET'):
 	auth_header = { 'Authorization': f'Bearer {MENTAT_TOKEN}' }
-	return await http_request(f'{MENTAT_BASE_URL}/{path.lstrip('/')}', payload, method, auth_header)
+	return await http_request(f'{MENTAT_BASE_URL}/{path.lstrip('/')}', payload, method, auth_header, is_json=True)
 
 
 # retrieve token

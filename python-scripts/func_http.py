@@ -6,18 +6,19 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	session = var_global.SESSION
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {payload}.")
 
-	if payload and method == 'GET':  # automatically set to POST if payload provided but method not specified
-		method = 'POST'
-	elif not payload:  # handle empty payload
+	if not payload:  # handle empty payload
 		payload = {}
+	elif method == 'GET':  # automatically set to POST if payload provided but method not specified
+		method = 'POST'
 
-	if method in ['POST', 'PUT', 'PATCH']:
-		if is_json:
-			raw_response = await session.request(method, endpoint, json=payload, headers=headers)
-		else:
-			raw_response = await session.request(method, endpoint, data=payload, headers=headers)
+	if method not in ('POST', 'PUT', 'PATCH'):
+		kwarg = 'params'
+	elif is_json:
+		kwarg = 'json'
 	else:
-		raw_response = await session.request(method, endpoint, params=payload, headers=headers)
+		kwarg = 'data'
+
+	raw_response = await session.request(method, endpoint, **{kwarg: payload}, headers=headers)
 
 	try:
 		response = raw_response.json()

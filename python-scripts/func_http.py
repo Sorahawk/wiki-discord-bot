@@ -22,11 +22,7 @@ async def http_request(endpoint, payload=None, method='GET', headers=None):
 		response = raw_response
 
 	var_global.OPERATION_LOGGER.info(response)
-
-	try:
-		return json.loads(json.dumps(response))
-	except:
-		return response
+	return response
 
 
 # wiki request wrapper
@@ -47,7 +43,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 # mentat request wrapper
 async def mentat_request(path, payload=None, method='GET'):
 	auth_header = { 'Authorization': f'Bearer {MENTAT_TOKEN}' }
-	return await http_request(f'{MENTAT_BASE_URL}/{path}', payload, method, auth_header)
+	return await http_request(f'{MENTAT_BASE_URL}/{path.lstrip('/')}', payload, method, auth_header)
 
 
 # retrieve token

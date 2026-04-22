@@ -12,7 +12,7 @@ async def http_request(endpoint, payload=None, method='GET', headers=None):
 		payload = {}
 
 	if method in ['POST', 'PUT', 'PATCH']:
-		raw_response = await session.request(method, endpoint, data=payload, headers=headers)
+		raw_response = await session.request(method, endpoint, json=payload, headers=headers)
 	else:
 		raw_response = await session.request(method, endpoint, params=payload, headers=headers)
 

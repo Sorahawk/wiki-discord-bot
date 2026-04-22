@@ -8,8 +8,6 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 
 	if not payload:  # handle empty payload
 		payload = {}
-	elif method == 'GET':  # automatically set to POST if payload provided but method not specified
-		method = 'POST'
 
 	if method not in ('POST', 'PUT', 'PATCH'):
 		kwarg = 'params'
@@ -29,6 +27,18 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	return response
 
 
+# mentat request wrapper
+async def mentat_request(path, method='GET', payload=None, filters=None):
+	auth_header = { 'Authorization': f'Bearer {MENTAT_TOKEN}' }
+	endpoint = f'{MENTAT_BASE_URL}/{path.lstrip('/')}'
+
+	# convert filters to params format by wrapping in keys in q[]
+	if filters and not payload:
+		payload = {f'q[{key}]': value for key, value in filters.items()}
+
+	return await http_request(endpoint, payload, method, auth_header, is_json=True)
+
+
 # wiki request wrapper
 async def wiki_request(payload, method='GET', token_type=None, retry=False):
 	if token_type:
@@ -42,12 +52,6 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 		response = await wiki_request(payload, method, token_type, retry=True)
 
 	return response
-
-
-# mentat request wrapper
-async def mentat_request(path, payload=None, method='GET'):
-	auth_header = { 'Authorization': f'Bearer {MENTAT_TOKEN}' }
-	return await http_request(f'{MENTAT_BASE_URL}/{path.lstrip('/')}', payload, method, auth_header, is_json=True)
 
 
 # retrieve token

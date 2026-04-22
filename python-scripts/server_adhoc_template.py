@@ -9,7 +9,7 @@ async def adhoc_on_ready():
 	await orig_on_ready()
 
 	# insert adhoc code BELOW
-	response = await mentat_request('/api/v1/...', payload=None, method='GET')
+	response = await mentat_request('/api/v1/...', 'GET', payload=None)
 	print(response)
 
 

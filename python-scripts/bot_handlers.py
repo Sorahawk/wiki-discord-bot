@@ -69,14 +69,17 @@ async def reaction_handler(payload):
 			await var_global.CHANNELS['feed'].send(f"<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.")
 
 
-# clears in-progress wiki missions if assignee leaves the server
+# checks for any in-progress wiki missions when assignee leaves the server
 async def removed_member_handler(user_id):
-	messages = [message async for message in var_global.CHANNELS['ongoing'].history(limit=None)]
-	for mission in messages:
-		embed = mission.embeds[0]
-		mission_id = re.search(r'\[(\d+)\]', embed.title).group(1)
+	path = '/api/v1/missions'
+	filters = {
+		'status_eq': 'accepted',
+		'assignee_user_discord_uid_eq': user_id
+	}
 
-		# check if user matches
-		assignee = embed.fields[-1].value
-		if user_id == int(re.search(r'<@(\d+)>', assignee).group(1)):
-			await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
+	missions = await mentat_request(path, filters=filters)
+	if len(missions) > 5:
+		raise Exception('More than 5 missions returned in `removed_member_handler`. Query filters might not be working.')
+
+	for mission in missions:
+		await mentat_request(f'/api/v1/missions/{mission['id']}/abandon', 'PUT')

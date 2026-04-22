@@ -19,6 +19,7 @@ async def adhoc_on_ready():
 	await bot.close()
 
 
+
 orig_on_ready = bot.on_ready
 bot.on_ready = adhoc_on_ready
 bot.run(DISCORD_BOT_TOKEN)

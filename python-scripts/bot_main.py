@@ -47,10 +47,12 @@ async def on_ready():
 async def on_error(event, *args, **kwargs):
 	await send_traceback(sys.exc_info()[1])
 
+
 # covers prefix commands
 @bot.event
 async def on_command_error(context, e):
 	await send_traceback(getattr(e, 'original', e))
+
 
 # covers slash commands
 @bot.tree.error
@@ -59,12 +61,7 @@ async def on_app_command_error(interaction, e):
 		await send_traceback(getattr(e, 'original', e))
 
 
-# handle emoji reacts
-@bot.event
-async def on_raw_reaction_add(payload):
-	if not var_global.SLEEP_MODE:
-		await reaction_handler(payload)
-
+# handlers
 
 # handle messages
 @bot.event
@@ -77,6 +74,21 @@ async def on_message(message):
 
 	elif not var_global.SLEEP_MODE:
 		await message_handler(bot, message)
+
+
+# handle emoji reacts
+@bot.event
+async def on_raw_reaction_add(payload):
+	if not var_global.SLEEP_MODE:
+		await reaction_handler(payload)
+
+
+# handle removed members
+@bot.event
+async def on_raw_member_remove(payload):
+	if not var_global.SLEEP_MODE:
+		await removed_member_handler(payload.user.id)
+
 
 
 # start bot

@@ -1,7 +1,7 @@
 from imports import *
 
 
-# respond to messages
+# handles messages
 async def message_handler(bot, message):
 	# ignore messages sent by the bot itself
 	if message.author == bot.user:
@@ -19,7 +19,7 @@ async def message_handler(bot, message):
 		await message.channel.send(response)
 
 
-# reacts to emoji responses in feed channel
+# handles emoji reacts in feed channel
 async def reaction_handler(payload):
 	if payload.channel_id != CHANNEL_IDS['feed']:
 		return
@@ -67,3 +67,16 @@ async def reaction_handler(payload):
 
 		if response.get('error', {}).get('code') == 'alreadyrolled':
 			await var_global.CHANNELS['feed'].send(f"<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.")
+
+
+# clears in-progress wiki missions if assignee leaves the server
+async def removed_member_handler(user_id):
+	messages = [message async for message in var_global.CHANNELS['ongoing'].history(limit=None)]
+	for mission in messages:
+		embed = mission.embeds[0]
+		mission_id = re.search(r'\[(\d+)\]', embed.title).group(1)
+
+		# check if user matches
+		assignee = embed.fields[-1].value
+		if user_id == re.search(r'<@(\d+)>', assignee).group(1):
+			await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')

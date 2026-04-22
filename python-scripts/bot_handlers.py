@@ -78,5 +78,5 @@ async def removed_member_handler(user_id):
 
 		# check if user matches
 		assignee = embed.fields[-1].value
-		if user_id == re.search(r'<@(\d+)>', assignee).group(1):
+		if user_id == int(re.search(r'<@(\d+)>', assignee).group(1)):
 			await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')

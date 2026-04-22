@@ -103,10 +103,10 @@ class CommandsCog(commands.Cog):
 
 			# check if user is still in the server
 			assignee = embed.fields[-1].value
-			user_id = re.search(r'<@(\d+)>', assignee).group(1)
+			assignee_id = int(re.search(r'<@(\d+)>', assignee).group(1))
 
 			try:
-				await interaction.guild.fetch_member(user_id)
+				await interaction.guild.fetch_member(assignee_id)
 			except discord.errors.NotFound:
 				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', method='PUT')
 

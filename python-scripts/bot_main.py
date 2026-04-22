@@ -67,8 +67,10 @@ async def on_app_command_error(interaction, e):
 @bot.event
 async def on_message(message):
 
-	# check if message is a prefix command, which are targeted at remote instance only
+	# check if message is a prefix command
 	context = await bot.get_context(message)
+
+	# only remote instance should respond to prefix commands
 	if context.valid and sys.platform == 'linux' and message.author.guild_permissions.administrator:
 		await bot.invoke(context)
 
@@ -86,8 +88,11 @@ async def on_raw_reaction_add(payload):
 # handle removed members
 @bot.event
 async def on_raw_member_remove(payload):
+	user_id = payload.user.id
+	var_global.OPERATION_LOGGER.info(f"User {user_id} left the server.")
+
 	if not var_global.SLEEP_MODE:
-		await removed_member_handler(payload.user.id)
+		await removed_member_handler(user_id)
 
 
 

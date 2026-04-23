@@ -48,9 +48,6 @@ CHANNEL_IDS = {
 	# Channel that logs all Recent Changes on the wiki
 	'feed': 1465745673486995642,
 
-	# Channel that displays all the available Wiki Missions
-	'available': 1393625122916798565,
-
 	# Channel that displays all the ongoing Wiki Missions
 	'ongoing': 1474360466003464243,
 }

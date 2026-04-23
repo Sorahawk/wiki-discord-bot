@@ -27,6 +27,8 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	return response
 
 
+# mentat functions
+
 # mentat request wrapper
 async def mentat_request(path, method='GET', payload=None, filters=None):
 	auth_header = { 'Authorization': f'Bearer {MENTAT_TOKEN}' }
@@ -38,6 +40,20 @@ async def mentat_request(path, method='GET', payload=None, filters=None):
 
 	return await http_request(endpoint, payload, method, auth_header, is_json=True)
 
+
+# abandon wiki mission, with safety check to ensure mission is uncompleted
+async def abandon_mentat_mission(mission):
+	var_global.OPERATION_LOGGER.info(f"Attempting to remove User {mission['assignee']} from Mission {mission_id}")
+
+	if mission['status'] == 'accepted':
+		mission_id = mission['id']
+		await mentat_request(f'/api/v1/missions/{mission_id}/abandon', 'PUT')
+	else:
+		var_global.OPERATION_LOGGER.info(f"Mission {mission_id} is in '{mission['status']}' state, not 'accepted', and cannot be abandoned.")
+
+
+
+# wiki functions
 
 # wiki request wrapper
 async def wiki_request(payload, method='GET', token_type=None, retry=False):

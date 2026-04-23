@@ -71,15 +71,9 @@ async def reaction_handler(payload):
 
 # checks for any in-progress wiki missions when assignee leaves the server
 async def removed_member_handler(user_id):
-	path = '/api/v1/missions'
-	filters = {
+	missions = await mentat_request('/api/v1/missions', filters={
 		'status_eq': 'accepted',
 		'assignee_user_discord_uid_eq': user_id
-	}
-
-	missions = await mentat_request(path, filters=filters)
-	if len(missions) > 5:
-		raise Exception('List of missions returned in `removed_member_handler` might be too huge. Verify that query filters are working.')
-
+	})
 	for mission in missions:
-		await mentat_request(f'/api/v1/missions/{mission['id']}/abandon', 'PUT')
+		await abandon_mentat_mission(mission)  # helper function will ensure the mission is actually in `accepted` state before abandoning

@@ -79,9 +79,9 @@ class CommandsCog(commands.Cog):
 	async def available_missions(self, interaction: discord.Interaction):
 		await interaction.response.defer()
 
-		messages = [message async for message in var_global.CHANNELS['available'].history(limit=None)]
+		missions = await mentat_request('/api/v1/missions', filters={ 'status_eq': 'active' })
 
-		await interaction.followup.send(f"There are {len(messages)}~ Wiki Missions left in <#{CHANNEL_IDS['available']}>.")
+		await interaction.followup.send(f"There are {len(missions)} claimable Wiki Missions left at the moment.")
 
 
 	@app_commands.command(name='cleanup_missions', description='Abandons ongoing missions whose assignees have left the server')
@@ -102,11 +102,11 @@ class CommandsCog(commands.Cog):
 				continue
 
 			# check if user is still in the server
-			assignee = embed.fields[-1].value
-			assignee_id = int(re.search(r'<@(\d+)>', assignee).group(1))
-
 			try:
+				assignee = embed.fields[-1].value
+				assignee_id = int(re.search(r'<@(\d+)>', assignee).group(1))
 				await interaction.guild.fetch_member(assignee_id)
+
 			except discord.errors.NotFound:
 				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', 'PUT')
 

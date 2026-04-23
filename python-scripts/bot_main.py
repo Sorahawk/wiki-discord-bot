@@ -57,7 +57,7 @@ async def on_command_error(context, e):
 # covers slash commands
 @bot.tree.error
 async def on_app_command_error(interaction, e):
-	if not isinstance(error, app_commands.errors.CheckFailure):
+	if not isinstance(e, app_commands.errors.CheckFailure):
 		await send_traceback(getattr(e, 'original', e))
 
 

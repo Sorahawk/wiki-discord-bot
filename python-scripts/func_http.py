@@ -41,15 +41,26 @@ async def mentat_request(path, method='GET', payload=None, filters=None):
 	return await http_request(endpoint, payload, method, auth_header, is_json=True)
 
 
-# abandon wiki mission, with safety check to ensure mission is uncompleted
-async def abandon_mentat_mission(mission):
-	var_global.OPERATION_LOGGER.info(f"Attempting to remove User {mission['assignee']} from Mission {mission_id}")
+# retrieve mission info
+async def get_mission(mission_id):
+	return await mentat_request(f'/api/v1/missions/{mission_id}')
+
+
+# abandon wiki mission without checks
+# this function should NOT be used without first affirming that the mission has state `accepted`
+async def abandon_mission(mission_id):
+	await mentat_request(f'/api/v1/missions/{mission_id}/abandon', 'PUT')
+
+
+# abandon wiki mission, ensuring that mission is safe to abandon (e.g. not completed)
+async def abandon_mission_safely(mission):
+	mission_id = mission['id']
+	var_global.OPERATION_LOGGER.info(f"Attempting to remove user {mission['assignee']} from mission {mission_id}")
 
 	if mission['status'] == 'accepted':
-		mission_id = mission['id']
-		await mentat_request(f'/api/v1/missions/{mission_id}/abandon', 'PUT')
+		await abandon_mission(mission_id)
 	else:
-		var_global.OPERATION_LOGGER.info(f"Mission {mission_id} is in '{mission['status']}' state, not 'accepted', and cannot be abandoned.")
+		var_global.OPERATION_LOGGER.warning(f"Mission {mission_id} is in '{mission['status']}' state, not 'accepted', and cannot be abandoned.")
 
 
 
@@ -108,7 +119,7 @@ async def wiki_login():
 		data = response['login']
 
 		if data['result'] == 'Success':
-			var_global.OPERATION_LOGGER.info(f"Successfully logged into Wiki as {var_secret.WIKI_CREDS[0]}.")
+			var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}.")
 			await refresh_tokens()
 		else:
 			raise Exception(f"Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}")
@@ -136,7 +147,7 @@ async def check_wiki_session():
 
 
 # API call to delete a page or file
-async def delete_wiki_page(title, reason=''):
+async def delete_page(title, reason=''):
 	return await wiki_request({
 		'action': 'delete',
 		'title': title,
@@ -146,7 +157,7 @@ async def delete_wiki_page(title, reason=''):
 
 
 # API call to rollback all consecutive edits from a single user if they are the latest revisions
-async def rollback_wiki_page(title, username, reason=''):
+async def rollback_page(title, username, reason=''):
 	return await wiki_request({
 		'action': 'rollback',
 		'title': title,

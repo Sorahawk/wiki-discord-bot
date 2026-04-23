@@ -26,17 +26,17 @@ class CommandsCog(commands.Cog):
 
 	# slash commands
 
-	# disable slash command execution during sleep mode or from unauthorised users
+	# log slash command usage, and disable execution during sleep mode or from unauthorised users
 	async def interaction_check(self, interaction):
 		var_global.OPERATION_LOGGER.info(f'@{interaction.user.display_name} used /{interaction.command.name}')
 		return not var_global.SLEEP_MODE and check_user_elevation(interaction.user)
 
 
-	# common function for abandon and submit commands
+	# common function for mission abandon and submit commands
 	async def act_on_missions(self, interaction, mission_id, action):
 		await interaction.response.defer(ephemeral=True)
 
-		mission = await mentat_request(f'/api/v1/missions/{mission_id}')
+		mission = await get_mission(mission_id)
 
 		if mission.get('error') == 'Mission not found':
 			reply = f"There is no Wiki Mission with ID {mission_id}."
@@ -45,9 +45,7 @@ class CommandsCog(commands.Cog):
 		elif mission.get('status') == 'accepted':
 
 			if action == 'abandon':
-				user_id = mission['assignee']
-				reply = f"User <@{user_id}> has been removed from Wiki Mission {mission_id}."
-
+				reply = f"User <@{mission['assignee']}> has been removed from Wiki Mission {mission_id}."
 			elif action == 'submit':
 				reply = f"Wiki Mission {mission_id} has been sent for approval."
 
@@ -78,10 +76,8 @@ class CommandsCog(commands.Cog):
 	@app_commands.guilds(SERVER_ID)
 	async def available_missions(self, interaction: discord.Interaction):
 		await interaction.response.defer()
-
 		missions = await mentat_request('/api/v1/missions', filters={ 'status_eq': 'active' })
-
-		await interaction.followup.send(f"There are {len(missions)} claimable Wiki Missions left at the moment.")
+		await interaction.followup.send(f"There are **{len(missions)}** claimable Wiki Missions left at the moment.")
 
 
 	@app_commands.command(name='cleanup_missions', description='Abandons ongoing missions whose assignees have left the server')
@@ -98,7 +94,7 @@ class CommandsCog(commands.Cog):
 			# check if mission has been claimed for longer than 2 weeks
 			two_weeks = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(weeks=2)
 			if embed.timestamp < two_weeks:
-				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', 'PUT')
+				await abandon_mission(mission_id)
 				continue
 
 			# check if user is still in the server
@@ -108,7 +104,7 @@ class CommandsCog(commands.Cog):
 				await interaction.guild.fetch_member(assignee_id)
 
 			except discord.errors.NotFound:
-				await mentat_request(f'/api/v1/missions/{mission_id}/abandon', 'PUT')
+				await abandon_mission(mission_id)
 
 		await interaction.followup.send(f"Wiki Missions with absent assignees (i.e. left the server or MIA >2 weeks) have been force-abandoned.")
 

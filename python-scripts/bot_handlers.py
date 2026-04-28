@@ -12,7 +12,7 @@ async def message_handler(bot, message):
 
 		response = BOT_VOICELINES['default']
 		for voiceline_data in BOT_REPLIES:
-			if any(word in message.content.lower() for word in voiceline_data[0]):
+			if any(phrase in message.content.lower() for phrase in voiceline_data[0]):
 				response = voiceline_data[1]
 				break
 

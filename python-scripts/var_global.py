@@ -96,7 +96,7 @@ BOT_VOICELINES = {
 }
 
 BOT_REPLIES = [
-	(["image help"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
+	(["image help", "sorry, these files do not meet the image requirements"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
 	(["who are you"], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen."),
 	(["thufir"], f"Greetings, <@{MENTAT_BOT_ID}> Hawat, House Atreides' Master of Assassins."),
 	(["sorry, i don't know what you're asking!"], "Didn't ask a thing."),

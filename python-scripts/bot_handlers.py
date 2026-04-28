@@ -7,8 +7,8 @@ async def message_handler(bot, message):
 	if message.author == bot.user:
 		return
 
-	# only react to messages that mention the bot
-	if bot.user in message.mentions:
+	# only react to messages that mention the bot, and all messages from the Mentat bot
+	if bot.user in message.mentions or message.author == MENTAT_BOT_ID:
 
 		response = BOT_VOICELINES['default']
 		for voiceline_data in BOT_REPLIES:

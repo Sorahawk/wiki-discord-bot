@@ -87,7 +87,7 @@ BOT_ACTIVITY_STATUSES = {
 	"a staring competition": 5,
 }
 
-# dictionary of replies
+# dictionary of replies, directly referenced in code
 BOT_VOICELINES = {
 	'default': "You again, what now?",
 	'update': "Stand by. Checking the mail for updates.",
@@ -95,8 +95,13 @@ BOT_VOICELINES = {
 	'wake': "What did I miss? Wait, I don't care.",
 }
 
-BOT_REPLIES = [
+# list of triggers and corresponding replies; every message is checked for these triggers
+BOT_REPLIES_ALWAYS = [
 	(["image help", "sorry, these files do not meet the image requirements"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
+]
+
+# list of triggers and corresponding replies; only messages that directly mention the bot is checked
+BOT_REPLIES_MENTIONED = [
 	(["who are you"], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen."),
 	(["thufir"], f"Greetings, <@{MENTAT_BOT_ID}> Hawat, House Atreides' Master of Assassins."),
 	(["sorry, i don't know what you're asking!"], "Didn't ask a thing."),

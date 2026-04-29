@@ -10,3 +10,10 @@ def check_user_elevation(member):
 # returns a Discord File object
 def generate_file(content, filename):
 	return discord.File(io.StringIO(content), filename=filename)
+
+
+# returns a matching reply, if any, from the specificed BOT_REPLIES list
+def check_replies(message, reply_list):
+	for reply in reply_list:
+		if any(phrase in message.content.lower() for phrase in reply[0]):
+			return reply[1]

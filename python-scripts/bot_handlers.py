@@ -7,15 +7,13 @@ async def message_handler(bot, message):
 	if message.author == bot.user:
 		return
 
-	# only react to messages that mention the bot, and all messages from the Mentat bot
-	if bot.user in message.mentions or message.author == MENTAT_BOT_ID:
+	# process messages that mention the bot
+	if bot.user in message.mentions:
+		response = check_replies(message, BOT_REPLIES_MENTIONED) or BOT_VOICELINES['default']
+		return await message.channel.send(response)
 
-		response = BOT_VOICELINES['default']
-		for voiceline_data in BOT_REPLIES:
-			if any(phrase in message.content.lower() for phrase in voiceline_data[0]):
-				response = voiceline_data[1]
-				break
-
+	# check for any special trigger phrases if bot is not mentioned
+	if response := check_replies(message, BOT_REPLIES_ALWAYS):
 		await message.channel.send(response)
 
 

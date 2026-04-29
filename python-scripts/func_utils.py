@@ -17,3 +17,8 @@ def check_replies(message, reply_list):
 	for reply in reply_list:
 		if any(phrase in message.content.lower() for phrase in reply[0]):
 			return reply[1]
+
+
+# returns a string where every line is formatted to be a blockquote
+def format_blockquotes(text):
+	return '\n'.join(f'> {line}' for line in text.splitlines())

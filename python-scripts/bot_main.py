@@ -66,16 +66,36 @@ async def on_app_command_error(interaction, e):
 # handle messages
 @bot.event
 async def on_message(message):
-
-	# check if message is a prefix command
-	context = await bot.get_context(message)
-
 	# only remote instance should respond to prefix commands
-	if context.valid and sys.platform == 'linux' and message.author.guild_permissions.administrator:
-		await bot.invoke(context)
+	if sys.platform == 'linux' and message.author.guild_permissions.administrator:
 
-	elif not var_global.SLEEP_MODE:
+		# check if message is a prefix command
+		context = await bot.get_context(message)
+		if context.valid:
+			await bot.invoke(context)
+
+	if not var_global.SLEEP_MODE:
 		await message_handler(bot, message)
+
+
+# handle message edits
+@bot.event
+async def on_raw_message_edit(payload):
+	if payload.guild_id != SERVER_ID:  # ignore events not in main server
+		return
+
+	if not var_global.SLEEP_MODE:
+		await message_edit_handler(bot, payload)
+
+
+# handle message deletions
+@bot.event
+async def on_raw_message_delete(payload):
+	if payload.guild_id != SERVER_ID:  # ignore events not in main server
+		return
+
+	if not var_global.SLEEP_MODE:
+		await message_delete_handler(payload)
 
 
 # handle emoji reacts
@@ -88,14 +108,11 @@ async def on_raw_reaction_add(payload):
 # handle removed members
 @bot.event
 async def on_raw_member_remove(payload):
-	user_id = payload.user.id
-	message = f"User <@{user_id}> left the server."
-
-	var_global.OPERATION_LOGGER.info(message)
-	await var_global.CHANNELS['audit'].send(message)
+	if payload.guild_id != SERVER_ID:  # ignore events not in main server
+		return
 
 	if not var_global.SLEEP_MODE:
-		await removed_member_handler(user_id)
+		await removed_member_handler(payload.user.id)
 
 
 

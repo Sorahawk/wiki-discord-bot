@@ -61,7 +61,7 @@ CHANNELS = { key: None for key in CHANNEL_IDS }
 # list of elevated Discord roles
 ELEVATED_USER_ROLES = [1204925713631813642, 1473396748478054420, 1204925888567844965, 1473734896957657209]
 
-# ID of Mentat bot
+# ID of Mentat companion bot
 MENTAT_BOT_ID = 1463966841914261710
 
 
@@ -93,21 +93,21 @@ BOT_ACTIVITY_STATUSES = {
 # dictionary of replies, directly referenced in code
 BOT_VOICELINES = {
 	'default': "You again, what now?",
-	'update': "Stand by. Checking the mail for updates.",
+	'update': "Stand by. Checking dispatches for updates.",
 	'sleep': "Your dull chatter is putting me to sleep.",
 	'wake': "What did I miss? Wait, I don't care.",
 }
 
 # list of triggers and corresponding replies; every message is checked for these triggers
 BOT_REPLIES_ALWAYS = [
-	(["image help", "sorry, these files do not meet the image requirements"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
+	(["image help", "these files do not meet the image requirements"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
 ]
 
 # list of triggers and corresponding replies; only messages that directly mention the bot is checked
 BOT_REPLIES_MENTIONED = [
 	(["who are you"], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen."),
 	(["thufir"], f"Greetings, <@{MENTAT_BOT_ID}> Hawat, House Atreides' Master of Assassins."),
-	(["sorry, i don't know what you're asking!"], "Didn't ask a thing."),
+	(["i don't know what you're asking!"], "Didn't ask a thing."),
 	(["tax"], "Taxes? His Imperial Highness has no want or need for your Solari. Now, leave me be, you nitwit."),
 	(["solari", "coin", "money", "cash"], "Your Solari is worthless here, peasant. Go about your own business and stop bothering me."),
 	(["planetologist"], "Cyprian Io is our esteemed Imperial Planetologist right here on Arrakis."),

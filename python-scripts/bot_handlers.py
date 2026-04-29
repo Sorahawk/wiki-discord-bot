@@ -17,6 +17,43 @@ async def message_handler(bot, message):
 		await message.channel.send(response)
 
 
+# handles message edits
+async def message_edit_handler(bot, payload):
+	message = payload.message
+
+	# ignore messages sent by the bot itself
+	if (author := message.author) == bot.user:
+		return
+
+	# ignore edits by elevated users
+	if check_user_elevation(author):
+		return
+
+	message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
+	audit_message = f"<@{author.id}> edited message: {message_link}\n\n"
+
+	new_content = message.content
+
+	# try to get original message content which will be present if it was still in the cache
+	if cached := getattr(payload, 'cached_message', None):
+		old_content = cached.content
+		if old_content == new_content:  # link previews technically edit the message when appearing but do not change the content
+			return
+
+		audit_message += f"**Original:**\n{format_blockquotes(old_content)}\n\n"
+
+	else:
+		audit_message += "**Original:**\n```Content unavailable in cache.```\n"
+
+	audit_message += f"**New**:\n{format_blockquotes(new_content)}"
+	await var_global.CHANNELS['audit'].send(audit_message)
+
+
+# handles message deletions
+async def message_delete_handler(payload):
+	pass
+
+
 # handles emoji reacts in feed channel
 async def reaction_handler(payload):
 	if payload.channel_id != CHANNEL_IDS['feed']:
@@ -69,6 +106,13 @@ async def reaction_handler(payload):
 
 # checks for any in-progress wiki missions when assignee leaves the server
 async def removed_member_handler(user_id):
+	# log event
+	message = f"User <@{user_id}> left the server."
+
+	var_global.OPERATION_LOGGER.info(message)
+	await var_global.CHANNELS['audit'].send(message)
+
+	# check if user has any accepted missions, and abandon them
 	missions = await mentat_request('/api/v1/missions', filters={
 		'status_eq': 'accepted',
 		'assignee_user_discord_uid_eq': user_id

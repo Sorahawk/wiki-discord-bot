@@ -89,7 +89,10 @@ async def on_raw_reaction_add(payload):
 @bot.event
 async def on_raw_member_remove(payload):
 	user_id = payload.user.id
-	var_global.OPERATION_LOGGER.info(f"User {user_id} left the server.")
+	message = f"User <@{user_id}> left the server."
+
+	var_global.OPERATION_LOGGER.info(message)
+	await var_global.CHANNELS['audit'].send(message)
 
 	if not var_global.SLEEP_MODE:
 		await removed_member_handler(user_id)

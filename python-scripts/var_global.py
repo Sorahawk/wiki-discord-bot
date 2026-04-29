@@ -42,7 +42,7 @@ SERVER_ID = 1204923645705855108
 
 # dictionary of Discord server channel IDs
 CHANNEL_IDS = {
-	# Channel that will receive notifications
+	# Default channel to send notifications
 	'main': 1465756865127514162,
 
 	# Channel that logs all Recent Changes on the wiki
@@ -50,6 +50,9 @@ CHANNEL_IDS = {
 
 	# Channel that displays all the ongoing Wiki Missions
 	'ongoing': 1474360466003464243,
+
+	# Channel to send audit logs
+	'audit': 1499032540168589386,
 }
 
 # automatically generate dictionary of channel runtime objects

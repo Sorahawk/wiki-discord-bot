@@ -20,9 +20,10 @@ async def message_handler(bot, message):
 # handles message edits
 async def message_edit_handler(bot, payload):
 	message = payload.message
+	author = message.author
 
 	# ignore messages sent by the bot itself
-	if (author := message.author) == bot.user:
+	if author == bot.user:
 		return
 
 	# ignore edits by elevated users
@@ -35,7 +36,7 @@ async def message_edit_handler(bot, payload):
 	new_content = message.content
 
 	# try to get original message content which will be present if it was still in the cache
-	if cached := getattr(payload, 'cached_message', None):
+	if cached := payload.cached_message:
 		old_content = cached.content
 		if old_content == new_content:  # link previews technically edit the message when appearing but do not change the content
 			return
@@ -46,6 +47,7 @@ async def message_edit_handler(bot, payload):
 		audit_message += "**Original:**\n```Content unavailable in cache.```\n"
 
 	audit_message += f"**New**:\n{format_blockquotes(new_content)}"
+
 	await var_global.CHANNELS['audit'].send(audit_message)
 
 

@@ -110,7 +110,7 @@ BOT_REPLIES_MENTIONED = [
 	(["i don't know what you're asking!"], "Didn't ask a thing."),
 	(["tax"], "Taxes? His Imperial Highness has no want or need for your Solari. Now, leave me be, you nitwit."),
 	(["solari", "coin", "money", "cash"], "Your Solari is worthless here, peasant. Go about your own business and stop bothering me."),
-	(["planetologist"], "Cyprian Io is our esteemed Imperial Planetologist right here on Arrakis."),
+	(["ecolog", "planetolog"], "Cyprian Io is our esteemed Imperial Planetologist right here on Arrakis."),
 	(["cyprian"], "It is no secret that Cyprian Io is Grand Nephew to the Emperor. That is the most relevant qualification one can have."),
 	(["bitter"], "Bitter? Cyprian and I are best mates."),
 ]

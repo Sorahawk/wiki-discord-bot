@@ -100,7 +100,7 @@ BOT_VOICELINES = {
 
 # list of triggers and corresponding replies; every message is checked for these triggers
 BOT_REPLIES_ALWAYS = [
-	(["image help", "these files do not meet the image requirements"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
+	(["image help", "width is too small. minimum width: 500px", "height is too small. minimum height: 1150px", "incorrect image w:h ratio. required ratio: 1:2.3"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px."),
 ]
 
 # list of triggers and corresponding replies; only messages that directly mention the bot is checked

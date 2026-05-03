@@ -15,7 +15,7 @@ def generate_file(content, filename):
 # returns a matching reply, if any, from the specificed BOT_REPLIES list
 def check_replies(message, reply_list):
 	for reply in reply_list:
-		if any(phrase in message.content.lower() for phrase in reply[0]):
+		if any(phrase.lower() in message.content.lower() for phrase in reply[0]):
 			return reply[1]
 
 

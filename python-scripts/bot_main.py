@@ -67,13 +67,18 @@ async def on_app_command_error(interaction, e):
 @bot.event
 async def on_message(message):
 	# only remote instance should respond to prefix commands
-	if sys.platform == 'linux' and message.author.guild_permissions.administrator:
+	if sys.platform == 'linux':
 
-		# check if message is a prefix command
-		context = await bot.get_context(message)
-		if context.valid:
-			await bot.invoke(context)
+		# only allow server admins to run prefix commands
+		perms = getattr(message.author, 'guild_permissions', None)
+		if perms and perms.administrator:
 
+			# check if message is a prefix command
+			context = await bot.get_context(message)
+			if context.valid:
+				return await bot.invoke(context)
+
+	# else check messages for trigger phrases
 	if not var_global.SLEEP_MODE:
 		await message_handler(bot, message)
 

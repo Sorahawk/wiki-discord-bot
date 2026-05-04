@@ -107,9 +107,13 @@ async def reaction_handler(payload):
 
 
 # checks for any in-progress wiki missions when assignee leaves the server
-async def removed_member_handler(user_id):
+async def removed_member_handler(bot, user_id):
+	# fetch user info
+	user = await bot.fetch_user(user_id)
+	user_name = user.display_name
+
 	# log event
-	message = f"User <@{user_id}> left the server."
+	message = f"User {username} (<@{user_id}>) left the server."
 
 	var_global.OPERATION_LOGGER.info(message)
 	await var_global.CHANNELS['audit'].send(message)

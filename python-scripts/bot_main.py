@@ -117,7 +117,7 @@ async def on_raw_member_remove(payload):
 		return
 
 	if not var_global.SLEEP_MODE:
-		await removed_member_handler(payload.user.id)
+		await removed_member_handler(bot, payload.user.id)
 
 
 

@@ -113,7 +113,7 @@ async def removed_member_handler(bot, user_id):
 	user_name = user.display_name
 
 	# log event
-	message = f"User {username} (<@{user_id}>) left the server."
+	message = f"User {user_name} (<@{user_id}>) left the server."
 
 	var_global.OPERATION_LOGGER.info(message)
 	await var_global.CHANNELS['audit'].send(message)

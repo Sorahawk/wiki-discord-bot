@@ -108,15 +108,17 @@ async def reaction_handler(payload):
 
 # checks for any in-progress wiki missions when assignee leaves the server
 async def removed_member_handler(bot, user_id):
-	# fetch user info
+	# fetch user info because raw event only returns user ID
 	user = await bot.fetch_user(user_id)
-	user_name = user.display_name
 
 	# log event
-	message = f"User left the server: {user_id} '{user_name}' (<@{user_id}>) {user.display_avatar.url}"
+	message = f"<@{user_id}> left the server - `{user_id}` `@{user.name} ({user.display_name})`"
 
 	var_global.OPERATION_LOGGER.info(message)
 	await var_global.CHANNELS['audit'].send(message)
+
+	avatar_url = user.display_avatar.with_size(128).url
+	await var_global.CHANNELS['audit'].send(avatar_url)
 
 	# check if user has any accepted missions, and abandon them
 	missions = await mentat_request('/api/v1/missions', filters={

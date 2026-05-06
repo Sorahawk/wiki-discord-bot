@@ -112,7 +112,7 @@ async def removed_member_handler(bot, user_id):
 	user = await bot.fetch_user(user_id)
 
 	# log event
-	message = f"<@{user_id}> left the server - `{user_id}` `@{user.name} ({user.display_name})`"
+	message = f"<@{user_id}> left the server - `{user_id}`  `@{user.name}`  `({user.display_name})`"
 
 	var_global.OPERATION_LOGGER.info(message)
 	await var_global.CHANNELS['audit'].send(message)

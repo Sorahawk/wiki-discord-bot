@@ -32,4 +32,4 @@ async def send_traceback(e, channel=None):
 	if len(full_trace) <= 1994:
 		await channel.send(f'```{full_trace}```')
 	else:
-		await channel.send(e, file=generate_file(full_trace, 'traceback.txt'))
+		await channel.send(f'```{str(e) or type(e).__name__}```', file=generate_file(full_trace, 'traceback.txt'))

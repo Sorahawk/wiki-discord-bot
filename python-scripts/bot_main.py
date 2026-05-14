@@ -95,12 +95,12 @@ async def on_message_edit(before, after):
 
 # handle message deletions
 @bot.event
-async def on_message_delete(payload):
-	if not payload.guild_id or payload.guild_id != SERVER_ID:  # ignore events not in main server
+async def on_message_delete(message):
+	if not message.guild.id or message.guild.id != SERVER_ID:  # ignore events not in main server
 		return
 
 	if not var_global.SLEEP_MODE:
-		await message_delete_handler(payload)
+		await message_delete_handler(message)
 
 
 # handle emoji reacts

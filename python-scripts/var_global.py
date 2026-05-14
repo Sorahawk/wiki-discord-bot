@@ -53,6 +53,9 @@ CHANNEL_IDS = {
 
 	# Channel to send audit logs
 	'audit': 1499032540168589386,
+
+	# Channel to route direct messages
+	'reroute': 1492574553698865373,
 }
 
 # automatically generate dictionary of channel runtime objects

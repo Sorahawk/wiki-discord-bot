@@ -66,6 +66,18 @@ async def on_app_command_error(interaction, e):
 # handle messages
 @bot.event
 async def on_message(message):
+	# reroute any received DMs to channel, and do not respond
+	if not message.guild:
+		output_header = f"<@{message.author.id}> sent a DM:\n"
+		output_message = output_header + format_blockquotes(message.content)
+
+		if len(output_message) <= 2000:
+			await var_global.CHANNELS['reroute'].send(output_message)
+		else:
+			await var_global.CHANNELS['reroute'].send(output_header, file=generate_file(output_message, 'output_message.txt'))
+
+		return
+
 	# only remote instance should respond to prefix commands
 	if sys.platform == 'linux':
 
@@ -86,7 +98,8 @@ async def on_message(message):
 # handle message edits
 @bot.event
 async def on_message_edit(before, after):
-	if not after.guild.id or after.guild.id != SERVER_ID:  # ignore events not in main server
+	# ignore events not in main server
+	if (after.guild and after.guild.id) != SERVER_ID:
 		return
 
 	if not var_global.SLEEP_MODE:
@@ -96,7 +109,8 @@ async def on_message_edit(before, after):
 # handle message deletions
 @bot.event
 async def on_message_delete(message):
-	if not message.guild.id or message.guild.id != SERVER_ID:  # ignore events not in main server
+	# ignore events not in main server
+	if (message.guild and message.guild.id) != SERVER_ID:
 		return
 
 	if not var_global.SLEEP_MODE:

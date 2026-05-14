@@ -41,7 +41,7 @@ async def message_edit_handler(bot, before, after):
 	audit_message = audit_header + f"**Original:**\n{format_blockquotes(old_content)}\n\n"
 	audit_message += f"**New**:\n{format_blockquotes(new_content)}"
 
-	if len(audit_message) <= 1994:
+	if len(audit_message) <= 2000:
 		await var_global.CHANNELS['audit'].send(audit_message)
 	else:
 		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'))

@@ -85,17 +85,17 @@ async def on_message(message):
 
 # handle message edits
 @bot.event
-async def on_raw_message_edit(payload):
-	if not payload.guild_id or payload.guild_id != SERVER_ID:  # ignore events not in main server
+async def on_message_edit(before, after):
+	if not after.guild.id or after.guild.id != SERVER_ID:  # ignore events not in main server
 		return
 
 	if not var_global.SLEEP_MODE:
-		await message_edit_handler(bot, payload)
+		await message_edit_handler(bot, before, after)
 
 
 # handle message deletions
 @bot.event
-async def on_raw_message_delete(payload):
+async def on_message_delete(payload):
 	if not payload.guild_id or payload.guild_id != SERVER_ID:  # ignore events not in main server
 		return
 

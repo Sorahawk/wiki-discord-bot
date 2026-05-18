@@ -103,7 +103,7 @@ BOT_VOICELINES = {
 
 # list of triggers and corresponding replies; every message is checked for these triggers
 BOT_REPLIES_ALWAYS = [
-	(["image help", "width is too small. minimum width: 500px", "height is too small. minimum height: 1150px", "incorrect image w:h ratio. required ratio: 1:2.3"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. Make sure to LOCK the aspect ratio, then scale the height to 1150px.\n\n4. Crop the sides down to 500px.\n\nYour images should look something like below[.](https://media.awakening.wiki/wiki/1/17/Executor_Torso.png) Check out our [Photobox Guide](<https://awakening.wiki/Wiki:Photobox_Guide>) for more info."),
+	(["image help", "width is too small. minimum width: 500px", "height is too small. minimum height: 1150px", "incorrect image w:h ratio. required ratio: 1:2.3"], "## Tips for Image Cropping\n\n1. Use any photo-editing software.\n\n2. Do not bother about your image dimensions yet. Crop the height (top & bottom edges) first, leaving some buffer above the head and below the feet.\n\n3. SCALE the image height to 1150px, making sure you LOCK the aspect ratio. Remember, you can scale the image UP; your screen resolution does NOT matter.\n\n4. Crop the sides down to 500px.\n\nYour images should look something like below[.](https://media.awakening.wiki/wiki/1/17/Executor_Torso.png) Check out our [Photobox Guide](<https://awakening.wiki/Wiki:Photobox_Guide>) for more info."),
 ]
 
 # list of triggers and corresponding replies; only messages that directly mention the bot is checked

@@ -3,10 +3,6 @@ from imports import *
 
 # handles messages
 async def message_handler(bot, message):
-	# ignore messages sent by the bot itself
-	if message.author == bot.user:
-		return
-
 	# process messages that mention the bot
 	if bot.user in message.mentions:
 		response = check_replies(message, BOT_REPLIES_MENTIONED) or BOT_VOICELINES['default']

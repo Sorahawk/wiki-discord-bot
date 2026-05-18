@@ -66,6 +66,10 @@ async def on_app_command_error(interaction, e):
 # handle messages
 @bot.event
 async def on_message(message):
+	# ignore messages sent by the bot itself
+	if message.author == bot.user:
+		return
+
 	# reroute any received DMs to channel, and do not respond
 	if not message.guild:
 		output_header = f"<@{message.author.id}> sent a DM:\n"

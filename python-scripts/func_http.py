@@ -68,6 +68,10 @@ async def abandon_mission_safely(mission):
 
 # wiki request wrapper
 async def wiki_request(payload, method='GET', token_type=None, retry=False):
+	# mark as bot edit
+	payload['bot'] = 1
+
+	# populate required token
 	if token_type:
 		payload['token'] = var_secret.WIKI_TOKENS[token_type]
 

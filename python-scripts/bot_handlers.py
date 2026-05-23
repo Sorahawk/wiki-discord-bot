@@ -44,8 +44,52 @@ async def message_edit_handler(bot, before, after):
 
 
 # handles message deletions
-async def message_delete_handler(payload):
-	pass
+async def message_delete_handler(bot, message):
+	author = message.author
+
+	# ignore bot messages being deleted
+	if author == bot.user or author.id == MENTAT_BOT_ID:
+		return
+
+	# fetch attachments immediately before Discord purges them
+	files = []
+
+	for file in message.attachments:
+		response = await var_global.SESSION.get(file.url)
+
+		if response.status_code == 200:
+			files.append(discord.File(io.BytesIO(response.content), filename=file.filename))
+
+	message_link = f'https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}'
+	audit_header = ''
+
+	# check audit log to find the deleter, might take a while to appear
+	# self-deletions don't appear in the log
+	await asyncio.sleep(2)
+
+	async for entry in message.guild.audit_logs(action=discord.AuditLogAction.message_delete, limit=3):
+		if entry.target.id == author.id and entry.extra.channel.id == message.channel.id:
+			audit_header = f"<@{entry.user.id}> deleted a message by <@{author.id}>: {message_link}"
+			break
+
+	# if no matching audit logs, likely a self-deletion
+	if not audit_header:
+
+		# ignore self-deletions by elevated users
+		if check_user_elevation(author):
+			return
+
+		audit_header = f"<@{author.id}> deleted their message: {message_link}"
+
+	audit_message = audit_header + f'\n{format_blockquotes(message.content)}'
+
+	if len(audit_message) <= 2000:
+		await var_global.CHANNELS['audit'].send(audit_message, files=files)
+	else:
+		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'))
+
+		if files:
+			await var_global.CHANNELS['audit'].send(files=files)
 
 
 # handles emoji reacts in feed channel

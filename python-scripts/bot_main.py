@@ -118,7 +118,7 @@ async def on_message_delete(message):
 		return
 
 	if not var_global.SLEEP_MODE:
-		await message_delete_handler(message)
+		await message_delete_handler(bot, message)
 
 
 # handle emoji reacts

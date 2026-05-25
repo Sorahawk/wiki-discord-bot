@@ -84,9 +84,9 @@ async def message_delete_handler(bot, message):
 	audit_message = audit_header + f'\n{format_blockquotes(message.content)}'
 
 	if len(audit_message) <= 2000:
-		await var_global.CHANNELS['audit'].send(audit_message, files=files)
+		await var_global.CHANNELS['audit'].send(audit_message, files=files, allowed_mentions=discord.AllowedMentions.none())
 	else:
-		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'))
+		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'), allowed_mentions=discord.AllowedMentions.none())
 
 		if files:
 			await var_global.CHANNELS['audit'].send(files=files)

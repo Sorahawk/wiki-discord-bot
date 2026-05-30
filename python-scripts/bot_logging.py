@@ -21,15 +21,17 @@ def init_logger():
 
 # obtains full traceback of given exception and outputs to specified channel
 async def send_traceback(e, channel=None):
-	full_trace = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+	max_len_wo_backticks = 1994
 
+	full_trace = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
 	var_global.OPERATION_LOGGER.error(full_trace)
 
 	channel = channel or var_global.CHANNELS.get('main')
 	if not channel:
 		return
 
-	if len(full_trace) <= 1994:
+	if len(full_trace) <= max_len_wo_backticks:
 		await channel.send(f'```{full_trace}```')
 	else:
-		await channel.send(f'```{str(e) or type(e).__name__}```', file=generate_file(full_trace, 'traceback.txt'))
+		error_truncated = str(e)[:max_len_wo_backticks] or type(e).__name__
+		await channel.send(f'```{error_truncated}```', file=generate_file(full_trace, 'traceback.txt'))

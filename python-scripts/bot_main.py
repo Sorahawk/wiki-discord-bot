@@ -25,7 +25,7 @@ async def on_ready():
 		var_global.CHANNELS[key] = bot.get_channel(CHANNEL_IDS[key])
 
 	# init requests session
-	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS, timeout=30)
+	var_global.SESSION = httpx.AsyncClient(headers=STANDARD_HEADERS, timeout=60)
 
 	# skip non-essential modules if running server adhoc scripts
 	if not var_global.THIN_MODE:

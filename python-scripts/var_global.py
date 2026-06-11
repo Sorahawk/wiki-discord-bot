@@ -109,7 +109,7 @@ BOT_REPLIES_ALWAYS = [
 		"height is too small. minimum height: 1150px",
 		"incorrect image w:h ratio. required ratio: 1:2.3",
 	],
-	"## Steps for Image Cropping\n\n1. Use any photo-editing software. If in doubt, try Paint.NET, which can be downloaded for free.\n\n2. Do not worry about the image dimensions yet. For now, just crop the TOP and BOTTOM of the image ONLY. Refer to the example image, if necessary.\n\n3. Scale the image height to 1150px, making sure you LOCK the aspect ratio. Remember, you can scale the image UP as well; your screen resolution does NOT matter.\n\n4. Crop the sides down to 500px.\n\nYour images should look something like below[.](https://media.awakening.wiki/wiki/1/17/Executor_Torso.png) Check out our [Photobox Guide](<https://awakening.wiki/Wiki:Photobox_Guide>) for more info."),
+	"## Steps for Image Cropping\n\n1. Use any photo-editing software. If in doubt, try Paint.NET, which can be downloaded for free.\n\n2. Do not worry about the image dimensions yet. For now, just crop the TOP and BOTTOM of the image ONLY. Refer to the example image, if necessary.\n\n3. Scale the image height to 1150px, making sure you LOCK the aspect ratio. Remember, you can scale the image UP as well; your screen resolution does NOT matter.\n\n4. Crop the sides down to 500px.\n\n**Your images should look something like below**[.](https://media.awakening.wiki/wiki/1/17/Executor_Torso.png) Check out our [Photobox Guide](<https://awakening.wiki/Wiki:Photobox_Guide>) for more info."),
 ]
 
 # list of triggers and corresponding replies; only messages that directly mention the bot is checked

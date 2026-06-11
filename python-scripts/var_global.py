@@ -103,6 +103,7 @@ BOT_VOICELINES = {
 
 # list of triggers and corresponding replies; every message is checked for these triggers
 BOT_REPLIES_ALWAYS = [
+<<<<<<< HEAD
 	(
 		[
 			"image help",
@@ -116,7 +117,7 @@ BOT_REPLIES_ALWAYS = [
 			"2. Do not worry about the image dimensions yet. For now, just crop the TOP and BOTTOM of the image ONLY. Refer to the example image, if necessary.\n\n"
 			"3. Scale the image height to 1150px, making sure you LOCK the aspect ratio. Remember, you can scale the image UP as well; your screen resolution does NOT matter.\n\n"
 			"4. Crop the sides down to 500px.\n\n"
-			"Your images should look something like below[.](https://media.awakening.wiki/wiki/1/17/Executor_Torso.png) Check out our [Photobox Guide](<https://awakening.wiki/Wiki:Photobox_Guide>) for more info."
+			"**Your images should look something like below**[.](https://media.awakening.wiki/wiki/1/17/Executor_Torso.png) Check out our [Photobox Guide](<https://awakening.wiki/Wiki:Photobox_Guide>) for more info."
 		)
 	)
 ]

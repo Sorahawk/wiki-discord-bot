@@ -103,7 +103,6 @@ BOT_VOICELINES = {
 
 # list of triggers and corresponding replies; every message is checked for these triggers
 BOT_REPLIES_ALWAYS = [
-<<<<<<< HEAD
 	(
 		[
 			"image help",

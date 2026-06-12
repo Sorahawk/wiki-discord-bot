@@ -38,9 +38,9 @@ async def message_edit_handler(bot, before, after):
 	audit_message += f"**New**:\n{format_blockquotes(new_content)}"
 
 	if len(audit_message) <= 2000:
-		await var_global.CHANNELS['audit'].send(audit_message)
+		await var_global.CHANNELS['audit'].send(audit_message, allowed_mentions=discord.AllowedMentions.none())
 	else:
-		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'))
+		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'), allowed_mentions=discord.AllowedMentions.none())
 
 
 # handles message deletions

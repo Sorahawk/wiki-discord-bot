@@ -61,7 +61,10 @@ async def abandon_mission_safely(mission):
 	if mission['status'] == 'accepted':
 		await abandon_mission(mission_id)
 	else:
-		var_global.OPERATION_LOGGER.warning(f"Mission {mission_id} is in '{mission['status']}' state, not 'accepted', and cannot be abandoned.")
+		message = f"WARNING - Mission {mission_id} is in '{mission['status']}' state, not 'accepted', and cannot be abandoned."
+
+		var_global.OPERATION_LOGGER.warning(message)
+		await var_global.CHANNELS['audit'].send(message)
 
 
 
@@ -78,12 +81,12 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 
 	response = await http_request(WIKI_BASE_URL, payload, method)
 
-	# TEMP DEBUG
+	# verify the response type is a dict
 	if not isinstance(response, dict):
-		await var_global.CHANNELS['reroute'].send(response)
+		raise Exception(f"**ERROR - Wiki API returned a non-JSON response (possible server error):**\n\n{response}")
 
 	# retry wiki request once if error
-	if isinstance(response, dict) and response.get('error', {}) and not retry:
+	if response.get('error', {}) and not retry:
 		await check_wiki_session()
 		response = await wiki_request(payload, method, token_type, retry=True)
 
@@ -131,7 +134,7 @@ async def wiki_login():
 			var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}.")
 			await refresh_tokens()
 		else:
-			raise Exception(f"Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}")
+			raise Exception(f"**Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}**")
 
 
 # check if login session is still valid

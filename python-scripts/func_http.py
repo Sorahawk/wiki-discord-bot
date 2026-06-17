@@ -18,10 +18,10 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 
 	raw_response = await session.request(method, endpoint, **{kwarg: payload}, headers=headers)
 
-	try:
+	if 'application/json' in raw_response.headers.get('Content-Type', ''):
 		response = raw_response.json()
-	except:
-		response = raw_response
+	else:
+		response = raw_response.text
 
 	var_global.OPERATION_LOGGER.info(response)
 	return response

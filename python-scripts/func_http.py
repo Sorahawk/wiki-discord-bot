@@ -78,8 +78,12 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 
 	response = await http_request(WIKI_BASE_URL, payload, method)
 
+	# TEMP DEBUG
+	if not isinstance(response, dict):
+		await var_global.CHANNELS['reroute'].send(response)
+
 	# retry wiki request once if error
-	if response.get('error', {}) and not retry:
+	if isinstance(response, dict) and response.get('error', {}) and not retry:
 		await check_wiki_session()
 		response = await wiki_request(payload, method, token_type, retry=True)
 

@@ -61,7 +61,7 @@ async def abandon_mission_safely(mission):
 	if mission['status'] == 'accepted':
 		await abandon_mission(mission_id)
 	else:
-		message = f"WARNING - Mission {mission_id} is in '{mission['status']}' state, not 'accepted', and cannot be abandoned."
+		message = f"WARNING: Mission {mission_id} is in '{mission['status']}' state, not 'accepted', and cannot be abandoned."
 
 		var_global.OPERATION_LOGGER.warning(message)
 		await var_global.CHANNELS['audit'].send(message)
@@ -83,7 +83,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 
 	# verify the response type is a dict
 	if not isinstance(response, dict):
-		raise Exception(f"**ERROR - Wiki API returned a non-JSON response (possible server error):**\n\n{response}")
+		raise Exception(f"Wiki API returned a non-JSON response (possible server error):\n\n{response}")
 
 	# retry wiki request once if error
 	if response.get('error', {}) and not retry:

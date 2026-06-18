@@ -28,7 +28,7 @@ WIKI_BASE_URL = 'https://awakening.wiki/api.php'
 MENTAT_BASE_URL = 'https://mentat.wiki'
 
 # standard headers for HTTP requests
-STANDARD_HEADERS = { 'User-Agent': f'Sorabot/1.0 python-httpx' }
+STANDARD_HEADERS = { 'User-Agent': 'Ixian Thinking Machine/Sorabot' }
 
 # async lock object to prevent race condition over the session
 ASYNC_LOCK = None

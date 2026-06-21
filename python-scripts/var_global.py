@@ -95,7 +95,6 @@ BOT_ACTIVITY_STATUSES = {
 
 # dictionary of replies, directly referenced in code
 BOT_VOICELINES = {
-	'default': "You again, what now?",
 	'update': "Stand by. Checking dispatches for updates.",
 	'sleep': "Your dull chatter is putting me to sleep.",
 	'wake': "What did I miss? Wait, I don't care.",
@@ -123,6 +122,7 @@ BOT_REPLIES_ALWAYS = [
 
 # list of triggers and corresponding replies; only messages that directly mention the bot is checked
 BOT_REPLIES_MENTIONED = [
+	(["hi", "hello"], "You again, what now?"),
 	(["who are you"], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen."),
 	(["thufir"], f"Greetings, <@{MENTAT_BOT_ID}> Hawat, House Atreides' Master of Assassins."),
 	(["i don't know what you're asking!"], "Didn't ask a thing."),

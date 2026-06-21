@@ -5,8 +5,9 @@ from imports import *
 async def message_handler(bot, message):
 	# process messages that mention the bot
 	if bot.user in message.mentions:
-		response = check_replies(message, BOT_REPLIES_ALWAYS) or check_replies(message, BOT_REPLIES_MENTIONED) or BOT_VOICELINES['default']
-		return await message.channel.send(response)
+		response = check_replies(message, BOT_REPLIES_ALWAYS) or check_replies(message, BOT_REPLIES_MENTIONED) or None
+		if response:
+			return await message.channel.send(response)
 
 	# check for any special trigger phrases if bot is not mentioned
 	if response := check_replies(message, BOT_REPLIES_ALWAYS):

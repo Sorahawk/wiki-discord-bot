@@ -122,7 +122,7 @@ BOT_REPLIES_ALWAYS = [
 
 # list of triggers and corresponding replies; only messages that directly mention the bot is checked
 BOT_REPLIES_MENTIONED = [
-	(["hi", "hello"], "You again, what now?"),
+	(["hello", "hi there", "hey there"], "You again, what now?"),
 	(["who are you"], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen."),
 	(["thufir"], f"Greetings, <@{MENTAT_BOT_ID}> Hawat, House Atreides' Master of Assassins."),
 	(["i don't know what you're asking!"], "Didn't ask a thing."),

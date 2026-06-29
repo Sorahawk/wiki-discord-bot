@@ -126,21 +126,29 @@ async def reaction_handler(payload):
 		if response.get('error', {}).get('code') == 'missingtitle':
 			await var_global.CHANNELS['feed'].send(f"<@{member.id}>, `{title}` no longer exists, thus cannot be deleted!")
 
-	# rollback consecutive edits action
+	# rollback consecutive edits or revert image actions
 	elif payload.emoji.name in ACCEPTED_EMOJIS['rollback']:
+		if 'new version' in content.lower():
+			match = re.search(r'\) uploaded \[([^\]]+)\]', content)
+			if match:
+				title = match.group(1)
+				response = await revert_image(title, member.display_name)
+				
+				if response.get('error'):
+					await var_global.CHANNELS['feed'].send(f"<@{member.id}>, error occurred during process of reverting `File:{title}`: {response['error']}")
+				return
+
 		# grab user name and page title
 		match = re.search(r':\[([^\]]+)\].*?\) edited \[([^\]]+)\]', content)
-		if not match:
-			return
+		if match:
+			# rollback page
+			username = match.group(1)
+			title = match.group(2)
 
-		# rollback page
-		username = match.group(1)
-		title = match.group(2)
+			response = await rollback_page(title, username, f"Latest edits by {username} rolled back via Discord by {member.display_name}")
 
-		response = await rollback_page(title, username, f"Latest edits by {username} rolled back via Discord by {member.display_name}")
-
-		if response.get('error', {}).get('code') == 'alreadyrolled':
-			await var_global.CHANNELS['feed'].send(f"<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.")
+			if response.get('error', {}).get('code') == 'alreadyrolled':
+				await var_global.CHANNELS['feed'].send(f"<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.")
 
 
 # checks for any in-progress wiki missions when assignee leaves the server

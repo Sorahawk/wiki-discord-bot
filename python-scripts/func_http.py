@@ -158,14 +158,19 @@ async def check_wiki_session():
 		await refresh_tokens()
 
 
-# API call to delete a page or file
-async def delete_page(title, reason=''):
-	return await wiki_request({
+# API call to delete a page, file, or a specific file version
+async def delete_page(title, reason='', oldimage=None):
+	payload = {
 		'action': 'delete',
 		'title': title,
 		'reason': reason,
 		'format': 'json'
-	}, 'POST', 'csrf')
+	}
+
+	if oldimage:
+		payload['oldimage'] = oldimage
+
+	return await wiki_request(payload, 'POST', 'csrf')
 
 
 # API call to rollback all consecutive edits from a single user if they are the latest revisions
@@ -177,3 +182,55 @@ async def rollback_page(title, username, reason=''):
 		'summary': reason,
 		'format': 'json'
 	}, 'POST', 'rollback')
+
+
+# API call to revert a file to its previous version while deleting the latest version
+async def revert_image(title, member_name):
+	file_title = f'File:{title}'
+
+	# fetch the two most recent versions, but archivename only shows up for old versions
+	response = await wiki_request({
+		'action': 'query',
+		'titles': file_title,
+		'prop': 'imageinfo',
+		'iiprop': 'archivename',
+		'iilimit': 2,
+		'format': 'json'
+	})
+
+	versions = list(response['query']['pages'].values())[0]['imageinfo']
+	to_revert = versions[1]['archivename']
+
+	# revert to the previous version
+	response = await wiki_request({
+		'action': 'filerevert',
+		'filename': title,
+		'archivename': to_revert,
+		'comment': f"Reverted to previous version via Discord by {member_name}",
+		'format': 'json'
+	}, 'POST', 'csrf')
+
+	if response.get('error'):
+		return response
+
+	# fetch again to get the archivename of the target version to delete
+	response = await wiki_request({
+		'action': 'query',
+		'titles': file_title,
+		'prop': 'imageinfo',
+		'iiprop': 'archivename',
+		'iilimit': 2,
+		'format': 'json'
+	})
+
+	versions = list(response['query']['pages'].values())[0]['imageinfo']
+	to_delete = versions[1]['archivename']
+
+	# delete the target version
+	response = await delete_page(file_title, f"Deleted target version via Discord by {member_name}", to_delete)
+
+	if response.get('error'):
+		return response
+
+	# delete the now-redundant duplicate version
+	return await delete_page(file_title, f"Deleted duplicate version via Discord by {member_name}", to_revert)

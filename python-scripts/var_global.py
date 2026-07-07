@@ -42,27 +42,24 @@ SERVER_ID = 1204923645705855108
 
 # dictionary of Discord server channel IDs
 CHANNEL_IDS = {
-	# Default channel to send notifications
-	'main': 1465756865127514162,
-
-	# Channel that logs all Recent Changes on the wiki
-	'feed': 1465745673486995642,
-
-	# Channel that displays all the ongoing Wiki Missions
-	'ongoing': 1474360466003464243,
-
-	# Channel to send audit logs
-	'audit': 1499032540168589386,
-
-	# Channel to route direct messages
-	'reroute': 1492574553698865373,
+	'main': 1465756865127514162,  # default notifications
+	'feed': 1465745673486995642,  # Recent Changes feed
+	'ongoing': 1474360466003464243,  # ongoing (claimed) Wiki Missions
+	'audit': 1499032540168589386,  # audit logs
+	'reroute': 1492574553698865373,  # reroute direct messages
 }
 
 # automatically generate dictionary of channel runtime objects
 CHANNELS = { key: None for key in CHANNEL_IDS }
 
 # list of elevated Discord roles
-ELEVATED_USER_ROLES = [1204925713631813642, 1473396748478054420, 1204925888567844965, 1473734896957657209, 1363446832310649065]
+ELEVATED_USER_ROLES = [
+	1204925713631813642,  # Director
+	1473396748478054420,  # Hands
+	1204925888567844965,  # Archivists
+	1522278415624044675,  # Emissaries
+	1473734896957657209,  # Initiates
+]
 
 # ID of Mentat companion bot
 MENTAT_BOT_ID = 1463966841914261710

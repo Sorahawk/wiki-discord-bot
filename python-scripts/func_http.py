@@ -272,7 +272,7 @@ async def revert_image(title, member_name):
 		'iilimit': 2
 	})
 
-	versions = list(response['query']['pages'].values())[0]['imageinfo']
+	versions = response['query']['pages'][0]['imageinfo']
 	to_delete = versions[1]['archivename']
 
 	# delete the target version

@@ -74,6 +74,7 @@ async def abandon_mission_safely(mission):
 async def wiki_request(payload, method='GET', token_type=None, retry=False):
 	payload['bot'] = 1  # mark as bot edit
 	payload['format'] = 'json'  # set output as json
+	payload['formatversion'] = 2  # set output format to recommended version
 
 	# populate required token
 	if token_type:
@@ -161,8 +162,7 @@ async def list_pages(namespace, prefix=None):
 		'action': 'query',
 		'list': 'allpages',
 		'apnamespace': namespace,
-		'aplimit': 'max',
-		'formatversion': 2
+		'aplimit': 'max'
 	}
 	if prefix:
 		payload['apprefix'] = prefix.split(':', 1)[-1] if ':' in prefix and namespace != 0 else prefix
@@ -192,8 +192,7 @@ async def get_page_content(title):
 		'titles': title,
 		'prop': 'revisions',
 		'rvslots': 'main',
-		'rvprop': 'content',
-		'formatversion': 2
+		'rvprop': 'content'
 	})
 
 	page = response['query']['pages'][0]
@@ -250,7 +249,7 @@ async def revert_image(title, member_name):
 		'iilimit': 2
 	})
 
-	versions = list(response['query']['pages'].values())[0]['imageinfo']
+	versions = response['query']['pages'][0]['imageinfo']
 	to_revert = versions[1]['archivename']
 
 	# revert to the previous version

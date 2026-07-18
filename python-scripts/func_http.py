@@ -155,6 +155,54 @@ async def check_wiki_session():
 		await refresh_tokens()
 
 
+# API call to list all page titles in a namespace, optionally filtered by title prefix
+async def list_pages(namespace, prefix=None):
+	payload = {
+		'action': 'query',
+		'list': 'allpages',
+		'apnamespace': namespace,
+		'aplimit': 'max',
+		'formatversion': 2
+	}
+	if prefix:
+		payload['apprefix'] = prefix.split(':', 1)[-1] if ':' in prefix and namespace != 0 else prefix
+
+	titles = []
+	cont = None
+
+	while True:
+		if cont:
+			payload['apcontinue'] = cont
+
+		response = await wiki_request(payload)
+		for page in response['query']['allpages']:
+			titles.append(page['title'])
+
+		cont = response.get('continue', {}).get('apcontinue')
+		if not cont:
+			break
+
+	return titles
+
+
+# API call to fetch current page content, or None if the page does not exist
+async def get_page_content(title):
+	response = await wiki_request({
+		'action': 'query',
+		'titles': title,
+		'prop': 'revisions',
+		'rvslots': 'main',
+		'rvprop': 'content',
+		'formatversion': 2
+	})
+
+	page = response['query']['pages'][0]
+	if page.get('missing'):
+		return None
+
+	return page['revisions'][0]['slots']['main']['content']
+
+
 # API call to edit a page
 async def edit_page(title, content, reason=''):
 	return await wiki_request({

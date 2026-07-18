@@ -72,8 +72,8 @@ async def abandon_mission_safely(mission):
 
 # wiki request wrapper
 async def wiki_request(payload, method='GET', token_type=None, retry=False):
-	# mark as bot edit
-	payload['bot'] = 1
+	payload['bot'] = 1  # mark as bot edit
+	payload['format'] = 'json'  # set output as json
 
 	# populate required token
 	if token_type:
@@ -98,8 +98,7 @@ async def get_wiki_token(token_type='csrf'):
 	response = await wiki_request({
 		'action': 'query',
 		'meta': 'tokens',
-		'type': token_type,
-		'format': 'json'
+		'type': token_type
 	})
 
 	tokens = response['query']['tokens']
@@ -122,7 +121,6 @@ async def wiki_login():
 
 		response = await wiki_request({
 			'action': 'login',
-			'format': 'json',
 			'lgname': var_secret.WIKI_CREDS[0],
 			'lgpassword': var_secret.WIKI_CREDS[1],
 			'lgtoken': login_token
@@ -141,8 +139,7 @@ async def wiki_login():
 async def check_wiki_session():
 	response = await wiki_request({
 		'action': 'query',
-		'meta': 'userinfo',
-		'format': 'json'
+		'meta': 'userinfo'
 	})
 
 	user = response['query']['userinfo']
@@ -164,9 +161,7 @@ async def delete_page(title, reason='', oldimage=None):
 		'action': 'delete',
 		'title': title,
 		'reason': reason,
-		'format': 'json'
 	}
-
 	if oldimage:
 		payload['oldimage'] = oldimage
 
@@ -179,8 +174,7 @@ async def rollback_page(title, username, reason=''):
 		'action': 'rollback',
 		'title': title,
 		'user': username,
-		'summary': reason,
-		'format': 'json'
+		'summary': reason
 	}, 'POST', 'rollback')
 
 
@@ -194,8 +188,7 @@ async def revert_image(title, member_name):
 		'titles': file_title,
 		'prop': 'imageinfo',
 		'iiprop': 'archivename',
-		'iilimit': 2,
-		'format': 'json'
+		'iilimit': 2
 	})
 
 	versions = list(response['query']['pages'].values())[0]['imageinfo']
@@ -206,8 +199,7 @@ async def revert_image(title, member_name):
 		'action': 'filerevert',
 		'filename': title,
 		'archivename': to_revert,
-		'comment': f"Reverted to previous version via Discord by {member_name}",
-		'format': 'json'
+		'comment': f"Reverted to previous version via Discord by {member_name}"
 	}, 'POST', 'csrf')
 
 	if response.get('error'):
@@ -219,8 +211,7 @@ async def revert_image(title, member_name):
 		'titles': file_title,
 		'prop': 'imageinfo',
 		'iiprop': 'archivename',
-		'iilimit': 2,
-		'format': 'json'
+		'iilimit': 2
 	})
 
 	versions = list(response['query']['pages'].values())[0]['imageinfo']

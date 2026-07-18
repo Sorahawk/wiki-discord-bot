@@ -155,6 +155,17 @@ async def check_wiki_session():
 		await refresh_tokens()
 
 
+# API call to edit a page
+async def edit_page(title, content, reason=''):
+	return await wiki_request({
+		'action': 'edit',
+		'title': title,
+		'text': content,
+		'summary': reason,
+		'nocreate': 1  # fail if page does not exist
+	}, 'POST', 'csrf')
+
+
 # API call to delete a page, file, or a specific file version
 async def delete_page(title, reason='', oldimage=None):
 	payload = {

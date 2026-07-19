@@ -202,14 +202,14 @@ async def get_page_content(title):
 	return page['revisions'][0]['slots']['main']['content']
 
 
-# API call to edit a page
-async def edit_page(title, content, reason=''):
+# API call to edit or create a page
+async def edit_page(title, content, reason='', nocreate=False):
 	return await wiki_request({
 		'action': 'edit',
 		'title': title,
 		'text': content,
 		'summary': reason,
-		'nocreate': 1  # fail if page does not exist
+		'nocreate': 1 if nocreate else 0  # determines whether request fails if page does not exist
 	}, 'POST', 'csrf')
 
 

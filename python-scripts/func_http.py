@@ -203,14 +203,21 @@ async def get_page_content(title):
 
 
 # API call to edit or create a page
-async def edit_page(title, content, reason='', nocreate=False):
-	return await wiki_request({
+# pass nocreate=True to refuse the edit if the page does not already exist
+# pass contentmodel to set the content model explicitly when creating a new page (e.g. 'translate-messagebundle')
+async def edit_page(title, content, reason='', nocreate=False, contentmodel=None):
+	payload = {
 		'action': 'edit',
 		'title': title,
 		'text': content,
-		'summary': reason,
-		'nocreate': 1 if nocreate else 0  # determines whether request fails if page does not exist
-	}, 'POST', 'csrf')
+		'summary': reason
+	}
+	if nocreate:
+		payload['nocreate'] = 1
+	if contentmodel:
+		payload['contentmodel'] = contentmodel
+
+	return await wiki_request(payload, 'POST', 'csrf')
 
 
 # API call to delete a page, file, or a specific file version

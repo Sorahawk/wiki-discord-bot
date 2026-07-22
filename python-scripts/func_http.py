@@ -185,6 +185,35 @@ async def list_pages(namespace, prefix=None):
 	return titles
 
 
+# API call to list all page titles belonging to a category, optionally filtered by namespace
+async def list_category_members(category, namespace=None):
+	payload = {
+		'action': 'query',
+		'list': 'categorymembers',
+		'cmtitle': f'Category:{category}',
+		'cmlimit': 'max'
+	}
+	if namespace is not None:
+		payload['cmnamespace'] = namespace
+
+	titles = []
+	cont = None
+
+	while True:
+		if cont:
+			payload['cmcontinue'] = cont
+
+		response = await wiki_request(payload)
+		for page in response['query']['categorymembers']:
+			titles.append(page['title'])
+
+		cont = response.get('continue', {}).get('cmcontinue')
+		if not cont:
+			break
+
+	return titles
+
+
 # API call to fetch current page content, or None if the page does not exist
 async def get_page_content(title):
 	response = await wiki_request({

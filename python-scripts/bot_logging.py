@@ -23,7 +23,7 @@ def init_logger():
 async def send_traceback(e, channel=None):
 	max_len_wo_backticks = 1994
 
-	full_trace = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+	full_trace = ''.join(format_exception(type(e), e, e.__traceback__))
 	var_global.OPERATION_LOGGER.error(full_trace)
 
 	channel = channel or var_global.CHANNELS.get('main')

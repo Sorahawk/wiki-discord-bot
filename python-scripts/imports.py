@@ -5,15 +5,16 @@ import os
 import re
 import sys
 import json
-import httpx
 import random
 import logging
 import asyncio
-import discord
 import datetime
-import traceback
 import subprocess
 
+from httpx import AsyncClient
+from traceback import format_exception
+
+import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.tasks import loop

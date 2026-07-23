@@ -214,27 +214,28 @@ async def list_category_members(category, namespace=None):
 	return titles
 
 
-# API call to fetch current page content, or None if the page does not exist
+# API call to fetch current page content and content model, or (None, None) if the page does not exist
 async def get_page_content(title):
 	response = await wiki_request({
 		'action': 'query',
 		'titles': title,
 		'prop': 'revisions',
 		'rvslots': 'main',
-		'rvprop': 'content'
+		'rvprop': 'content|contentmodel'
 	})
 
 	page = response['query']['pages'][0]
 	if page.get('missing'):
-		return None
+		return None, None
 
-	return page['revisions'][0]['slots']['main']['content']
+	slot = page['revisions'][0]['slots']['main']
+	return slot['content'], slot['contentmodel']
 
 
 # API call to edit or create a page
 # pass nocreate=True to refuse the edit if the page does not already exist
-# pass contentmodel to set the content model explicitly when creating a new page (e.g. 'translate-messagebundle')
-async def edit_page(title, content, reason='', nocreate=False, contentmodel=None):
+# pass content_model to set the content model explicitly when creating a new page (e.g. 'translate-messagebundle')
+async def edit_page(title, content, reason='', nocreate=False, content_model=None):
 	payload = {
 		'action': 'edit',
 		'title': title,
@@ -243,8 +244,8 @@ async def edit_page(title, content, reason='', nocreate=False, contentmodel=None
 	}
 	if nocreate:
 		payload['nocreate'] = 1
-	if contentmodel:
-		payload['contentmodel'] = contentmodel
+	if content_model:
+		payload['contentmodel'] = content_model
 
 	return await wiki_request(payload, 'POST', 'csrf')
 

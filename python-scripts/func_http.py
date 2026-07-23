@@ -56,7 +56,7 @@ async def abandon_mission(mission_id):
 # abandon wiki mission, ensuring that mission is safe to abandon (e.g. not completed)
 async def abandon_mission_safely(mission):
 	mission_id = mission['id']
-	var_global.OPERATION_LOGGER.info(f"Attempting to remove user {mission['assignee']} from mission {mission_id}")
+	var_global.OPERATION_LOGGER.info(f"Attempting to remove User <@{mission['assignee']}> from Wiki Mission {mission_id}.")
 
 	if mission['status'] == 'accepted':
 		await abandon_mission(mission_id)

@@ -156,64 +156,6 @@ async def check_wiki_session():
 		await refresh_tokens()
 
 
-# API call to list all page titles in a namespace, optionally filtered by title prefix
-async def list_pages(namespace, prefix=None):
-	payload = {
-		'action': 'query',
-		'list': 'allpages',
-		'apnamespace': namespace,
-		'aplimit': 'max'
-	}
-	if prefix:
-		payload['apprefix'] = prefix.split(':', 1)[-1] if ':' in prefix and namespace != 0 else prefix
-
-	titles = []
-	cont = None
-
-	while True:
-		if cont:
-			payload['apcontinue'] = cont
-
-		response = await wiki_request(payload)
-		for page in response['query']['allpages']:
-			titles.append(page['title'])
-
-		cont = response.get('continue', {}).get('apcontinue')
-		if not cont:
-			break
-
-	return titles
-
-
-# API call to list all page titles belonging to a category, optionally filtered by namespace
-async def list_category_members(category, namespace=None):
-	payload = {
-		'action': 'query',
-		'list': 'categorymembers',
-		'cmtitle': f'Category:{category}',
-		'cmlimit': 'max'
-	}
-	if namespace is not None:
-		payload['cmnamespace'] = namespace
-
-	titles = []
-	cont = None
-
-	while True:
-		if cont:
-			payload['cmcontinue'] = cont
-
-		response = await wiki_request(payload)
-		for page in response['query']['categorymembers']:
-			titles.append(page['title'])
-
-		cont = response.get('continue', {}).get('cmcontinue')
-		if not cont:
-			break
-
-	return titles
-
-
 # API call to fetch content and content model for one or more titles
 # accepts a single title string or a list of titles
 # returns a dict keyed by page title, with corresponding value (content, content_model), or (None, None) for missing pages
@@ -263,15 +205,29 @@ async def edit_page(title, content, reason='', nocreate=False, content_model=Non
 	return await wiki_request(payload, 'POST', 'csrf')
 
 
+# API call to move a page
+async def move_page(old_title, new_title, reason='', noredirect=True):
+	payload = {
+		'action': 'move',
+		'from': old_title,
+		'to': new_title,
+		'reason': reason
+	}
+	if noredirect:
+		payload['noredirect'] = 1
+
+	return await wiki_request(payload, 'POST', 'csrf')
+
+
 # API call to delete a page, file, or a specific file version
-async def delete_page(title, reason='', oldimage=None):
+async def delete_page(title, reason='', old_image=None):
 	payload = {
 		'action': 'delete',
 		'title': title,
 		'reason': reason,
 	}
-	if oldimage:
-		payload['oldimage'] = oldimage
+	if old_image:
+		payload['oldimage'] = old_image
 
 	return await wiki_request(payload, 'POST', 'csrf')
 
@@ -333,3 +289,61 @@ async def revert_image(title, member_name):
 
 	# delete the now-redundant duplicate version
 	return await delete_page(file_title, f"Deleted duplicate version via Discord by {member_name}", to_revert)
+
+
+# API call to list all page titles in a namespace, optionally filtered by title prefix
+async def list_pages(namespace, prefix=None):
+	payload = {
+		'action': 'query',
+		'list': 'allpages',
+		'apnamespace': namespace,
+		'aplimit': 'max'
+	}
+	if prefix:
+		payload['apprefix'] = prefix.split(':', 1)[-1] if ':' in prefix and namespace != 0 else prefix
+
+	titles = []
+	cont = None
+
+	while True:
+		if cont:
+			payload['apcontinue'] = cont
+
+		response = await wiki_request(payload)
+		for page in response['query']['allpages']:
+			titles.append(page['title'])
+
+		cont = response.get('continue', {}).get('apcontinue')
+		if not cont:
+			break
+
+	return titles
+
+
+# API call to list all page titles belonging to a category, optionally filtered by namespace
+async def list_category_members(category, namespace=None):
+	payload = {
+		'action': 'query',
+		'list': 'categorymembers',
+		'cmtitle': f'Category:{category}',
+		'cmlimit': 'max'
+	}
+	if namespace is not None:
+		payload['cmnamespace'] = namespace
+
+	titles = []
+	cont = None
+
+	while True:
+		if cont:
+			payload['cmcontinue'] = cont
+
+		response = await wiki_request(payload)
+		for page in response['query']['categorymembers']:
+			titles.append(page['title'])
+
+		cont = response.get('continue', {}).get('cmcontinue')
+		if not cont:
+			break
+
+	return titles

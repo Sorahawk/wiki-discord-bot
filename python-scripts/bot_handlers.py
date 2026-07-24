@@ -126,11 +126,51 @@ async def reaction_handler(payload):
 			match = re.search(r'\) uploaded \[([^\]]+)\]', content)
 			if match:
 				title = match.group(1)
-				response = await revert_image(title, member.display_name)
-				
+				file_title = f'File:{title}'
+
+				# fetch the two most recent versions, but archivename only shows up for old versions
+				response = await wiki_request({
+					'action': 'query',
+					'titles': file_title,
+					'prop': 'imageinfo',
+					'iiprop': 'archivename',
+					'iilimit': 2
+				})
+
+				versions = response['query']['pages'][0]['imageinfo']
+				to_revert = versions[1]['archivename']
+
+				error_message_base = f"<@{member.id}>, error occurred during process of reverting `File:{title}`: "
+
+				# revert to the previous version
+				response = await revert_image(title, to_revert, f"Reverted to previous version via Discord by {member.display_name}")
 				if response.get('error'):
-					await var_global.CHANNELS['feed'].send(f"<@{member.id}>, error occurred during process of reverting `File:{title}`: {response['error']}")
-				return
+					await var_global.CHANNELS['feed'].send(error_message_base + response['error']['info'])
+					return
+
+				# fetch again to get the archivename of the target version to delete
+				response = await wiki_request({
+					'action': 'query',
+					'titles': file_title,
+					'prop': 'imageinfo',
+					'iiprop': 'archivename',
+					'iilimit': 2
+				})
+
+				versions = response['query']['pages'][0]['imageinfo']
+				to_delete = versions[1]['archivename']
+
+				# delete the target version
+				response = await delete_page(file_title, f"Deleted target version via Discord by {member.display_name}", to_delete)
+				if response.get('error'):
+					await var_global.CHANNELS['feed'].send(error_message_base + response['error']['info'])
+					return
+
+				# delete the now-redundant duplicate version
+				response = await delete_page(file_title, f"Deleted duplicate version via Discord by {member.display_name}", to_revert)
+				if response.get('error'):
+					await var_global.CHANNELS['feed'].send(error_message_base + response['error']['info'])
+					return
 
 		# grab user name and page title
 		match = re.search(r':\[([^\]]+)\].*?\) edited \[([^\]]+)\]', content)

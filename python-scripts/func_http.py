@@ -56,7 +56,7 @@ async def abandon_mission(mission_id):
 # abandon wiki mission, ensuring that mission is safe to abandon (e.g. not completed)
 async def abandon_mission_safely(mission):
 	mission_id = mission['id']
-	var_global.OPERATION_LOGGER.info(f"Attempting to remove User <@{mission['assignee']}> from Wiki Mission {mission_id}.")
+	var_global.OPERATION_LOGGER.info(f"Attempting to remove user {mission['assignee']} from mission {mission_id}")
 
 	if mission['status'] == 'accepted':
 		await abandon_mission(mission_id)
@@ -214,22 +214,35 @@ async def list_category_members(category, namespace=None):
 	return titles
 
 
-# API call to fetch current page content and content model, or (None, None) if the page does not exist
-async def get_page_content(title):
-	response = await wiki_request({
-		'action': 'query',
-		'titles': title,
-		'prop': 'revisions',
-		'rvslots': 'main',
-		'rvprop': 'content|contentmodel'
-	})
+# API call to fetch content and content model for one or more titles
+# accepts a single title string or a list of titles
+# returns a dict keyed by page title, with corresponding value (content, content_model), or (None, None) for missing pages
+async def get_page_content(titles):
+	if isinstance(titles, str):
+		titles = [titles]
 
-	page = response['query']['pages'][0]
-	if page.get('missing'):
-		return None, None
+	results = {}
+	MAX_BATCH_LENGTH = 500
 
-	slot = page['revisions'][0]['slots']['main']
-	return slot['content'], slot['contentmodel']
+	for i in range(0, len(titles), MAX_BATCH_LENGTH):
+		batch = titles[i:i + MAX_BATCH_LENGTH]
+
+		response = await wiki_request({
+			'action': 'query',
+			'titles': '|'.join(batch),
+			'prop': 'revisions',
+			'rvslots': 'main',
+			'rvprop': 'content|contentmodel'
+		})
+
+		for page in response['query']['pages']:
+			if page.get('missing'):
+				results[page['title']] = (None, None)
+			else:
+				slot = page['revisions'][0]['slots']['main']
+				results[page['title']] = (slot['content'], slot['contentmodel'])
+
+	return results
 
 
 # API call to edit or create a page

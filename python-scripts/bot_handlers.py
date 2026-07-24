@@ -32,16 +32,22 @@ async def message_edit_handler(bot, before, after):
 	old_content = before.content
 	new_content = after.content
 
-	if old_content == new_content:  # link previews technically edit the message when appearing but do not change the content
+	after_ids = {a.id for a in after.attachments}
+	removed_attachments = [a for a in before.attachments if a.id not in after_ids]
+
+	# link previews showing up after a message is sent technically edits the message, but does not change the content
+	if old_content == new_content and not removed_attachments:
 		return
 
-	audit_message = audit_header + f"**Original:**\n{format_blockquotes(old_content)}\n\n"
-	audit_message += f"**New**:\n{format_blockquotes(new_content)}"
+	files = await fetch_attachments_as_files(removed_attachments)
 
-	if len(audit_message) <= 2000:
-		await var_global.CHANNELS['audit'].send(audit_message, allowed_mentions=discord.AllowedMentions.none())
-	else:
-		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'), allowed_mentions=discord.AllowedMentions.none())
+	audit_body = f"**Original:**\n{format_blockquotes(old_content)}\n\n"
+	audit_body += f"**New**:\n{format_blockquotes(new_content)}"
+
+	if removed_attachments:
+		audit_body += f"\n\n**Removed {len(removed_attachments)} attachment(s)**"
+
+	await send_audit_message(var_global.CHANNELS['audit'], audit_header, audit_body, files)
 
 
 # handles message deletions
@@ -52,14 +58,7 @@ async def message_delete_handler(bot, message):
 	if author == bot.user or author.id == MENTAT_BOT_ID:
 		return
 
-	# fetch attachments immediately before Discord purges them
-	files = []
-
-	for file in message.attachments:
-		response = await var_global.SESSION.get(file.url)
-
-		if response.status_code == 200:
-			files.append(discord.File(io.BytesIO(response.content), filename=file.filename))
+	files = await fetch_attachments_as_files(message.attachments)
 
 	message_link = f'https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}'
 	audit_header = ''
@@ -82,15 +81,8 @@ async def message_delete_handler(bot, message):
 
 		audit_header = f"<@{author.id}> deleted their message: {message_link}"
 
-	audit_message = audit_header + f'\n{format_blockquotes(message.content)}'
-
-	if len(audit_message) <= 2000:
-		await var_global.CHANNELS['audit'].send(audit_message, files=files, allowed_mentions=discord.AllowedMentions.none())
-	else:
-		await var_global.CHANNELS['audit'].send(audit_header, file=generate_file(audit_message, 'audit_message.txt'), allowed_mentions=discord.AllowedMentions.none())
-
-		if files:
-			await var_global.CHANNELS['audit'].send(files=files)
+	audit_body = f'\n{format_blockquotes(message.content)}'
+	await send_audit_message(var_global.CHANNELS['audit'], audit_header, audit_body, files)
 
 
 # handles emoji reacts in feed channel

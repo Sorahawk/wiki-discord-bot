@@ -41,11 +41,13 @@ async def message_edit_handler(bot, before, after):
 
 	files = await fetch_attachments_as_files(removed_attachments)
 
-	audit_body = f"**Original:**\n{format_blockquotes(old_content)}\n\n"
-	audit_body += f"**New**:\n{format_blockquotes(new_content)}"
+	audit_body = ''
+	if old_content != new_content:
+		audit_body += f"**Original:**\n{format_blockquotes(old_content)}\n\n"
+		audit_body += f"**New**:\n{format_blockquotes(new_content)}\n\n"
 
 	if removed_attachments:
-		audit_body += f"\n\n**Removed {len(removed_attachments)} attachment(s)**"
+		audit_body += f"**Removed attachment:**"
 
 	await send_audit_message(var_global.CHANNELS['audit'], audit_header, audit_body, files)
 

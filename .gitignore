@@ -1,12 +1,10 @@
 __pycache__/
 
-python-scripts/var_secret.py
+*adhoc*
+!wiki_adhoc_common.py
+!wiki_adhoc_template.py
+!server_adhoc_template.py
 
-python-scripts/wiki_adhoc*.py
-!python-scripts/wiki_adhoc_common.py
-!python-scripts/wiki_adhoc_template.py
-
-python-scripts/server_adhoc*.py
-!python-scripts/server_adhoc_template.py
+var_secret.py
 
 status.log

@@ -147,7 +147,7 @@ async def check_wiki_session():
 
 	# if session is expired, MediaWiki returns an anonymous user
 	if user.get('anon') is not None:
-		var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login.')
+		var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login')
 		await wiki_login()
 
 	# even if session is still valid, just refresh tokens to be safe

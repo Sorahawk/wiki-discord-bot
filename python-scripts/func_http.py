@@ -4,7 +4,7 @@ from imports import *
 # standard function for HTTP requests
 async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False):
 	session = var_global.SESSION
-	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {payload}.")
+	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {payload}")
 
 	if not payload:  # handle empty payload
 		payload = {}
@@ -130,7 +130,7 @@ async def wiki_login():
 		data = response['login']
 
 		if data['result'] == 'Success':
-			var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}.")
+			var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}")
 			await refresh_tokens()
 		else:
 			raise Exception(f"**Wiki login failed: {data['result']} - {data.get('reason', 'no reason specified')}**")

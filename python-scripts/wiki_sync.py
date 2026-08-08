@@ -1,8 +1,10 @@
 from imports import *
 
 
-# batch-fetches live content for the given titles and compares against local
-# returns changed (title -> (local, live)) and missing (titles with no live page)
+# fetches live content for the specified titles and compares against local
+# returns two items:
+# a dict keyed by title, with corresponding value being a tuple (local content, live content)
+# and a list of titles with no matching live page
 async def diff_against_wiki(local_by_title):
 	live_by_title = await get_page_content(list(local_by_title))
 	changed, missing = {}, []
@@ -18,10 +20,8 @@ async def diff_against_wiki(local_by_title):
 	return changed, missing
 
 
-# returns True if the live revision came from the pipeline, meaning the wiki copy originated
-# from the repo and has since fallen behind, so the repo is the newer side
-# both checks are needed: the author alone cannot tell a sync apart from the bot's other edits,
-# and the marker alone could be reproduced by anyone copying a summary out of page history
+# returns True if the specified revision on the wiki was written by this pipeline
+# this means that the repo is now the new version
 def is_stale_sync_revision(revision):
 	if not revision:
 		return False
@@ -41,7 +41,7 @@ def check_local_content(content):
 	return None
 
 
-# pushes local content to the wiki and protects the page if it is a MessageBundle
+# pushes local content to the wiki, and protects the page if it is a MessageBundle
 async def push_page(title, content, full_path, rel_path, head_sha):
 	commit_subject = await get_last_commit_subject(rel_path)
 	summary = f'{commit_subject} ({SYNC_SUMMARY_MARKER} - {head_sha[:7]})'
@@ -51,25 +51,23 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 	if response.get('error'):
 		raise RuntimeError(f"failed to edit {title}: {response['error']}")
 
-	# English MessageBundle sources anchor page links and module relations, so keep them locked
+	# lock main English source for all MessageBundles
 	if title.startswith('MessageBundle:'):
 		protection = await get_protection(title)
 
 		if not any(entry['type'] == 'edit' for entry in protection):
-			await protect_page(title, reason=MESSAGEBUNDLE_PROTECTION_REASON)
+			await protect_page(title, reason=MB_PROTECTION_MSG)
 
 
 # determines which titles need comparing against the wiki this cycle
-# returns the title set (None means compare everything) and the timestamp to store on success
-# the timestamp is captured before the comparison runs, so an edit landing mid-cycle
-# falls into the next window rather than being skipped entirely
-async def resolve_sync_scope(base_sha, head_sha, full_scan):
-	# no watermark means the bot has just started, so any drift accumulated while it was
-	# down is invisible to Recent Changes and the whole tree has to be compared
+# returns a set of titles (None means compare everything) and the timestamp to store on success
+async def resolve_sync_scope(base_sha, full_scan):
 	if full_scan or not var_global.LAST_RECONCILE_TIMESTAMP:
 		return None, await get_wiki_timestamp()
 
-	changed_paths = await get_changed_paths(base_sha, head_sha, PAGES_ROOT)
+	changed_paths = await get_changed_paths(base_sha, PAGES_ROOT)
+
+	# ancestry is broken, so the commit range is unusable and the whole tree must be compared
 	if changed_paths is None:
 		return None, await get_wiki_timestamp()
 
@@ -83,20 +81,18 @@ async def resolve_sync_scope(base_sha, head_sha, full_scan):
 
 
 # reconciles the wiki repo against the wiki in both directions
-# the repo wins where the wiki's latest edit was our own sync, and the wiki wins otherwise
+# the repo wins where the wiki's latest edit was from this code, else the wiki wins
 async def run_sync(full_scan=False):
 	async with var_global.REPO_LOCK:
 		base_sha = await get_head_sha()
 		await reset_to_remote()
 		head_sha = await get_head_sha()
 
-		titles, timestamp = await resolve_sync_scope(base_sha, head_sha, full_scan)
-
-		# an empty scope falls through harmlessly - every call below no-ops on empty input
+		titles, timestamp = await resolve_sync_scope(base_sha, full_scan)
 		local_by_title, file_by_title = collect_local_pages(titles)
 
 		changed, missing = await diff_against_wiki(local_by_title)
-		revisions = await get_last_revisions(list(changed))
+		revisions = await get_last_revisions(changed)
 
 		pushed, pulled, created, skipped = [], [], [], []
 
@@ -149,11 +145,11 @@ async def report_sync(pushed, pulled, created, skipped):
 
 	sections = []
 
-	for label, titles in (('Created on wiki', created), ('Pushed to wiki', pushed), ('Pulled to repo', pulled)):
+	for label, titles in (('Created on Wiki', created), ('Pushed to Wiki', pushed), ('Pulled to repo', pulled)):
 		if titles:
 			sections.append(f'**{label}:**\n' + '\n'.join(f'- `{title}`' for title in titles))
 
 	if skipped:
 		sections.append('**Skipped:**\n' + '\n'.join(f'- `{title}` - {reason}' for title, reason in skipped))
 
-	await send_audit_message(var_global.CHANNELS['main'], '**Wiki Sync Report**\n\n', '\n\n'.join(sections))
+	await send_audit_message(var_global.CHANNELS['feed'], '**Wiki Sync Report**\n\n', '\n\n'.join(sections))

@@ -152,4 +152,4 @@ async def report_sync(pushed, pulled, created, skipped):
 	if skipped:
 		sections.append('**Skipped:**\n' + '\n'.join(f'- `{title}` - {reason}' for title, reason in skipped))
 
-	await send_audit_message(var_global.CHANNELS['feed'], '**Wiki Sync Report**\n\n', '\n\n'.join(sections))
+	await send_audit_message(var_global.CHANNELS['main'], '**Wiki Sync Report**\n\n', '\n\n'.join(sections))

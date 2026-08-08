@@ -4,6 +4,7 @@ from imports import *
 # standard function for HTTP requests
 async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False, no_log=False):
 	session = var_global.SESSION
+	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {payload}")
 
 	if not payload:  # handle empty payload
 		payload = {}
@@ -14,12 +15,6 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 		kwarg = 'json'
 	else:
 		kwarg = 'data'
-
-	log_message = f"Making {method} request to {endpoint}"
-	if not no_log:
-		log_message += f" with payload {payload}"
-
-	var_global.OPERATION_LOGGER.info(log_message)
 
 	raw_response = await session.request(method, endpoint, **{kwarg: payload}, headers=headers)
 
@@ -172,11 +167,9 @@ async def get_page_content(titles):
 	results = {}
 
 	for i in range(0, len(titles), MAX_QUERY_TITLES):
-		batch = titles[i:i + MAX_QUERY_TITLES]
-
 		response = await wiki_request({
 			'action': 'query',
-			'titles': '|'.join(batch),
+			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
 			'prop': 'revisions',
 			'rvslots': 'main',
 			'rvprop': 'content|contentmodel',

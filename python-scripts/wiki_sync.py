@@ -10,15 +10,11 @@ async def diff_against_wiki(local_by_title):
 	changed, missing = {}, []
 
 	for title, local_content in local_by_title.items():
-		live_entry = live_by_title.get(title)
+		live_content = live_by_title[title][0]
 
-		if live_entry is None:
+		if live_content is None:
 			missing.append(title)
-			continue
-
-		live_content = live_entry[0]
-
-		if live_content != local_content:
+		elif live_content != local_content:
 			changed[title] = (local_content, live_content)
 
 	return changed, missing

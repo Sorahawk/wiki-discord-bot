@@ -175,7 +175,7 @@ async def get_page_content(titles):
 			'prop': 'revisions',
 			'rvslots': 'main',
 			'rvprop': 'content|contentmodel',
-		})
+		}, no_log=True)
 
 		for page in response['query']['pages']:
 			if page.get('missing'):
@@ -377,7 +377,7 @@ async def get_wiki_timestamp():
 		'action': 'query',
 		'meta': 'siteinfo',
 		'siprop': 'general',
-	}, 'POST', 'csrf')
+	}, no_log=True)
 	return response['query']['general']['time']
 
 
@@ -398,7 +398,7 @@ async def get_recent_changes(since_timestamp):
 			'rcprop': 'title|timestamp',
 			'rclimit': 'max',
 			**cont
-		}, 'POST', 'csrf')
+		})
 
 		for change in response['query']['recentchanges']:
 			titles.add(change['title'])
@@ -423,7 +423,7 @@ async def get_last_revisions(titles):
 			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
 			'prop': 'revisions',
 			'rvprop': 'user|comment',
-		}, 'POST', 'csrf', no_log=True)
+		}, no_log=True)
 
 		for page in response['query']['pages']:
 			if not page.get('missing'):

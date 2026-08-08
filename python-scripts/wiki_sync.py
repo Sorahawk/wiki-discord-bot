@@ -1,10 +1,8 @@
 from imports import *
 
 
-# fetches live content for the specified titles and compares against local
-# returns two items:
-# a dict keyed by title, with corresponding value being a tuple (local content, live content)
-# and a list of titles with no matching live page
+# batch-fetches live content for the given titles and compares against local
+# returns changed (title -> (local, live)) and missing (titles with no live page)
 async def diff_against_wiki(local_by_title):
 	live_by_title = await get_page_content(list(local_by_title))
 	changed, missing = {}, []
@@ -20,8 +18,10 @@ async def diff_against_wiki(local_by_title):
 	return changed, missing
 
 
-# returns True if the specified revision on the wiki was written by this pipeline
-# this means that the repo is now the new version
+# returns True if the live revision came from the pipeline, meaning the wiki copy originated
+# from the repo and has since fallen behind, so the repo is the newer side
+# both checks are needed: the author alone cannot tell a sync apart from the bot's other edits,
+# and the marker alone could be reproduced by anyone copying a summary out of page history
 def is_stale_sync_revision(revision):
 	if not revision:
 		return False
@@ -30,12 +30,19 @@ def is_stale_sync_revision(revision):
 	return user == BOT_USERNAME and SYNC_SUMMARY_MARKER in comment
 
 
-# pushes local content to the wiki, applying safety guards and protecting MessageBundles
-# returns True on success, False if the content failed a guard
-async def push_page(title, content, full_path, rel_path, head_sha):
-	if not content.strip() or has_conflict_markers(content):
-		return False
+# returns the reason a local file is unfit to sync, or None if it passes
+def check_local_content(content):
+	if not content.strip():
+		return 'file is blank'
 
+	if has_conflict_markers(content):
+		return 'unresolved merge conflict markers'
+
+	return None
+
+
+# pushes local content to the wiki and protects the page if it is a MessageBundle
+async def push_page(title, content, full_path, rel_path, head_sha):
 	commit_subject = await get_last_commit_subject(rel_path)
 	summary = f'{commit_subject} ({SYNC_SUMMARY_MARKER} - {head_sha[:7]})'
 
@@ -44,25 +51,25 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 	if response.get('error'):
 		raise RuntimeError(f"failed to edit {title}: {response['error']}")
 
-	# lock main English source for all MessageBundles
+	# English MessageBundle sources anchor page links and module relations, so keep them locked
 	if title.startswith('MessageBundle:'):
 		protection = await get_protection(title)
 
 		if not any(entry['type'] == 'edit' for entry in protection):
-			await protect_page(title, reason=MB_PROTECTION_MSG)
-
-	return True
+			await protect_page(title, reason=MESSAGEBUNDLE_PROTECTION_REASON)
 
 
 # determines which titles need comparing against the wiki this cycle
-# returns a set of titles (None means compare everything) and the timestamp to store on success
-async def resolve_sync_scope(base_sha, full_scan):
+# returns the title set (None means compare everything) and the timestamp to store on success
+# the timestamp is captured before the comparison runs, so an edit landing mid-cycle
+# falls into the next window rather than being skipped entirely
+async def resolve_sync_scope(base_sha, head_sha, full_scan):
+	# no watermark means the bot has just started, so any drift accumulated while it was
+	# down is invisible to Recent Changes and the whole tree has to be compared
 	if full_scan or not var_global.LAST_RECONCILE_TIMESTAMP:
 		return None, await get_wiki_timestamp()
 
-	changed_paths = await get_changed_paths(base_sha, PAGES_ROOT)
-
-	# ancestry is broken, so the commit range is unusable and the whole tree must be compared
+	changed_paths = await get_changed_paths(base_sha, head_sha, PAGES_ROOT)
 	if changed_paths is None:
 		return None, await get_wiki_timestamp()
 
@@ -76,43 +83,51 @@ async def resolve_sync_scope(base_sha, full_scan):
 
 
 # reconciles the wiki repo against the wiki in both directions
-# the repo wins where the wiki's latest edit was from this code, else the wiki wins
+# the repo wins where the wiki's latest edit was our own sync, and the wiki wins otherwise
 async def run_sync(full_scan=False):
 	async with var_global.REPO_LOCK:
 		base_sha = await get_head_sha()
 		await reset_to_remote()
 		head_sha = await get_head_sha()
 
-		titles, timestamp = await resolve_sync_scope(base_sha, full_scan)
+		titles, timestamp = await resolve_sync_scope(base_sha, head_sha, full_scan)
+
+		# an empty scope falls through harmlessly - every call below no-ops on empty input
 		local_by_title, file_by_title = collect_local_pages(titles)
 
 		changed, missing = await diff_against_wiki(local_by_title)
-		revisions = await get_last_revisions(changed)
+		revisions = await get_last_revisions(list(changed))
 
 		pushed, pulled, created, skipped = [], [], [], []
 
 		for title in missing:
 			full_path, rel_path = file_by_title[title]
+			local_content = local_by_title[title]
 
-			if await push_page(title, local_by_title[title], full_path, rel_path, head_sha):
-				created.append(title)
-			else:
-				skipped.append(title)
+			if reason := check_local_content(local_content):
+				skipped.append((title, f'not created - {reason}'))
+				continue
+
+			await push_page(title, local_content, full_path, rel_path, head_sha)
+			created.append(title)
 
 		for title, (local_content, live_content) in changed.items():
 			full_path, rel_path = file_by_title[title]
 
+			# a blank or conflicted local file is never a legitimate state, whichever side wins,
+			# so the page is left alone until the file is fixed
+			if reason := check_local_content(local_content):
+				skipped.append((title, f'sync prevented - {reason}'))
+				continue
+
 			# the latest live edit was our own sync, so the wiki is the stale side
 			if is_stale_sync_revision(revisions.get(title)):
-				if await push_page(title, local_content, full_path, rel_path, head_sha):
-					pushed.append(title)
-				else:
-					skipped.append(title)
-
+				await push_page(title, local_content, full_path, rel_path, head_sha)
+				pushed.append(title)
 				continue
 
 			if not live_content.strip():
-				skipped.append(title)
+				skipped.append((title, 'pull prevented - live page is blank'))
 				continue
 
 			full_path.write_text(live_content, encoding='utf-8')
@@ -125,20 +140,20 @@ async def run_sync(full_scan=False):
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
 
 
-# reports sync activity to Discord, staying silent unless something needs attention
+# reports sync activity to Discord, staying silent when there was nothing to do
 async def report_sync(pushed, pulled, created, skipped):
-	sections = []
-
-	if created:
-		sections.append('**Created on Wiki:**\n' + '\n'.join(f'- `{title}`' for title in created))
-
-	if skipped:
-		sections.append('**Skipped (failed safety checks):**\n' + '\n'.join(f'- `{title}`' for title in skipped))
-
-	if not sections:
-		if pushed or pulled:
-			var_global.OPERATION_LOGGER.info(f'Sync complete - {len(pushed)} pushed, {len(pulled)} pulled')
+	if not (pushed or pulled or created or skipped):
 		return
 
-	sections.append(f'{len(pushed)} pushed, {len(pulled)} pulled')
-	await var_global.CHANNELS['feed'].send('\n\n'.join(sections))
+	var_global.OPERATION_LOGGER.info(f'Sync complete - {len(created)} created, {len(pushed)} pushed, {len(pulled)} pulled, {len(skipped)} skipped')
+
+	sections = []
+
+	for label, titles in (('Created on wiki', created), ('Pushed to wiki', pushed), ('Pulled to repo', pulled)):
+		if titles:
+			sections.append(f'**{label}:**\n' + '\n'.join(f'- `{title}`' for title in titles))
+
+	if skipped:
+		sections.append('**Skipped:**\n' + '\n'.join(f'- `{title}` - {reason}' for title, reason in skipped))
+
+	await send_audit_message(var_global.CHANNELS['main'], '**Wiki Sync Report**\n\n', '\n\n'.join(sections))

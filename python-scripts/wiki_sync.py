@@ -130,7 +130,7 @@ async def report_sync(pushed, pulled, created, skipped):
 	sections = []
 
 	if created:
-		sections.append('**Created on wiki:**\n' + '\n'.join(f'- `{title}`' for title in created))
+		sections.append('**Created on Wiki:**\n' + '\n'.join(f'- `{title}`' for title in created))
 
 	if skipped:
 		sections.append('**Skipped (failed safety checks):**\n' + '\n'.join(f'- `{title}`' for title in skipped))

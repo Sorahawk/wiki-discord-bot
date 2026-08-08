@@ -130,7 +130,7 @@ async def run_sync(full_scan=False):
 			pulled.append(title)
 
 		if pulled:
-			await commit_and_push(PAGES_ROOT, f'Pull from wiki ({len(pulled)} pages)')
+			await commit_and_push(PAGES_ROOT, f'Pull from Wiki ({len(pulled)} pages)')
 
 		await report_sync(pushed, pulled, created, skipped)
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
@@ -145,7 +145,7 @@ async def report_sync(pushed, pulled, created, skipped):
 
 	sections = []
 
-	for label, titles in (('Created on Wiki', created), ('Pushed to Wiki', pushed), ('Pulled to repo', pulled)):
+	for label, titles in (('Created on Wiki', created), ('Pushed to Wiki', pushed), ('Pulled to Repo', pulled)):
 		if titles:
 			sections.append(f'**{label}:**\n' + '\n'.join(f'- `{title}`' for title in titles))
 

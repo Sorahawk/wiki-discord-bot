@@ -11,7 +11,18 @@ class CommandsCog(commands.Cog):
 	# pull latest code from GitHub and restart itself
 	@commands.command(name='update')
 	async def update_code(self, context):
-		await context.send(BOT_VOICELINES['update'])
+
+		# wait for any repo sync to complete
+		if var_global.REPO_LOCK.locked():
+			await context.send(BOT_VOICELINES['waiting'])
+
+		try:
+			await asyncio.wait_for(var_global.REPO_LOCK.acquire(), timeout=90)
+
+		except Exception as e:
+			await send_traceback(e)
+
+		await context.send(BOT_VOICELINES['updating'])
 		subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
 		subprocess.run(['sudo', 'systemctl', 'restart', LINUX_SERVICE_NAME])
 
@@ -21,7 +32,14 @@ class CommandsCog(commands.Cog):
 	@commands.command(name='sleep')
 	async def sleep(self, context):
 		var_global.SLEEP_MODE = not var_global.SLEEP_MODE
-		await context.send(BOT_VOICELINES['sleep' if var_global.SLEEP_MODE else 'wake'])
+		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
+
+
+	# manually trigger a full reconcile between the content repo and the wiki
+	@commands.command(name='sync')
+	async def sync_wiki(self, context):
+		await run_sync(full_scan=True)
+		await context.send(BOT_VOICELINES['synced'])
 
 
 	# slash commands
@@ -109,6 +127,7 @@ class CommandsCog(commands.Cog):
 				var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: Overtime')
 
 		await interaction.followup.send(f"Wiki Missions with absent assignees (i.e. left the server or MIA >2 weeks) have been force-abandoned.")
+
 
 
 async def setup(bot):

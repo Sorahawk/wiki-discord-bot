@@ -116,15 +116,14 @@ async def refresh_tokens():
 
 # login to wiki
 async def wiki_login():
-	# lock login attempts
-	async with var_global.ASYNC_LOCK:
+	async with var_global.WIKI_LOCK:
 		login_token = await get_wiki_token('login')
 
 		response = await wiki_request({
 			'action': 'login',
 			'lgname': var_secret.WIKI_CREDS[0],
 			'lgpassword': var_secret.WIKI_CREDS[1],
-			'lgtoken': login_token
+			'lgtoken': login_token,
 		}, 'POST')
 
 		data = response['login']
@@ -140,7 +139,7 @@ async def wiki_login():
 async def check_wiki_session():
 	response = await wiki_request({
 		'action': 'query',
-		'meta': 'userinfo'
+		'meta': 'userinfo',
 	})
 
 	user = response['query']['userinfo']
@@ -164,17 +163,16 @@ async def get_page_content(titles):
 		titles = [titles]
 
 	results = {}
-	MAX_BATCH_LENGTH = 500
 
-	for i in range(0, len(titles), MAX_BATCH_LENGTH):
-		batch = titles[i:i + MAX_BATCH_LENGTH]
+	for i in range(0, len(titles), MAX_QUERY_TITLES):
+		batch = titles[i:i + MAX_QUERY_TITLES]
 
 		response = await wiki_request({
 			'action': 'query',
 			'titles': '|'.join(batch),
 			'prop': 'revisions',
 			'rvslots': 'main',
-			'rvprop': 'content|contentmodel'
+			'rvprop': 'content|contentmodel',
 		})
 
 		for page in response['query']['pages']:
@@ -195,7 +193,7 @@ async def edit_page(title, content, reason='', nocreate=False, content_model=Non
 		'action': 'edit',
 		'title': title,
 		'text': content,
-		'summary': reason
+		'summary': reason,
 	}
 	if nocreate:
 		payload['nocreate'] = 1
@@ -211,7 +209,7 @@ async def move_page(old_title, new_title, reason='', noredirect=True):
 		'action': 'move',
 		'from': old_title,
 		'to': new_title,
-		'reason': reason
+		'reason': reason,
 	}
 	if noredirect:
 		payload['noredirect'] = 1
@@ -238,7 +236,7 @@ async def rollback_page(title, username, reason=''):
 		'action': 'rollback',
 		'title': title,
 		'user': username,
-		'summary': reason
+		'summary': reason,
 	}, 'POST', 'rollback')
 
 
@@ -252,7 +250,7 @@ async def revert_image(title, member_name):
 		'titles': file_title,
 		'prop': 'imageinfo',
 		'iiprop': 'archivename',
-		'iilimit': 2
+		'iilimit': 2,
 	})
 
 	versions = response['query']['pages'][0]['imageinfo']
@@ -263,7 +261,7 @@ async def revert_image(title, member_name):
 		'action': 'filerevert',
 		'filename': title,
 		'archivename': to_revert,
-		'comment': f"Reverted to previous version via Discord by {member_name}"
+		'comment': f"Reverted to previous version via Discord by {member_name}",
 	}, 'POST', 'csrf')
 
 	if response.get('error'):
@@ -275,7 +273,7 @@ async def revert_image(title, member_name):
 		'titles': file_title,
 		'prop': 'imageinfo',
 		'iiprop': 'archivename',
-		'iilimit': 2
+		'iilimit': 2,
 	})
 
 	versions = response['query']['pages'][0]['imageinfo']
@@ -297,7 +295,7 @@ async def list_pages(namespace, prefix=None):
 		'action': 'query',
 		'list': 'allpages',
 		'apnamespace': namespace,
-		'aplimit': 'max'
+		'aplimit': 'max',
 	}
 	if prefix:
 		payload['apprefix'] = prefix.split(':', 1)[-1] if ':' in prefix and namespace != 0 else prefix
@@ -326,7 +324,7 @@ async def list_category_members(category, namespace=None):
 		'action': 'query',
 		'list': 'categorymembers',
 		'cmtitle': f'Category:{category}',
-		'cmlimit': 'max'
+		'cmlimit': 'max',
 	}
 	if namespace is not None:
 		payload['cmnamespace'] = namespace
@@ -355,7 +353,7 @@ async def get_protection(title):
 		'action': 'query',
 		'titles': title,
 		'prop': 'info',
-		'inprop': 'protection'
+		'inprop': 'protection',
 	})
 	return response['query']['pages'][0].get('protection', [])
 
@@ -367,5 +365,67 @@ async def protect_page(title, edit_level='sysop', move_level='sysop', expiry='in
 		'title': title,
 		'protections': f'edit={edit_level}|move={move_level}',
 		'expiry': f'{expiry}|{expiry}',
-		'reason': reason
+		'reason': reason,
 	}, 'POST', 'csrf')
+
+
+# returns the wiki server's current timestamp, used to anchor the reconcile timestamp
+async def get_wiki_timestamp():
+	response = await wiki_request({
+		'action': 'query',
+		'meta': 'siteinfo',
+		'siprop': 'general',
+	}, 'POST', 'csrf')
+	return response['query']['general']['time']
+
+
+# fetches titles edited or created on the wiki since the given timestamp
+# returns the set of titles and the newest timestamp seen, else None if there were no changes
+async def get_recent_changes(since_timestamp):
+	cont = {}
+	titles = set()
+	newest = None
+
+	while True:
+		response = await wiki_request({
+			'action': 'query',
+			'list': 'recentchanges',
+			'rcstart': since_timestamp,
+			'rcdir': 'newer',
+			'rctype': 'edit|new',
+			'rcprop': 'title|timestamp',
+			'rclimit': 'max',
+			**cont
+		}, 'POST', 'csrf')
+
+		for change in response['query']['recentchanges']:
+			titles.add(change['title'])
+			newest = max(newest, change['timestamp']) if newest else change['timestamp']
+
+		# check if there are more changes to retrieve
+		if not (cont := response.get('continue', {})):
+			break
+
+	return titles, newest
+
+
+# batch-fetches the author and summary of the latest revision for the given titles
+# returns a dict of title -> (user, comment); missing pages are omitted
+async def get_last_revisions(titles):
+	titles = list(titles)
+	results = {}
+
+	for i in range(0, len(titles), MAX_QUERY_TITLES):
+		response = await wiki_request({
+			'action': 'query',
+			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
+			'prop': 'revisions',
+			'rvprop': 'user|comment',
+		}, 'POST', 'csrf')
+
+		for page in response['query']['pages']:
+			if not page.get('missing'):
+				revision = page['revisions'][0]
+				results[page['title']] = (revision['user'], revision.get('comment', ''))
+
+	return results

@@ -29,8 +29,10 @@ async def on_ready():
 
 	# skip non-essential modules if running server adhoc scripts
 	if not var_global.THIN_MODE:
-		# init async lock
-		var_global.ASYNC_LOCK = asyncio.Lock()
+
+		# init async locks
+		var_global.WIKI_LOCK = asyncio.Lock()
+		var_global.REPO_LOCK = asyncio.Lock()
 
 		# sync command tree
 		await bot.load_extension('bot_commands')

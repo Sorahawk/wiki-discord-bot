@@ -1,11 +1,20 @@
 
+BOT_USERNAME = 'Sorabot'
+
+
 ### LINUX ###
 
-# absolute path to the project folder on the Linux cloud instance
+# absolute path to the project folder on the Linux VM
 # cannot use os.getcwd() because systemd service runs the script from root directory
 LINUX_ABSOLUTE_PATH = '/home/ubuntu/wiki-bot/python-scripts'
 
-# name of the bot service running on the Linux cloud instance
+# absolute path to the wiki repo checkout on the Linux VM
+WIKI_REPO_PATH = '/home/ubuntu/wiki-content'
+
+# folder within the wiki repo containing all page files
+PAGES_ROOT = 'Pages'
+
+# name of the bot service running on the Linux VM
 LINUX_SERVICE_NAME = 'wiki-bot.service'
 
 # logger name
@@ -24,14 +33,20 @@ SESSION = None
 # base URL for Wiki API
 WIKI_BASE_URL = 'https://awakening.wiki/api.php'
 
+# max number of entries returned per wiki query request
+MAX_QUERY_TITLES = 500  # bot accounts can go up to 500 with apihighlimits, else it would be 50
+
 # base URL for Mentat API
 MENTAT_BASE_URL = 'https://mentat.wiki'
 
 # standard headers for HTTP requests
-STANDARD_HEADERS = { 'User-Agent': 'Ixian Thinking Machine/Sorabot' }
+STANDARD_HEADERS = { 'User-Agent': f'Ixian Thinking Machine/{BOT_USERNAME}' }
 
 # async lock object to prevent race condition over the session
-ASYNC_LOCK = None
+WIKI_LOCK = None
+
+# async lock object to prevent race condition over repo state
+REPO_LOCK = None
 
 
 
@@ -42,11 +57,11 @@ SERVER_ID = 1204923645705855108
 
 # dictionary of Discord server channel IDs
 CHANNEL_IDS = {
-	'main': 1465756865127514162,  # default notifications
-	'feed': 1465745673486995642,  # Recent Changes feed
-	'ongoing': 1474360466003464243,  # ongoing (claimed) Wiki Missions
-	'audit': 1499032540168589386,  # audit logs
-	'reroute': 1492574553698865373,  # reroute direct messages
+	'main': 1465756865127514162,	# default notifications
+	'feed': 1465745673486995642,	# Recent Changes feed
+	'ongoing': 1474360466003464243,	# ongoing (claimed) Wiki Missions
+	'audit': 1499032540168589386,	# audit logs
+	'reroute': 1492574553698865373,	# reroute direct messages
 }
 
 # automatically generate dictionary of channel runtime objects
@@ -92,9 +107,11 @@ BOT_ACTIVITY_STATUSES = {
 
 # dictionary of replies, directly referenced in code
 BOT_VOICELINES = {
-	'update': "Stand by. Checking dispatches for updates.",
-	'sleep': "Your dull chatter is putting me to sleep.",
-	'wake': "What did I miss? Wait, I don't care.",
+	'waiting': "Stand aside! More important things are happening.",
+	'updating': "Checking dispatches for updates.",
+	'sleeping': "Your dull chatter is putting me to sleep.",
+	'waking': "What did I miss? Wait, I don't care.",
+	'synced': "The Mentats have returned a positive report. Hooray.",
 }
 
 # list of triggers and corresponding replies; every message is checked for these triggers
@@ -145,3 +162,22 @@ FEED_BLACKLIST = [
 	':wastebasket:',			# page deleted
 	':lock:',					# page protection changed
 ]
+
+# content model to assign when creating a page, inferred from the file extension
+# css and javascript are lowercase, whereas Scribunto is capitalised
+CONTENT_MODELS = {
+	'.css': 'css',
+	'.js': 'javascript',
+	'.json': 'translate-messagebundle',
+	'.lua': 'Scribunto',
+	'.txt': 'wikitext',
+}
+
+# wiki timestamp of the latest successful reconcile
+LAST_RECONCILE_TIMESTAMP = None
+
+# marker appended to every sync edit summary to differentiate from all other edits
+SYNC_SUMMARY_MARKER = 'Sync from GitHub'
+
+# reason recorded when the pipeline protects a MessageBundle
+MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'

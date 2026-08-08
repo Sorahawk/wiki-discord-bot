@@ -2,7 +2,7 @@ from imports import *
 
 
 # standard function for HTTP requests
-async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False):
+async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False, no_log=False):
 	session = var_global.SESSION
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {payload}")
 
@@ -23,7 +23,9 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	else:
 		response = raw_response.text
 
-	var_global.OPERATION_LOGGER.info(response)
+	if not no_log:
+		var_global.OPERATION_LOGGER.info(response)
+
 	return response
 
 
@@ -71,7 +73,7 @@ async def abandon_mission_safely(mission):
 # wiki functions
 
 # wiki request wrapper
-async def wiki_request(payload, method='GET', token_type=None, retry=False):
+async def wiki_request(payload, method='GET', token_type=None, retry=False, no_log=False):
 	payload['bot'] = 1  # mark as bot edit
 	payload['format'] = 'json'  # set output as json
 	payload['formatversion'] = 2  # set output format to recommended version
@@ -80,7 +82,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 	if token_type:
 		payload['token'] = var_secret.WIKI_TOKENS[token_type]
 
-	response = await http_request(WIKI_BASE_URL, payload, method)
+	response = await http_request(WIKI_BASE_URL, payload, method, no_log=no_log)
 
 	# verify the response type is a dict
 	if not isinstance(response, dict):
@@ -89,7 +91,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False):
 	# retry wiki request once if error
 	if response.get('error', {}) and not retry:
 		await check_wiki_session()
-		response = await wiki_request(payload, method, token_type, retry=True)
+		response = await wiki_request(payload, method, token_type, retry=True, no_log=no_log)
 
 	return response
 
@@ -421,7 +423,7 @@ async def get_last_revisions(titles):
 			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
 			'prop': 'revisions',
 			'rvprop': 'user|comment',
-		}, 'POST', 'csrf')
+		}, 'POST', 'csrf', no_log=True)
 
 		for page in response['query']['pages']:
 			if not page.get('missing'):

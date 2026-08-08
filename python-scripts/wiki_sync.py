@@ -141,4 +141,4 @@ async def report_sync(pushed, pulled, created, skipped):
 		return
 
 	sections.append(f'{len(pushed)} pushed, {len(pulled)} pulled')
-	await var_global.CHANNELS['main'].send('\n\n'.join(sections))
+	await var_global.CHANNELS['feed'].send('\n\n'.join(sections))

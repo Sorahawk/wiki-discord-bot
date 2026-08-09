@@ -83,6 +83,7 @@ async def resolve_sync_scope(base_sha, full_scan):
 # reconciles the wiki repo against the wiki in both directions
 # the repo wins where the wiki's latest edit was from this code, else the wiki wins
 async def run_sync(full_scan=False):
+	print(f'watermark={var_global.LAST_RECONCILE_TIMESTAMP} skips={len(var_global.REPORTED_SKIPS)}')
 	async with var_global.REPO_LOCK:
 		base_sha = await get_head_sha()
 		await reset_to_remote()

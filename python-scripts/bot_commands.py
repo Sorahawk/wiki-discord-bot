@@ -63,7 +63,6 @@ class CommandsCog(commands.Cog):
 			return await context.send(BOT_VOICELINES['nothing'])
 
 		await report_sync([], [], [], [], resolved)
-		await context.send(BOT_VOICELINES['resolved'])
 
 
 	# resolve every tracked conflict in favour of the repo

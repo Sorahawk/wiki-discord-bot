@@ -154,7 +154,7 @@ async def resolve_conflicts(push_to_wiki):
 
 			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(local_by_title)} pages)')
 
-		side = 'repo' if push_to_wiki else 'wiki'
+		side = 'Repo' if push_to_wiki else 'Wiki'
 		resolved = [(title, side) for title in titles]
 
 		var_global.TRACKED_CONFLICTS.clear()

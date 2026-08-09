@@ -101,7 +101,7 @@ async def run_sync(full_scan=False):
 			local_content = local_by_title[title]
 
 			if reason := check_local_content(local_content):
-				skipped.append((title, f'not created - {reason}'))
+				skipped.append((title, f'Not created ({reason})'))
 				continue
 
 			await push_page(title, local_content, full_path, rel_path, head_sha)
@@ -113,7 +113,7 @@ async def run_sync(full_scan=False):
 			# a blank or conflicted local file is never a legitimate state, whichever side wins,
 			# so the page is left alone until the file is fixed
 			if reason := check_local_content(local_content):
-				skipped.append((title, f'sync prevented - {reason}'))
+				skipped.append((title, f'Sync prevented ({reason})'))
 				continue
 
 			# the latest live edit was our own sync, so the wiki is the stale side
@@ -123,7 +123,7 @@ async def run_sync(full_scan=False):
 				continue
 
 			if not live_content.strip():
-				skipped.append((title, 'pull prevented - live page is blank'))
+				skipped.append((title, 'Pull prevented (Live page is blank)'))
 				continue
 
 			full_path.write_text(live_content, encoding='utf-8')

@@ -13,13 +13,9 @@ class CommandsCog(commands.Cog):
 		if var_global.REPO_LOCK.locked():
 			await context.send(BOT_VOICELINES['waiting'])
 
-		try:
-			async with asyncio.timeout(60):
-				async with var_global.REPO_LOCK:
-					pass
-
-		except Exception as e:
-			await send_traceback(e)
+		async with asyncio.timeout(60):
+			async with var_global.REPO_LOCK:
+				pass
 
 
 	# pull latest code from GitHub and restart itself

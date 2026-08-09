@@ -8,7 +8,21 @@ async def git_run(*args):
 		stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
 	)
 
-	stdout, stderr = await process.communicate()
+	try:
+		stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=60)
+
+	except Exception as e:
+		process.terminate()  # SIGTERM lets git clean up its lock files
+
+		try:
+			await asyncio.wait_for(process.communicate(), timeout=5)
+
+		except asyncio.TimeoutError:
+			process.kill()
+			await process.communicate()
+
+		raise
+
 	if process.returncode:
 		raise RuntimeError(f"git {' '.join(args)} failed ({process.returncode}): {stderr.decode().strip()}")
 

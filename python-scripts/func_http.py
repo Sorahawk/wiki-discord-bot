@@ -177,7 +177,7 @@ async def get_page_content(titles):
 			'prop': 'revisions',
 			'rvslots': 'main',
 			'rvprop': 'content|contentmodel',
-		})#, no_log=True)
+		}, no_log=True)
 
 		for page in response['query']['pages']:
 			if page.get('missing'):

@@ -31,7 +31,7 @@ def is_stale_sync_revision(revision):
 
 
 # returns the reason a local file is unfit to sync, or None if it passes
-def check_local_content(content):
+def check_push_content(content):
 	if not content.strip():
 		return 'file is blank'
 
@@ -60,25 +60,24 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 
 
 # determines which titles need comparing against the wiki this cycle
-# returns a set of titles (None means compare everything) and the timestamp to store on success
+# returns the full set of titles to compare, the subset that changed in the repo, and the timestamp to store on success
+# None for either set means compare everything
 async def resolve_sync_scope(base_sha, full_scan):
 	timestamp = await get_wiki_timestamp()
 
 	if full_scan or not var_global.LAST_RECONCILE_TIMESTAMP:
-		return None, timestamp
+		return None, None, timestamp
 
 	changed_paths = await get_changed_paths(base_sha, PAGES_ROOT)
 
 	# ancestry is broken, so the commit range is unusable and the whole tree must be compared
 	if changed_paths is None:
-		return None, timestamp
+		return None, None, timestamp
 
-	titles = await get_recent_changes(var_global.LAST_RECONCILE_TIMESTAMP)
+	repo_titles = { resolve_title(Path(path)) for path in changed_paths }
+	titles = await get_recent_changes(var_global.LAST_RECONCILE_TIMESTAMP) | repo_titles
 
-	for path in changed_paths:
-		titles.add(resolve_title(Path(path)))
-
-	return titles, timestamp
+	return titles, repo_titles, timestamp
 
 
 # reconciles the wiki repo against the wiki in both directions
@@ -89,11 +88,11 @@ async def run_sync(full_scan=False):
 		await reset_to_remote()
 		head_sha = await get_head_sha()
 
-		titles, timestamp = await resolve_sync_scope(base_sha, full_scan)
+		titles, repo_titles, timestamp = await resolve_sync_scope(base_sha, full_scan)
 		local_by_title, file_by_title = collect_local_pages(titles)
 
 		changed, missing = await diff_against_wiki(local_by_title)
-		revisions = await get_last_revisions(changed)
+		revisions = await get_last_revisions(list(changed))
 
 		pushed, pulled, created, skipped = [], [], [], []
 
@@ -101,24 +100,24 @@ async def run_sync(full_scan=False):
 			full_path, rel_path = file_by_title[title]
 			local_content = local_by_title[title]
 
-			if reason := check_local_content(local_content):
+			if reason := check_push_content(local_content):
 				skipped.append((title, f'Not created ({reason})'))
 				continue
 
 			await push_page(title, local_content, full_path, rel_path, head_sha)
 			created.append(title)
 
+		if not repo_titles:  # None means the whole tree is in scope, so no commit range is available to compare against
+			repo_titles = set()
+
 		for title, (local_content, live_content) in changed.items():
 			full_path, rel_path = file_by_title[title]
 
-			# a blank or conflicted local file is never a legitimate state, whichever side wins,
-			# so the page is left alone until the file is fixed
-			if reason := check_local_content(local_content):
-				skipped.append((title, f'Sync prevented ({reason})'))
-				continue
+			if is_stale_sync_revision(revisions.get(title)) or (title in repo_titles and not live_content.strip()):
+				if reason := check_push_content(local_content):
+					skipped.append((title, f'Push prevented ({reason})'))
+					continue
 
-			# the latest live edit was our own sync, so the wiki is the stale side
-			if is_stale_sync_revision(revisions.get(title)):
 				await push_page(title, local_content, full_path, rel_path, head_sha)
 				pushed.append(title)
 				continue

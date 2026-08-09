@@ -8,30 +8,40 @@ class CommandsCog(commands.Cog):
 
 	# prefix commands
 
-	# pull latest code from GitHub and restart itself
-	@commands.command(name='update')
-	async def update_code(self, context):
-
-		# wait for any repo sync to complete
+	# waits for any in-progress repo sync to complete
+	async def wait_for_repo_sync(self, context):
 		if var_global.REPO_LOCK.locked():
 			await context.send(BOT_VOICELINES['waiting'])
 
 		try:
-			await asyncio.wait_for(var_global.REPO_LOCK.acquire(), timeout=90)
+			async with asyncio.timeout(60):
+				async with var_global.REPO_LOCK:
+					pass
 
 		except Exception as e:
 			await send_traceback(e)
 
+
+	# pull latest code from GitHub and restart itself
+	@commands.command(name='update')
+	async def update_code(self, context):
+		await self.wait_for_repo_sync(context)
 		await context.send(BOT_VOICELINES['updating'])
+
 		subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
 		subprocess.run(['sudo', 'systemctl', 'restart', LINUX_SERVICE_NAME])
 
 
 	# toggle sleep mode which disables slash commands as well as message and reaction handlers
+	# it also disables the wiki-repo syncing functionality
 	# the goal is to avoid shutting down the remote instance during local testing which defeats the purpose of the update prefix command
 	@commands.command(name='sleep')
 	async def sleep(self, context):
 		var_global.SLEEP_MODE = not var_global.SLEEP_MODE
+
+		if var_global.SLEEP_MODE:
+			await self.wait_for_repo_sync(context)
+
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
 
 

@@ -161,34 +161,6 @@ async def check_wiki_session():
 		await refresh_tokens()
 
 
-# API call to fetch content and content model for one or more titles
-# accepts a single title string or a list of titles
-# returns a dict keyed by page title, with corresponding value (content, content_model), or (None, None) for missing pages
-async def get_page_content(titles):
-	if isinstance(titles, str):
-		titles = [titles]
-
-	results = {}
-
-	for i in range(0, len(titles), MAX_QUERY_TITLES):
-		response = await wiki_request({
-			'action': 'query',
-			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
-			'prop': 'revisions',
-			'rvslots': 'main',
-			'rvprop': 'content|contentmodel',
-		}, no_log=True)
-
-		for page in response['query']['pages']:
-			if page.get('missing'):
-				results[page['title']] = (None, None)
-			else:
-				slot = page['revisions'][0]['slots']['main']
-				results[page['title']] = (slot['content'], slot['contentmodel'])
-
-	return results
-
-
 # API call to edit or create a page
 # pass nocreate=True to refuse the edit if the page does not already exist
 # pass content_model to set the content model explicitly when creating a new page (e.g. 'translate-messagebundle')
@@ -413,7 +385,9 @@ async def get_recent_changes(since_timestamp):
 # batch-fetches the author and summary of the latest revision for the given titles
 # returns a dict of title -> (user, comment); missing pages are omitted
 async def get_last_revisions(titles):
-	titles = list(titles)
+	if isinstance(titles, str):
+		titles = [titles]
+
 	results = {}
 
 	for i in range(0, len(titles), MAX_QUERY_TITLES):
@@ -428,5 +402,33 @@ async def get_last_revisions(titles):
 			if not page.get('missing'):
 				revision = page['revisions'][0]
 				results[page['title']] = (revision['user'], revision.get('comment', ''))
+
+	return results
+
+
+# API call to fetch content and content model for one or more titles
+# accepts a single title string or a list of titles
+# returns a dict keyed by page title, with corresponding value (content, content_model), or (None, None) for missing pages
+async def get_page_content(titles):
+	if isinstance(titles, str):
+		titles = [titles]
+
+	results = {}
+
+	for i in range(0, len(titles), MAX_QUERY_TITLES):
+		response = await wiki_request({
+			'action': 'query',
+			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
+			'prop': 'revisions',
+			'rvslots': 'main',
+			'rvprop': 'content|contentmodel',
+		}, no_log=True)
+
+		for page in response['query']['pages']:
+			if page.get('missing'):
+				results[page['title']] = (None, None)
+			else:
+				slot = page['revisions'][0]['slots']['main']
+				results[page['title']] = (slot['content'], slot['contentmodel'])
 
 	return results

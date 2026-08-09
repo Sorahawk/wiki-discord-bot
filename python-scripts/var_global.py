@@ -136,12 +136,12 @@ BOT_REPLIES_ALWAYS = [
 
 # list of triggers and corresponding replies; only messages that directly mention the bot is checked
 BOT_REPLIES_MENTIONED = [
-	(["hello", " hi ", " hey "], "You again, what now?"),
+	(["hello"], "You again, what now?"),
 	(["who are you"], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, and the Imperial Treasurer here in Arrakeen."),
 	(["thufir"], f"Greetings, <@{MENTAT_BOT_ID}> Hawat, House Atreides' Master of Assassins."),
 	(["i don't know what you're asking!"], "Didn't ask a thing."),
 	(["tax"], "Taxes? His Imperial Highness has no want or need for your Solari. Now, leave me be, you nitwit."),
-	(["solari", "coin", "money", "cash"], "Your Solari is worthless here, peasant. Go about your own business and stop bothering me."),
+	(["solari", "coin", "credit"], "Your Solari is worthless here, peasant. Go about your own business and stop bothering me."),
 	(["ecolog", "planetolog"], "Cyprian Io is our esteemed Imperial Planetologist right here on Arrakis."),
 	(["cyprian"], "It is no secret that Cyprian Io is Grand Nephew to the Emperor. That is the most relevant qualification one can have."),
 	(["bitter"], "Bitter? Cyprian and I are best mates."),

@@ -107,11 +107,13 @@ BOT_ACTIVITY_STATUSES = {
 
 # dictionary of replies, directly referenced in code
 BOT_VOICELINES = {
-	'waiting': "Stand aside! More important things are happening.",
-	'updating': "Checking dispatches for updates.",
+	'nothing': "There is nothing to resolve. Stop wasting my time.",
+	'resolved': "The matter is settled. Do try not to repeat it.",
 	'sleeping': "Your dull chatter is putting me to sleep.",
-	'waking': "What did I miss? Wait, I don't care.",
 	'synced': "The Mentats have returned a positive report. Hooray.",
+	'updating': "Checking dispatches for updates.",
+	'waiting': "Stand aside! More important things are happening.",
+	'waking': "What did I miss? Wait, I don't care.",
 }
 
 # list of triggers and corresponding replies; every message is checked for these triggers
@@ -176,8 +178,17 @@ CONTENT_MODELS = {
 # wiki timestamp of the latest successful reconcile
 LAST_RECONCILE_TIMESTAMP = None
 
+# repo HEAD at the end of the latest successful reconcile
+LAST_RECONCILE_SHA = None
+
+# titles differing on both sides with no clear direction, held until manually resolved
+TRACKED_CONFLICTS = set()
+
 # marker appended to every sync edit summary to differentiate from all other edits
-SYNC_SUMMARY_MARKER = 'Sync from Repo'
+PUSH_MARKER = 'Push from Git'
+
+# subject line for every commit written by the pipeline
+PULL_MARKER = 'Pull from Wiki'
 
 # reason recorded when the pipeline protects a MessageBundle
 MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'

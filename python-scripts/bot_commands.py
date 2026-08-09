@@ -41,11 +41,41 @@ class CommandsCog(commands.Cog):
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
 
 
-	# manually trigger a full reconcile between the content repo and the wiki
+	# manually trigger a full reconcile between the wiki repo and the wiki
 	@commands.command(name='sync')
 	async def sync_wiki(self, context):
+		if var_global.SLEEP_MODE:
+			return await context.send(BOT_VOICELINES['sleeping'])
+
 		await run_sync(full_scan=True)
 		await context.send(BOT_VOICELINES['synced'])
+
+
+	# resolve every tracked conflict in favour of the repo
+	@commands.command(name='push')
+	async def push_conflicts(self, context):
+		await self.resolve_wiki_conflicts(context, True)
+
+
+	# resolve every tracked conflict in favour of the wiki
+	@commands.command(name='pull')
+	async def pull_conflicts(self, context):
+		await self.resolve_wiki_conflicts(context, False)
+
+
+	# common function for the push and pull conflict resolution commands
+	async def resolve_wiki_conflicts(self, context, push_to_wiki):
+		if var_global.SLEEP_MODE:
+			return await context.send(BOT_VOICELINES['sleeping'])
+
+		titles = await resolve_conflicts(push_to_wiki)
+
+		if not titles:
+			return await context.send(BOT_VOICELINES['nothing'])
+
+		lines = '\n'.join(f'- `{title}` overwritten by {"repo" if push_to_wiki else "wiki"}' for title in titles)
+		await send_audit_message(context.channel, '## Conflicts Resolved\n\n', lines)
+		await context.send(BOT_VOICELINES['resolved'])
 
 
 	# slash commands

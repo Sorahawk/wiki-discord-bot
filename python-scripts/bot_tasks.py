@@ -57,11 +57,6 @@ class TasksCog(commands.Cog):
 			await send_traceback(e)
 
 
-	@task_sync_wiki.before_loop
-	async def before_sync_wiki(self):
-		await self.bot.wait_until_ready()
-
-
 
 async def setup(bot):
 	await bot.add_cog(TasksCog(bot))

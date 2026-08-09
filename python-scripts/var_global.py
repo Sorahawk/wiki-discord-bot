@@ -182,6 +182,12 @@ LAST_RECONCILE_SHA = None
 # titles differing on both sides with no clear direction, held until manually resolved
 TRACKED_CONFLICTS = set()
 
+# titles the pipeline refused or failed to write, mapped to the reason, held until the problem is fixed
+TRACKED_BLOCKED = {}
+
+# marker that indicates an unresolved merge conflict in a repo file
+MERGE_CONFLICT_MARKER = '<<<<<<< '
+
 # marker appended to every sync edit summary to differentiate from all other edits
 PUSH_MARKER = 'Push from Git'
 

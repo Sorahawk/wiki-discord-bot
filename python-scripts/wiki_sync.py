@@ -28,7 +28,9 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 	response = await edit_page(title, content, summary, content_model=get_content_model(full_path))
 
 	if response.get('error'):
-		raise RuntimeError(f"failed to edit {title}: {response['error']}")
+		error = response['error']
+		var_global.OPERATION_LOGGER.error(f'Failed to edit {title}: {error}')
+		return error.get('info') or error.get('code', 'unknown error')
 
 	# lock main English source for all MessageBundles
 	if title.startswith('MessageBundle:'):
@@ -36,6 +38,15 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 
 		if not any(entry['type'] == 'edit' for entry in protection):
 			await protect_page(title, reason=MB_PROTECTION_MSG)
+
+
+# holds a title until the underlying problem is fixed, recording it only on the first occurrence
+def block_title(title, reason, blocked):
+	if title not in var_global.TRACKED_BLOCKED:
+		blocked.append((title, reason))
+
+	var_global.TRACKED_BLOCKED[title] = reason
+	var_global.TRACKED_CONFLICTS.discard(title)
 
 
 # determines which titles changed on each side this cycle
@@ -66,19 +77,23 @@ async def run_sync(full_scan=False):
 		head_sha = await get_head_sha()
 
 		repo_titles, wiki_titles, timestamp = await resolve_sync_scope(full_scan)
-		scope = None if repo_titles is None else repo_titles | wiki_titles | var_global.TRACKED_CONFLICTS
+		scope = None if repo_titles is None else repo_titles | wiki_titles | var_global.TRACKED_CONFLICTS | var_global.TRACKED_BLOCKED.keys()
 
 		local_by_title, file_by_title = collect_local_pages(scope)
 		changed, missing = await diff_against_wiki(local_by_title)
 
-		pushed, pulled, created, conflicted, resolved = [], [], [], [], []
+		pushed, pulled, created, conflicted, blocked, resolved = [], [], [], [], [], []
 
 		# a missing page has nothing to conflict with, so it is always created
 		for title in missing:
 			full_path, rel_path = file_by_title[title]
 
-			await push_page(title, local_by_title[title], full_path, rel_path, head_sha)
+			if error := await push_page(title, local_by_title[title], full_path, rel_path, head_sha):
+				block_title(title, error, blocked)
+				continue
+
 			created.append(title)
+			var_global.TRACKED_BLOCKED.pop(title, None)
 			var_global.TRACKED_CONFLICTS.discard(title)
 
 		for title, (local_content, live_content) in changed.items():
@@ -88,34 +103,48 @@ async def run_sync(full_scan=False):
 			wiki_changed = wiki_titles is not None and title in wiki_titles
 			was_conflicted = title in var_global.TRACKED_CONFLICTS
 
-			# both sides changed, or neither did, so there is no signal to arbitrate on
+			# no signal, or signals on both sides, so there is nothing to arbitrate on
 			if repo_changed == wiki_changed:
-				if not was_conflicted:
+				if not (was_conflicted or title in var_global.TRACKED_BLOCKED):
 					conflicted.append(title)
+					var_global.TRACKED_CONFLICTS.add(title)
 
-				var_global.TRACKED_CONFLICTS.add(title)
 				continue
 
 			if repo_changed:
-				await push_page(title, local_content, full_path, rel_path, head_sha)
+				# a file with merge conflicts is never safe to push, so hold it until the markers are gone
+				if MERGE_CONFLICT_MARKER in local_content:
+					block_title(title, 'Unresolved merge markers', blocked)
+					continue
+
+				if error := await push_page(title, local_content, full_path, rel_path, head_sha):
+					block_title(title, error, blocked)
+					continue
+
 				pushed.append(title)
+
 			else:
 				full_path.write_text(live_content, encoding='utf-8')
 				pulled.append(title)
 
+			# the write succeeded, so whatever was holding this title is cleared
+			var_global.TRACKED_BLOCKED.pop(title, None)
+
 			if was_conflicted:
 				var_global.TRACKED_CONFLICTS.discard(title)
-				resolved.append((title, 'repo' if repo_changed else 'wiki'))
+				resolved.append((title, 'Repo' if repo_changed else 'Wiki'))
 
-		# both sides agree again, so any conflict on that title was resolved by hand
+		# both sides agree again, so anything held on that title was resolved by hand
 		missing_set = set(missing)
 		for title in local_by_title:
 			if title not in changed and title not in missing_set:
 				var_global.TRACKED_CONFLICTS.discard(title)
+				var_global.TRACKED_BLOCKED.pop(title, None)
 
 		# a full scan is the only way to see the whole outstanding set, so list it in full
 		if full_scan:
 			conflicted = sorted(var_global.TRACKED_CONFLICTS)
+			blocked = sorted(var_global.TRACKED_BLOCKED.items())
 
 		if pulled:
 			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(pulled)} pages)')
@@ -123,25 +152,43 @@ async def run_sync(full_scan=False):
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
 		var_global.LAST_RECONCILE_SHA = await get_head_sha()  # read after the pull commit so it stays out of the next diff
 
-		return await report_sync(pushed, pulled, created, conflicted, resolved)
+		return await report_sync(pushed, pulled, created, conflicted, blocked, resolved)
 
 
 # resolves every tracked conflict in one direction, returning the titles acted on
+# returns two lists: the titles written, and the titles still held
 async def resolve_conflicts(push_to_wiki):
 	async with var_global.REPO_LOCK:
-		if not var_global.TRACKED_CONFLICTS:
-			return []
+		if push_to_wiki:
+			titles = sorted(var_global.TRACKED_CONFLICTS | var_global.TRACKED_BLOCKED.keys())
+		else:
+			titles = sorted(var_global.TRACKED_CONFLICTS)
+
+		if not titles:
+			return [], []
 
 		await reset_to_remote()
 		head_sha = await get_head_sha()
 
-		titles = sorted(var_global.TRACKED_CONFLICTS)
 		local_by_title, file_by_title = collect_local_pages(set(titles))
+		side = 'Repo' if push_to_wiki else 'Wiki'
+		resolved, blocked = [], []
 
 		if push_to_wiki:
 			for title, local_content in local_by_title.items():
 				full_path, rel_path = file_by_title[title]
-				await push_page(title, local_content, full_path, rel_path, head_sha)
+
+				if MERGE_CONFLICT_MARKER in local_content:
+					block_title(title, 'Unresolved merge markers', blocked)
+					continue
+
+				if error := await push_page(title, local_content, full_path, rel_path, head_sha):
+					block_title(title, error, blocked)
+					continue
+
+				resolved.append((title, side))
+				var_global.TRACKED_BLOCKED.pop(title, None)
+				var_global.TRACKED_CONFLICTS.discard(title)
 
 		else:
 			live_by_title = await get_page_content(list(local_by_title))
@@ -149,27 +196,37 @@ async def resolve_conflicts(push_to_wiki):
 			for title in local_by_title:
 				live_content = live_by_title[title][0]
 
-				if live_content is not None:
-					file_by_title[title][0].write_text(live_content, encoding='utf-8')
+				# nothing to pull, so the title stays held until the repo side is pushed or fixed
+				if live_content is None:
+					continue
 
-			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(local_by_title)} pages)')
+				file_by_title[title][0].write_text(live_content, encoding='utf-8')
 
-		side = 'Repo' if push_to_wiki else 'Wiki'
-		resolved = [(title, side) for title in titles]
+				resolved.append((title, side))
+				var_global.TRACKED_BLOCKED.pop(title, None)
+				var_global.TRACKED_CONFLICTS.discard(title)
 
-		var_global.TRACKED_CONFLICTS.clear()
+			if resolved:
+				await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(resolved)} pages)')
+
 		var_global.LAST_RECONCILE_SHA = await get_head_sha()
 
-		return resolved
+		return resolved, blocked
 
 
 # reports sync activity to Discord, staying silent when there was nothing to do
-async def report_sync(pushed, pulled, created, conflicted, resolved):
-	if not (pushed or pulled or created or conflicted or resolved):
+async def report_sync(pushed, pulled, created, conflicted, blocked, resolved, channel=None):
+	if not (pushed or pulled or created or conflicted or blocked or resolved):
 		return False
 
-	var_global.OPERATION_LOGGER.info(
-		f'Sync complete - {len(created)} created, {len(pushed)} pushed, {len(pulled)} pulled, {len(conflicted)} conflicted'
+	var_global.OPERATION_LOGGER.info(''.join([
+		'Sync complete - ',
+		f'{len(created)} created, ',
+		f'{len(pushed)} pushed, ',
+		f'{len(pulled)} pulled, ',
+		f'{len(conflicted)} conflicted, ',
+		f'{len(blocked)} blocked'
+		])
 	)
 
 	resolved_titles = {title for title, _ in resolved}
@@ -184,8 +241,10 @@ async def report_sync(pushed, pulled, created, conflicted, resolved):
 		if titles:
 			sections.append(f'**{label}:**\n' + '\n'.join(f'- `{title}`' for title in titles))
 
-	if resolved:
-		lines = '\n'.join(f'- `{title}` - Overwritten by {side}' for title, side in resolved)
-		sections.append(f'**Conflicts Resolved:**\n{lines}')
+	for label, entries in (('Blocked', blocked), ('Conflicts Resolved', resolved)):
+		if entries:
+			lines = '\n'.join(f'- `{title}` - {detail}' for title, detail in entries)
+			sections.append(f'**{label}:**\n{lines}')
 
-	await send_audit_message(var_global.CHANNELS['main'], '## Wiki Sync Report\n\n', '\n\n'.join(sections))
+	await send_audit_message(channel or var_global.CHANNELS['main'], '## Wiki Sync Report\n\n', '\n\n'.join(sections))
+	return True

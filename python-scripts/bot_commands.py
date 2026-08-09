@@ -29,7 +29,7 @@ class CommandsCog(commands.Cog):
 
 
 	# toggle sleep mode which disables slash commands as well as message and reaction handlers
-	# it also disables the wiki-repo syncing functionality
+	# it also disables the automatic wiki-repo syncing functionality
 	# the goal is to avoid shutting down the remote instance during local testing which defeats the purpose of the update prefix command
 	@commands.command(name='sleep')
 	async def sleep(self, context):
@@ -44,25 +44,17 @@ class CommandsCog(commands.Cog):
 	# manually trigger a full reconcile between the wiki repo and the wiki
 	@commands.command(name='sync')
 	async def sync_wiki(self, context):
-		if var_global.SLEEP_MODE:
-			return await context.send(BOT_VOICELINES['sleeping'])
-
 		reported = await run_sync(full_scan=True)
 		if reported is False:  # specifically check for False which indicates no report was sent
-			await var_global.CHANNELS['main'].send(BOT_VOICELINES['nothing'])
+			await context.send(BOT_VOICELINES['nothing'])
 
 
 	# common function for the push and pull conflict resolution commands
 	async def resolve_wiki_conflicts(self, context, push_to_wiki):
-		if var_global.SLEEP_MODE:
-			return await context.send(BOT_VOICELINES['sleeping'])
+		resolved, blocked = await resolve_conflicts(push_to_wiki)
 
-		resolved = await resolve_conflicts(push_to_wiki)
-
-		if not resolved:
-			return await context.send(BOT_VOICELINES['nothing'])
-
-		await report_sync([], [], [], [], resolved)
+		if not await report_sync([], [], [], [], blocked, resolved, context.channel):
+			await context.send(BOT_VOICELINES['nothing'])
 
 
 	# resolve every tracked conflict in favour of the repo

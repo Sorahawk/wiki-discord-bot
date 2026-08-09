@@ -45,7 +45,7 @@ class TasksCog(commands.Cog):
 
 
 	# reconciles the wiki repo against the wiki in both directions
-	@loop(seconds=30)
+	@loop(seconds=20)
 	async def task_sync_wiki(self):
 		if sys.platform != 'linux' or var_global.SLEEP_MODE:
 			return

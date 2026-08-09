@@ -88,8 +88,6 @@ async def run_sync(full_scan=False):
 		await reset_to_remote()
 		head_sha = await get_head_sha()
 
-		var_global.OPERATION_LOGGER.info(f'base={base_sha[:7]} head={head_sha[:7]} full_scan={full_scan}')
-
 		titles, repo_titles, timestamp = await resolve_sync_scope(base_sha, full_scan)
 		local_by_title, file_by_title = collect_local_pages(titles)
 
@@ -114,8 +112,6 @@ async def run_sync(full_scan=False):
 
 		for title, (local_content, live_content) in changed.items():
 			full_path, rel_path = file_by_title[title]
-
-			var_global.OPERATION_LOGGER.info(f'{title}: in_repo_titles={title in repo_titles} live_blank={not live_content.strip()} local_len={len(local_content)} revision={revisions.get(title)}')
 
 			if is_stale_sync_revision(revisions.get(title)) or (title in repo_titles and not live_content.strip()):
 				if reason := check_push_content(local_content):

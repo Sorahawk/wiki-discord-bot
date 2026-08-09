@@ -180,7 +180,7 @@ LAST_RECONCILE_TIMESTAMP = None
 LAST_RECONCILE_SHA = None
 
 # titles differing on both sides with no clear direction, held until manually resolved
-TRACKED_CONFLICTS = set()
+TRACKED_UNDECIDED = set()
 
 # titles the pipeline refused or failed to write, mapped to the reason, held until the problem is fixed
 TRACKED_BLOCKED = {}

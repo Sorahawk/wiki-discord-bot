@@ -30,10 +30,10 @@ from var_secret import *
 
 from func_utils import *
 from func_http import *
+from func_git import *
 
 from bot_logging import *
 from bot_handlers import *
 
 from wiki_titles import *
-from wiki_git import *
 from wiki_sync import *

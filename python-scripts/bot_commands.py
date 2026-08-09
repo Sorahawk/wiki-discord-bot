@@ -49,24 +49,24 @@ class CommandsCog(commands.Cog):
 			await context.send(BOT_VOICELINES['nothing'])
 
 
-	# common function for the push and pull conflict resolution commands
-	async def resolve_wiki_conflicts(self, context, push_to_wiki):
+	# common function for push and pull commands
+	async def resolve_push_pull(self, context, push_to_wiki):
 		resolved, blocked = await resolve_conflicts(push_to_wiki)
 
 		if not await report_sync([], [], [], [], blocked, resolved, context.channel):
 			await context.send(BOT_VOICELINES['nothing'])
 
 
-	# resolve every tracked conflict in favour of the repo
+	# resolve tracked conflicts from repo to wiki
 	@commands.command(name='push')
-	async def push_conflicts(self, context):
-		await self.resolve_wiki_conflicts(context, True)
+	async def push_to_wiki(self, context):
+		await self.resolve_push_pull(context, True)
 
 
-	# resolve every tracked conflict in favour of the wiki
+	# resolve tracked conflicts from wiki to repo
 	@commands.command(name='pull')
-	async def pull_conflicts(self, context):
-		await self.resolve_wiki_conflicts(context, False)
+	async def pull_from_wiki(self, context):
+		await self.resolve_push_pull(context, False)
 
 
 	# slash commands

@@ -120,10 +120,12 @@ async def run_sync(full_scan=False):
 		if pulled:
 			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(pulled)} pages)')
 
-		await report_sync(pushed, pulled, created, conflicted, resolved)
+		reported = await report_sync(pushed, pulled, created, conflicted, resolved)
 
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
 		var_global.LAST_RECONCILE_SHA = await get_head_sha()  # read after the pull commit so it stays out of the next diff
+
+		return reported
 
 
 # resolves every tracked conflict in one direction, returning the titles acted on
@@ -163,8 +165,7 @@ async def resolve_conflicts(push_to_wiki):
 # reports sync activity to Discord, staying silent when there was nothing to do
 async def report_sync(pushed, pulled, created, conflicted, resolved):
 	if not (pushed or pulled or created or conflicted or resolved):
-		await var_global.CHANNELS['main'].send(BOT_VOICELINES['nothing'])
-		return
+		return False
 
 	var_global.OPERATION_LOGGER.info(
 		f'Sync complete - {len(created)} created, {len(pushed)} pushed, {len(pulled)} pulled, {len(conflicted)} conflicted'

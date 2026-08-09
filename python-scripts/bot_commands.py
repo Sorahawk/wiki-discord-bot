@@ -47,7 +47,9 @@ class CommandsCog(commands.Cog):
 		if var_global.SLEEP_MODE:
 			return await context.send(BOT_VOICELINES['sleeping'])
 
-		await run_sync(full_scan=True)
+		reported = await run_sync(full_scan=True)
+		if reported is False:
+			await var_global.CHANNELS['main'].send(BOT_VOICELINES['nothing'])
 
 
 	# resolve every tracked conflict in favour of the repo

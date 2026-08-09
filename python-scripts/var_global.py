@@ -173,6 +173,9 @@ CONTENT_MODELS = {
 	'.txt': 'wikitext',
 }
 
+# track skipped pages already reported, to avoid repeating the same warning every cycle
+REPORTED_SKIPS = set()
+
 # wiki timestamp of the latest successful reconcile
 LAST_RECONCILE_TIMESTAMP = None
 

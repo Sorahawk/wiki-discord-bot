@@ -132,7 +132,11 @@ async def run_sync(full_scan=False):
 		if pulled:
 			await commit_and_push(PAGES_ROOT, f'Pull from Wiki ({len(pulled)} pages)')
 
-		await report_sync(pushed, pulled, created, skipped)
+		# a full scan reports every current skip, whereas the loop reports each only once
+		new_skips = skipped if full_scan else [entry for entry in skipped if entry not in var_global.REPORTED_SKIPS]
+		var_global.REPORTED_SKIPS = set(skipped)
+
+		await report_sync(pushed, pulled, created, new_skips)
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
 
 

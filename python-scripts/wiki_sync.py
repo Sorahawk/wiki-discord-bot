@@ -154,10 +154,13 @@ async def resolve_conflicts(push_to_wiki):
 
 			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(local_by_title)} pages)')
 
+		side = 'repo' if push_to_wiki else 'wiki'
+		resolved = [(title, side) for title in titles]
+
 		var_global.TRACKED_CONFLICTS.clear()
 		var_global.LAST_RECONCILE_SHA = await get_head_sha()
 
-		return titles
+		return resolved
 
 
 # reports sync activity to Discord, staying silent when there was nothing to do
@@ -182,7 +185,7 @@ async def report_sync(pushed, pulled, created, conflicted, resolved):
 			sections.append(f'**{label}:**\n' + '\n'.join(f'- `{title}`' for title in titles))
 
 	if resolved:
-		lines = '\n'.join(f'- `{title}` overwritten by {side}' for title, side in resolved)
+		lines = '\n'.join(f'- `{title}` - Overwritten by {side}' for title, side in resolved)
 		sections.append(f'**Conflicts Resolved:**\n{lines}')
 
 	await send_audit_message(var_global.CHANNELS['main'], '## Wiki Sync Report\n\n', '\n\n'.join(sections))

@@ -48,7 +48,6 @@ class CommandsCog(commands.Cog):
 			return await context.send(BOT_VOICELINES['sleeping'])
 
 		await run_sync(full_scan=True)
-		await context.send(BOT_VOICELINES['synced'])
 
 
 	# resolve every tracked conflict in favour of the repo
@@ -75,7 +74,6 @@ class CommandsCog(commands.Cog):
 
 		lines = '\n'.join(f'- `{title}` overwritten by {"repo" if push_to_wiki else "wiki"}' for title in titles)
 		await send_audit_message(context.channel, '## Conflicts Resolved\n\n', lines)
-		await context.send(BOT_VOICELINES['resolved'])
 
 
 	# slash commands

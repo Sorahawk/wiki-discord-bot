@@ -163,6 +163,7 @@ async def resolve_conflicts(push_to_wiki):
 # reports sync activity to Discord, staying silent when there was nothing to do
 async def report_sync(pushed, pulled, created, conflicted, resolved):
 	if not (pushed or pulled or created or conflicted or resolved):
+		await var_global.CHANNELS['main'].send(BOT_VOICELINES['nothing'])
 		return
 
 	var_global.OPERATION_LOGGER.info(

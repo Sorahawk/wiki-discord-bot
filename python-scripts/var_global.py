@@ -108,9 +108,7 @@ BOT_ACTIVITY_STATUSES = {
 # dictionary of replies, directly referenced in code
 BOT_VOICELINES = {
 	'nothing': "There is nothing to resolve. Stop wasting my time.",
-	'resolved': "The matter is settled. Do try not to repeat it.",
 	'sleeping': "Your dull chatter is putting me to sleep.",
-	'synced': "The Mentats have returned a positive report. Hooray.",
 	'updating': "Checking dispatches for updates.",
 	'waiting': "Stand aside! More important things are happening.",
 	'waking': "What did I miss? Wait, I don't care.",

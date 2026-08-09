@@ -45,20 +45,3 @@ def collect_local_pages(titles=None):
 		file_by_title[title] = (full_path, rel_path)
 
 	return local_by_title, file_by_title
-
-
-# checks content for unresolved merge conflict markers
-def has_conflict_markers(content):
-	has_opening, has_closing, has_separator = False, False, False
-
-	# look for a pair of opening and closing markers or a lone marker alongside a bare separator line
-	# this is to prevent false-positives from decorative '=======' in comments or wikitext
-	for line in content.splitlines():
-		if line.startswith('<<<<<<<') or line.startswith('|||||||'):
-			has_opening = True
-		elif line.startswith('>>>>>>>'):
-			has_closing = True
-		elif line.rstrip() == '=======':
-			has_separator = True
-
-	return (has_opening and has_closing) or ((has_opening or has_closing) and has_separator)

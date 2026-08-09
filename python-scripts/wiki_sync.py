@@ -62,28 +62,28 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 # determines which titles need comparing against the wiki this cycle
 # returns a set of titles (None means compare everything) and the timestamp to store on success
 async def resolve_sync_scope(base_sha, full_scan):
+	timestamp = await get_wiki_timestamp()
+
 	if full_scan or not var_global.LAST_RECONCILE_TIMESTAMP:
-		return None, await get_wiki_timestamp()
+		return None, timestamp
 
 	changed_paths = await get_changed_paths(base_sha, PAGES_ROOT)
 
 	# ancestry is broken, so the commit range is unusable and the whole tree must be compared
 	if changed_paths is None:
-		return None, await get_wiki_timestamp()
+		return None, timestamp
 
-	recent_titles, newest = await get_recent_changes(var_global.LAST_RECONCILE_TIMESTAMP)
+	titles = await get_recent_changes(var_global.LAST_RECONCILE_TIMESTAMP)
 
-	titles = set(recent_titles)
 	for path in changed_paths:
 		titles.add(resolve_title(Path(path)))
 
-	return titles, newest or var_global.LAST_RECONCILE_TIMESTAMP
+	return titles, timestamp
 
 
 # reconciles the wiki repo against the wiki in both directions
 # the repo wins where the wiki's latest edit was from this code, else the wiki wins
 async def run_sync(full_scan=False):
-	print(f'watermark={var_global.LAST_RECONCILE_TIMESTAMP} skips={len(var_global.REPORTED_SKIPS)}')
 	async with var_global.REPO_LOCK:
 		base_sha = await get_head_sha()
 		await reset_to_remote()

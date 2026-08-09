@@ -384,11 +384,9 @@ async def get_wiki_timestamp():
 
 
 # fetches titles edited or created on the wiki since the given timestamp
-# returns the set of titles and the newest timestamp seen, else None if there were no changes
 async def get_recent_changes(since_timestamp):
 	cont = {}
 	titles = set()
-	newest = None
 
 	while True:
 		response = await wiki_request({
@@ -397,20 +395,19 @@ async def get_recent_changes(since_timestamp):
 			'rcstart': since_timestamp,
 			'rcdir': 'newer',
 			'rctype': 'edit|new',
-			'rcprop': 'title|timestamp',
+			'rcprop': 'title',
 			'rclimit': 'max',
 			**cont
 		})
 
 		for change in response['query']['recentchanges']:
 			titles.add(change['title'])
-			newest = max(newest, change['timestamp']) if newest else change['timestamp']
 
 		# check if there are more changes to retrieve
 		if not (cont := response.get('continue', {})):
 			break
 
-	return titles, newest
+	return titles
 
 
 # batch-fetches the author and summary of the latest revision for the given titles

@@ -124,4 +124,4 @@ async def report_sync(pushed, pulled, created):
 		if titles:
 			sections.append(f'**{label}:**\n' + '\n'.join(f'- `{title}`' for title in titles))
 
-	await send_audit_message(var_global.CHANNELS['main'], '**Wiki Sync Report**\n\n', '\n\n'.join(sections))
+	await send_audit_message(var_global.CHANNELS['main'], '## Wiki Sync Report\n\n', '\n\n'.join(sections))

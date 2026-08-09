@@ -25,7 +25,7 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 
 	if not no_log:
 		# omit harmless warning about wiki bot param
-		if response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
+		if isinstance(response, dict) and response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
 			del response['warnings']
 
 		var_global.OPERATION_LOGGER.info(response)
@@ -396,7 +396,7 @@ async def get_last_revisions(titles):
 			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
 			'prop': 'revisions',
 			'rvprop': 'user|comment',
-		})
+		}, 'POST')  # use POST instead of GET in case the concatenated titles blow past the size limit for GET requests
 
 		for page in response['query']['pages']:
 			if not page.get('missing'):
@@ -422,7 +422,7 @@ async def get_page_content(titles):
 			'prop': 'revisions',
 			'rvslots': 'main',
 			'rvprop': 'content|contentmodel',
-		}, no_log=True)
+		}, 'POST', no_log=True)  # use POST instead of GET in case the concatenated titles blow past the size limit for GET requests
 
 		for page in response['query']['pages']:
 			if page.get('missing'):

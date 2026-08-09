@@ -177,7 +177,7 @@ CONTENT_MODELS = {
 LAST_RECONCILE_TIMESTAMP = None
 
 # marker appended to every sync edit summary to differentiate from all other edits
-SYNC_SUMMARY_MARKER = 'Sync from GitHub'
+SYNC_SUMMARY_MARKER = 'Sync from Repo'
 
 # reason recorded when the pipeline protects a MessageBundle
 MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'

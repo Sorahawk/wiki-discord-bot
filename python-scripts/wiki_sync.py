@@ -120,12 +120,10 @@ async def run_sync(full_scan=False):
 		if pulled:
 			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(pulled)} pages)')
 
-		reported = await report_sync(pushed, pulled, created, conflicted, resolved)
-
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
 		var_global.LAST_RECONCILE_SHA = await get_head_sha()  # read after the pull commit so it stays out of the next diff
 
-		return reported
+		return await report_sync(pushed, pulled, created, conflicted, resolved)
 
 
 # resolves every tracked conflict in one direction, returning the titles acted on

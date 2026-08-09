@@ -48,7 +48,7 @@ class CommandsCog(commands.Cog):
 			return await context.send(BOT_VOICELINES['sleeping'])
 
 		reported = await run_sync(full_scan=True)
-		if reported is False:
+		if reported is False:  # specifically check for False which indicates no report was sent
 			await var_global.CHANNELS['main'].send(BOT_VOICELINES['nothing'])
 
 

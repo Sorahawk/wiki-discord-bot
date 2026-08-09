@@ -61,16 +61,6 @@ class TasksCog(commands.Cog):
 	async def before_sync_wiki(self):
 		await self.bot.wait_until_ready()
 
-		if sys.platform != 'linux':
-			return
-
-		# reconcile the full tree on startup
-		try:
-			await run_sync(full_scan=True)
-
-		except Exception as e:
-			await send_traceback(e)
-
 
 
 async def setup(bot):

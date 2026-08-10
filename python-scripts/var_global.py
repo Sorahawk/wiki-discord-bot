@@ -33,9 +33,6 @@ SESSION = None
 # base URL for Wiki API
 WIKI_BASE_URL = 'https://awakening.wiki/api.php'
 
-# max number of entries returned per wiki query request
-MAX_QUERY_TITLES = 500  # bot accounts can go up to 500 with apihighlimits, else it would be 50
-
 # base URL for Mentat API
 MENTAT_BASE_URL = 'https://mentat.wiki'
 
@@ -47,6 +44,37 @@ WIKI_LOCK = None
 
 # async lock object to prevent race condition over repo state
 REPO_LOCK = None
+
+# max number of entries returned per wiki query request
+MAX_QUERY_TITLES = 500  # bot accounts can go up to 500 with apihighlimits, else it would be 50
+
+
+
+### SYNC ###
+
+# wiki timestamp of the latest successful reconcile
+LAST_RECONCILE_TIMESTAMP = None
+
+# repo HEAD at the end of the latest successful reconcile
+LAST_RECONCILE_SHA = None
+
+# titles differing on both sides with no clear direction, held until manually resolved
+TRACKED_UNDECIDED = set()
+
+# titles the pipeline refused or failed to write, mapped to the reason, held until the problem is fixed
+TRACKED_BLOCKED = {}
+
+# marker appended to every sync edit summary to differentiate from all other edits
+PUSH_MARKER = 'Push from Git'
+
+# subject line for every commit written by the pipeline
+PULL_MARKER = 'Pull from Wiki'
+
+# marker that indicates an unresolved merge conflict in a repo file
+MERGE_CONFLICT_MARKER = '<<<<<<< '
+
+# reason recorded when the pipeline protects a MessageBundle
+MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'
 
 
 
@@ -172,27 +200,3 @@ CONTENT_MODELS = {
 	'.lua': 'Scribunto',
 	'.txt': 'wikitext',
 }
-
-# wiki timestamp of the latest successful reconcile
-LAST_RECONCILE_TIMESTAMP = None
-
-# repo HEAD at the end of the latest successful reconcile
-LAST_RECONCILE_SHA = None
-
-# titles differing on both sides with no clear direction, held until manually resolved
-TRACKED_UNDECIDED = set()
-
-# titles the pipeline refused or failed to write, mapped to the reason, held until the problem is fixed
-TRACKED_BLOCKED = {}
-
-# marker that indicates an unresolved merge conflict in a repo file
-MERGE_CONFLICT_MARKER = '<<<<<<< '
-
-# marker appended to every sync edit summary to differentiate from all other edits
-PUSH_MARKER = 'Push from Git'
-
-# subject line for every commit written by the pipeline
-PULL_MARKER = 'Pull from Wiki'
-
-# reason recorded when the pipeline protects a MessageBundle
-MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'

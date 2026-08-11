@@ -151,7 +151,7 @@ async def check_wiki_session():
 	user = response['query']['userinfo']
 
 	# if session is expired, MediaWiki returns an anonymous user
-	if user.get('anon') is not None:
+	if user.get('anon'):
 		var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login')
 		await wiki_login()
 
@@ -330,7 +330,7 @@ async def list_category_members(category, namespace=None):
 		'cmtitle': f'Category:{category}',
 		'cmlimit': 'max',
 	}
-	if namespace is not None:
+	if namespace:
 		payload['cmnamespace'] = namespace
 
 	titles = []

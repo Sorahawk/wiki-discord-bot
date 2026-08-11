@@ -38,7 +38,8 @@ def collect_local_pages(titles=None):
 
 		rel_path = full_path.relative_to(repo_root)
 		title = resolve_title(rel_path)
-		if titles is not None and title not in titles:
+
+		if titles and title not in titles:
 			continue
 
 		local_by_title[title] = full_path.read_text(encoding='utf-8')

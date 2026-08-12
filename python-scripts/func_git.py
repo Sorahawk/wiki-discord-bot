@@ -12,7 +12,7 @@ async def git_run(*args):
 		stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=60)
 
 	except asyncio.TimeoutError:
-		var_global.OPERATION_LOGGER.error(f'git {args[0]} timed out, returncode={process.returncode}')
+		var_global.OPERATION_LOGGER.error(f'git {args[0]} (pid {process.pid}) timed out, returncode={process.returncode}')
 
 		process.terminate()  # SIGTERM lets git clean up its lock files
 

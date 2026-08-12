@@ -50,6 +50,10 @@ class TasksCog(commands.Cog):
 		if sys.platform != 'linux' or var_global.SLEEP_MODE:
 			return
 
+		if var_global.REPO_LOCK.locked():
+			var_global.OPERATION_LOGGER.warning('Sync cycle still running, skipping this tick')
+			return
+
 		try:
 			await run_sync()
 

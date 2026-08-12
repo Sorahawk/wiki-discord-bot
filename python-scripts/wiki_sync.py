@@ -151,11 +151,13 @@ async def run_sync(full_scan=False):
 			undecided = sorted(var_global.TRACKED_UNDECIDED)
 			blocked = sorted(var_global.TRACKED_BLOCKED.items())
 
+		# re-read HEAD only when a pull commit moved it, so it stays out of the next diff
 		if pulled:
 			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(pulled)} pages)')
+			head_sha = await get_head_sha()
 
+		var_global.LAST_RECONCILE_SHA = head_sha
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
-		var_global.LAST_RECONCILE_SHA = await get_head_sha()  # read after the pull commit so it stays out of the next diff
 
 		return await report_sync(pushed, pulled, created, undecided, blocked, resolved)
 

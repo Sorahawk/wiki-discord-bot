@@ -50,8 +50,6 @@ class TasksCog(commands.Cog):
 		if sys.platform != 'linux' or var_global.SLEEP_MODE:
 			return
 
-		var_global.OPERATION_LOGGER.info(f'timestamp {LAST_RECONCILE_TIMESTAMP}, sha {LAST_RECONCILE_SHA}')
-
 		if var_global.REPO_LOCK.locked():
 			var_global.OPERATION_LOGGER.warning('Sync cycle still running, skipping this tick')
 			return

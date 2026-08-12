@@ -79,6 +79,8 @@ async def resolve_sync_scope(full_scan):
 # reconciles the wiki repo against the wiki in both directions; the side that changed this cycle wins
 # if both changed, or neither did, the page is held as undecided
 async def run_sync(full_scan=False):
+	var_global.OPERATION_LOGGER.info(f'timestamp {var_global.LAST_RECONCILE_TIMESTAMP}, sha {var_global.LAST_RECONCILE_SHA}')
+
 	async with var_global.REPO_LOCK:
 		await reset_to_remote()
 		head_sha = await get_head_sha()

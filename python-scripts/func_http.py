@@ -130,7 +130,7 @@ async def wiki_login():
 			'lgname': var_secret.WIKI_CREDS[0],
 			'lgpassword': var_secret.WIKI_CREDS[1],
 			'lgtoken': login_token,
-		}, 'POST')
+		}, 'POST', no_log=True)
 
 		data = response['login']
 
@@ -177,7 +177,7 @@ async def get_page_content(titles):
 			'prop': 'revisions',
 			'rvslots': 'main',
 			'rvprop': 'content|contentmodel',
-		}, 'POST', no_log=True)  # use POST instead of GET in case the concatenated titles blow past the size limit for GET requests
+		}, 'POST')#, no_log=True)  # use POST instead of GET in case the concatenated titles blow past the size limit for GET requests
 
 		for page in response['query']['pages']:
 			if page.get('missing'):

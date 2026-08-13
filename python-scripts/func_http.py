@@ -23,7 +23,9 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	else:
 		response = raw_response.text
 
-	if not no_log:
+	if no_log:
+		var_global.OPERATION_LOGGER.info('Response is suppressed due to no_log=True')
+	else:
 		# omit harmless warning about wiki bot param
 		if isinstance(response, dict) and response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
 			del response['warnings']

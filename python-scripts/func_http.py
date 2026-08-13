@@ -132,7 +132,7 @@ async def wiki_login():
 			'lgname': var_secret.WIKI_CREDS[0],
 			'lgpassword': var_secret.WIKI_CREDS[1],
 			'lgtoken': login_token,
-		}, 'POST')
+		}, 'POST', no_log=True)
 
 		data = response['login']
 

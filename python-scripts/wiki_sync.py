@@ -60,12 +60,14 @@ async def resolve_sync_scope(full_scan):
 	timestamp = await get_wiki_timestamp()
 
 	if full_scan or not var_global.LAST_RECONCILE_TIMESTAMP or not var_global.LAST_RECONCILE_SHA:
+		var_global.OPERATION_LOGGER.warning(f'Full scan - full_scan={full_scan}, ts={var_global.LAST_RECONCILE_TIMESTAMP}, sha={var_global.LAST_RECONCILE_SHA}')
 		return None, None, timestamp
 
 	changed_paths = await get_changed_paths(var_global.LAST_RECONCILE_SHA, PAGES_ROOT)
 
 	# ancestry is broken, so the commit range is unusable and the whole tree must be compared
 	if changed_paths is None:
+		var_global.OPERATION_LOGGER.warning(f'Full scan - broken ancestry from {var_global.LAST_RECONCILE_SHA}')
 		return None, None, timestamp
 
 	repo_titles = {resolve_title(Path(path)) for path in changed_paths}
@@ -77,6 +79,8 @@ async def resolve_sync_scope(full_scan):
 # reconciles the wiki repo against the wiki in both directions; the side that changed this cycle wins
 # if both changed, or neither did, the page is held as undecided
 async def run_sync(full_scan=False):
+	var_global.OPERATION_LOGGER.info(f'timestamp {var_global.LAST_RECONCILE_TIMESTAMP}, sha {var_global.LAST_RECONCILE_SHA}')
+
 	async with var_global.REPO_LOCK:
 		await reset_to_remote()
 		head_sha = await get_head_sha()
@@ -151,11 +155,13 @@ async def run_sync(full_scan=False):
 			undecided = sorted(var_global.TRACKED_UNDECIDED)
 			blocked = sorted(var_global.TRACKED_BLOCKED.items())
 
+		# re-read HEAD only when a pull commit moved it, so it stays out of the next diff
 		if pulled:
 			await commit_and_push(PAGES_ROOT, f'{PULL_MARKER} ({len(pulled)} pages)')
+			head_sha = await get_head_sha()
 
+		var_global.LAST_RECONCILE_SHA = head_sha
 		var_global.LAST_RECONCILE_TIMESTAMP = timestamp
-		var_global.LAST_RECONCILE_SHA = await get_head_sha()  # read after the pull commit so it stays out of the next diff
 
 		return await report_sync(pushed, pulled, created, undecided, blocked, resolved)
 

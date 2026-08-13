@@ -36,7 +36,10 @@ class CommandsCog(commands.Cog):
 		var_global.SLEEP_MODE = not var_global.SLEEP_MODE
 
 		if var_global.SLEEP_MODE:
-			await self.wait_for_repo_sync(context)
+			try:
+				await self.wait_for_repo_sync(context)
+			except Exception as e:
+				await send_traceback(e)
 
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
 

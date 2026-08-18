@@ -10,7 +10,9 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 
 	# censor sensitive items in payload from being logged
 	logged_payload = payload.copy()
-	logged_payload.pop('lgpassword', None)
+	if 'lgpassword' in logged_payload:
+		logged_payload['lgpassword'] = 'CENSORED'
+
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {logged_payload}")
 
 	if method not in ('POST', 'PUT', 'PATCH'):

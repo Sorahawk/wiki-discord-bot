@@ -148,7 +148,7 @@ async def wiki_login():
 			var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}")
 			await refresh_tokens()
 		else:
-			raise Exception(f"**Wiki login failed: {data['result']} - {data.get('reason', 'No reason specified')}**")
+			raise Exception(f"Wiki login failed: {data['result']} - {data.get('reason', 'No reason specified')}")
 
 
 # check if login session is still valid

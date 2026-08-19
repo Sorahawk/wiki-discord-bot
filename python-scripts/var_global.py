@@ -46,7 +46,8 @@ WIKI_LOCK = None
 REPO_LOCK = None
 
 # max number of entries returned per wiki query request
-MAX_QUERY_TITLES = 500  # bot accounts can go up to 500 with apihighlimits, else it would be 50
+# bot accounts can go up to 500 with apihighlimits; normal accounts capped at 50
+MAX_QUERY_TITLES = 100  # reduced to avoid potential issues with sending too many page titles in the request; encountered at 170
 
 
 

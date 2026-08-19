@@ -117,8 +117,8 @@ async def run_sync(full_scan=False):
 		for title, (local_content, live_content) in changed.items():
 			full_path, rel_path = file_by_title[title]
 
-			repo_changed = repo_titles and title in repo_titles
-			wiki_changed = wiki_titles and title in wiki_titles
+			repo_changed = repo_titles is not None and title in repo_titles
+			wiki_changed = wiki_titles is not None and title in wiki_titles
 			was_undecided = title in var_global.TRACKED_UNDECIDED
 
 			# no signal, or signals on both sides, so there is nothing to arbitrate on

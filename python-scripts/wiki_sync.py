@@ -250,7 +250,7 @@ async def report_sync(pushed, pulled, created, undecided, blocked, resolved, cha
 		('Awaiting Resolution', undecided),
 	):
 		if titles:
-			sections.append(f'**{label}:**\n' + '\n'.join(f'- `{title}`' for title in titles))
+			sections.append(f'**{label}:**\n' + '\n'.join(f'\n- `{title}`' for title in titles))
 
 	for label, entries in (('Blocked', blocked), ('Conflicts Resolved', resolved)):
 		if entries:

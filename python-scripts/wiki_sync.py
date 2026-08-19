@@ -58,16 +58,25 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 # returns (repo titles, wiki titles, timestamp); None for both sets means compare everything
 async def resolve_sync_scope(full_scan):
 	timestamp = await get_wiki_timestamp()
+	
+	var_global.OPERATION_LOGGER.info(f'Last timestamp: {var_global.LAST_RECONCILE_TIMESTAMP}\nLast SHA: {var_global.LAST_RECONCILE_SHA}')
+	var_global.OPERATION_LOGGER.info(
+		f'scope={'ALL' if scope is None else len(scope)} '
+		f'repo={None if repo_titles is None else len(repo_titles)} '
+		f'wiki={None if wiki_titles is None else len(wiki_titles)} '
+		f'undecided={len(var_global.TRACKED_UNDECIDED)} '
+		f'blocked={len(var_global.TRACKED_BLOCKED)} '
+	)
 
 	if full_scan or not var_global.LAST_RECONCILE_TIMESTAMP or not var_global.LAST_RECONCILE_SHA:
-		var_global.OPERATION_LOGGER.warning(f'Full scan - full_scan={full_scan}, ts={var_global.LAST_RECONCILE_TIMESTAMP}, sha={var_global.LAST_RECONCILE_SHA}')
+		var_global.OPERATION_LOGGER.info(f'Full scan - full_scan={full_scan}, ts={var_global.LAST_RECONCILE_TIMESTAMP}, sha={var_global.LAST_RECONCILE_SHA}')
 		return None, None, timestamp
 
 	changed_paths = await get_changed_paths(var_global.LAST_RECONCILE_SHA, PAGES_ROOT)
 
 	# ancestry is broken, so the commit range is unusable and the whole tree must be compared
 	if changed_paths is None:
-		var_global.OPERATION_LOGGER.warning(f'Full scan - broken ancestry from {var_global.LAST_RECONCILE_SHA}')
+		var_global.OPERATION_LOGGER.info(f'Full scan - broken ancestry from {var_global.LAST_RECONCILE_SHA}')
 		return None, None, timestamp
 
 	repo_titles = {resolve_title(Path(path)) for path in changed_paths}

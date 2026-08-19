@@ -79,7 +79,7 @@ async def resolve_sync_scope(full_scan):
 # reconciles the wiki repo against the wiki in both directions; the side that changed this cycle wins
 # if both changed, or neither did, the page is held as undecided
 async def run_sync(full_scan=False):
-	var_global.OPERATION_LOGGER.info(f'timestamp {var_global.LAST_RECONCILE_TIMESTAMP}, sha {var_global.LAST_RECONCILE_SHA}')
+	var_global.OPERATION_LOGGER.info(f'Latest timestamp: {var_global.LAST_RECONCILE_TIMESTAMP}\nLatest SHA: {var_global.LAST_RECONCILE_SHA}')
 
 	async with var_global.REPO_LOCK:
 		await reset_to_remote()
@@ -87,8 +87,6 @@ async def run_sync(full_scan=False):
 
 		repo_titles, wiki_titles, timestamp = await resolve_sync_scope(full_scan)
 		scope = None if repo_titles is None else repo_titles | wiki_titles | var_global.TRACKED_UNDECIDED | var_global.TRACKED_BLOCKED.keys()
-
-		var_global.OPERATION_LOGGER.info(f'Last timestamp: {var_global.LAST_RECONCILE_TIMESTAMP}\nLast SHA: {var_global.LAST_RECONCILE_SHA}')
 
 		local_by_title, file_by_title = collect_local_pages(scope)
 		changed, missing = await diff_against_wiki(local_by_title)

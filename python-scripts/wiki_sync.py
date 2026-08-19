@@ -58,15 +58,6 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 # returns (repo titles, wiki titles, timestamp); None for both sets means compare everything
 async def resolve_sync_scope(full_scan):
 	timestamp = await get_wiki_timestamp()
-	
-	var_global.OPERATION_LOGGER.info(f'Last timestamp: {var_global.LAST_RECONCILE_TIMESTAMP}\nLast SHA: {var_global.LAST_RECONCILE_SHA}')
-	var_global.OPERATION_LOGGER.info(
-		f'scope={'ALL' if scope is None else len(scope)} '
-		f'repo={None if repo_titles is None else len(repo_titles)} '
-		f'wiki={None if wiki_titles is None else len(wiki_titles)} '
-		f'undecided={len(var_global.TRACKED_UNDECIDED)} '
-		f'blocked={len(var_global.TRACKED_BLOCKED)} '
-	)
 
 	if full_scan or not var_global.LAST_RECONCILE_TIMESTAMP or not var_global.LAST_RECONCILE_SHA:
 		var_global.OPERATION_LOGGER.info(f'Full scan - full_scan={full_scan}, ts={var_global.LAST_RECONCILE_TIMESTAMP}, sha={var_global.LAST_RECONCILE_SHA}')
@@ -96,6 +87,15 @@ async def run_sync(full_scan=False):
 
 		repo_titles, wiki_titles, timestamp = await resolve_sync_scope(full_scan)
 		scope = None if repo_titles is None else repo_titles | wiki_titles | var_global.TRACKED_UNDECIDED | var_global.TRACKED_BLOCKED.keys()
+
+		var_global.OPERATION_LOGGER.info(f'Last timestamp: {var_global.LAST_RECONCILE_TIMESTAMP}\nLast SHA: {var_global.LAST_RECONCILE_SHA}')
+		var_global.OPERATION_LOGGER.info(
+			f'scope={'ALL' if scope is None else len(scope)} '
+			f'repo={None if repo_titles is None else len(repo_titles)} '
+			f'wiki={None if wiki_titles is None else len(wiki_titles)} '
+			f'undecided={len(var_global.TRACKED_UNDECIDED)} '
+			f'blocked={len(var_global.TRACKED_BLOCKED)} '
+		)
 
 		local_by_title, file_by_title = collect_local_pages(scope)
 		changed, missing = await diff_against_wiki(local_by_title)

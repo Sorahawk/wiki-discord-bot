@@ -100,7 +100,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False, no_l
 	if not isinstance(response, dict):
 		snippet = re.search(r'<title>(.*?)</title>', response)
 		summary = snippet.group(1) if snippet else response[:200]
-		raise Exception(f'Wiki API returned a non-JSON response:\n\n{summary}')
+		raise Exception(f"Wiki API returned a non-JSON response:\n\n{summary}")
 
 	# retry wiki request once if error
 	if response.get('error', {}) and not retry:

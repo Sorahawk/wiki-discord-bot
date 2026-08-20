@@ -257,5 +257,5 @@ async def report_sync(pushed, pulled, created, undecided, blocked, resolved, cha
 			lines = '\n'.join(f'\n- `{title.replace(' ', '_')}` - {detail}' for title, detail in entries)
 			sections.append(f'**{label}:**\n{lines}')
 
-	await send_audit_message(channel or var_global.CHANNELS['main'], '## Wiki Sync Report\n\n', '\n\n'.join(sections))
+	await send_audit_message(channel or var_global.CHANNELS['main'], '## Wiki Sync Report\n\n\n', '\n\n'.join(sections))
 	return True

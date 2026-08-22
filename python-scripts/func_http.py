@@ -171,6 +171,74 @@ async def check_wiki_session():
 		await refresh_tokens()
 
 
+# returns the wiki server's current timestamp (format: 2026-08-22T07:25:22Z)
+async def get_wiki_timestamp():
+	response = await wiki_request({
+		'action': 'query',
+		'meta': 'siteinfo',
+		'siprop': 'general',
+	}, no_log=True)
+	return response['query']['general']['time']
+
+
+# API call to list all page titles in a namespace, optionally filtered by title prefix
+async def list_pages(namespace, prefix=None):
+	payload = {
+		'action': 'query',
+		'list': 'allpages',
+		'apnamespace': namespace,
+		'aplimit': 'max',
+	}
+	if prefix:
+		payload['apprefix'] = prefix.split(':', 1)[-1] if ':' in prefix and namespace != 0 else prefix
+
+	titles = []
+	cont = None
+
+	while True:
+		if cont:
+			payload['apcontinue'] = cont
+
+		response = await wiki_request(payload)
+		for page in response['query']['allpages']:
+			titles.append(page['title'])
+
+		cont = response.get('continue', {}).get('apcontinue')
+		if not cont:
+			break
+
+	return titles
+
+
+# API call to list all page titles belonging to a category, optionally filtered by namespace
+async def list_category_members(category, namespace=None):
+	payload = {
+		'action': 'query',
+		'list': 'categorymembers',
+		'cmtitle': f'Category:{category}',
+		'cmlimit': 'max',
+	}
+	if namespace:
+		payload['cmnamespace'] = namespace
+
+	titles = []
+	cont = None
+
+	while True:
+		if cont:
+			payload['cmcontinue'] = cont
+
+		response = await wiki_request(payload)
+		for page in response['query']['categorymembers']:
+			titles.append(page['title'])
+
+		cont = response.get('continue', {}).get('cmcontinue')
+		if not cont:
+			break
+
+	return titles
+
+
 # API call to fetch content and content model for one or more titles
 # accepts a single title string or a list of titles
 # returns a dict keyed by page title, with corresponding value (content, content_model), or (None, None) for missing pages
@@ -301,64 +369,6 @@ async def revert_image(title, member_name):
 
 	# delete the now-redundant duplicate version
 	return await delete_page(file_title, f"Deleted duplicate version via Discord by {member_name}", to_revert)
-
-
-# API call to list all page titles in a namespace, optionally filtered by title prefix
-async def list_pages(namespace, prefix=None):
-	payload = {
-		'action': 'query',
-		'list': 'allpages',
-		'apnamespace': namespace,
-		'aplimit': 'max',
-	}
-	if prefix:
-		payload['apprefix'] = prefix.split(':', 1)[-1] if ':' in prefix and namespace != 0 else prefix
-
-	titles = []
-	cont = None
-
-	while True:
-		if cont:
-			payload['apcontinue'] = cont
-
-		response = await wiki_request(payload)
-		for page in response['query']['allpages']:
-			titles.append(page['title'])
-
-		cont = response.get('continue', {}).get('apcontinue')
-		if not cont:
-			break
-
-	return titles
-
-
-# API call to list all page titles belonging to a category, optionally filtered by namespace
-async def list_category_members(category, namespace=None):
-	payload = {
-		'action': 'query',
-		'list': 'categorymembers',
-		'cmtitle': f'Category:{category}',
-		'cmlimit': 'max',
-	}
-	if namespace:
-		payload['cmnamespace'] = namespace
-
-	titles = []
-	cont = None
-
-	while True:
-		if cont:
-			payload['cmcontinue'] = cont
-
-		response = await wiki_request(payload)
-		for page in response['query']['categorymembers']:
-			titles.append(page['title'])
-
-		cont = response.get('continue', {}).get('cmcontinue')
-		if not cont:
-			break
-
-	return titles
 
 
 # API call to check a page's current protection levels

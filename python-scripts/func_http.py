@@ -2,22 +2,22 @@ from imports import *
 
 
 # standard function for HTTP requests
-async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False, no_log=False):
+async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False):
 	session = var_global.SESSION
 
 	if not payload:  # handle empty payload
 		payload = {}
 
-	# censor sensitive items in payload from being logged
+	# omit items in payload from logs
 	logged_payload = payload.copy()
 
 	if 'lgpassword' in logged_payload:
-		logged_payload['lgpassword'] = 'CENSORED'
+		logged_payload['lgpassword'] = '(CENSORED)'
 
 	if 'titles' in logged_payload:
 		titles = logged_payload['titles'].split('|')
 		if (num_titles := len(titles)) > 30:
-			logged_payload['titles'] = f'TRUNCATED: {num_titles} page titles'
+			logged_payload['titles'] = f'(TRUNCATED) {num_titles} page titles'
 
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {logged_payload}")
 
@@ -35,15 +35,17 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	else:
 		response = raw_response.text
 
-	if no_log:
-		var_global.OPERATION_LOGGER.info('Response is suppressed due to no_log=True')
-	else:
-		# omit harmless warning about wiki bot param
-		if isinstance(response, dict) and response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
-			del response['warnings']
+	# omit harmless warning about wiki bot param
+	if isinstance(response, dict) and response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
+		del response['warnings']
 
-		var_global.OPERATION_LOGGER.info(response)
+	LOGGED_RESPONSE_MAX_LEN = 500
+	logged_response = str(response.copy())
 
+	if len(logged_response) > LOGGED_RESPONSE_MAX_LEN:
+		logged_response = f'(TRUNCATED) {logged_response[:LOGGED_RESPONSE_MAX_LEN]}...'
+
+	var_global.OPERATION_LOGGER.info(logged_response)
 	return response
 
 
@@ -91,7 +93,7 @@ async def abandon_mission_safely(mission):
 # wiki functions
 
 # wiki request wrapper
-async def wiki_request(payload, method='GET', token_type=None, retry=False, no_log=False):
+async def wiki_request(payload, method='GET', token_type=None, retry=False):
 	payload['bot'] = 1  # mark as bot edit
 	payload['format'] = 'json'  # set output as json
 	payload['formatversion'] = 2  # set output format to recommended version
@@ -100,7 +102,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False, no_l
 	if token_type:
 		payload['token'] = var_secret.WIKI_TOKENS[token_type]
 
-	response = await http_request(WIKI_BASE_URL, payload, method, no_log=no_log)
+	response = await http_request(WIKI_BASE_URL, payload, method)
 
 	# verify the response type is a dict
 	if not isinstance(response, dict):
@@ -111,7 +113,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False, no_l
 	# retry wiki request once if error
 	if response.get('error', {}) and not retry:
 		await check_wiki_session()
-		response = await wiki_request(payload, method, token_type, retry=True, no_log=no_log)
+		response = await wiki_request(payload, method, token_type, retry=True)
 
 	return response
 
@@ -146,7 +148,7 @@ async def wiki_login(retry=False):
 			'lgname': var_secret.WIKI_CREDS[0],
 			'lgpassword': var_secret.WIKI_CREDS[1],
 			'lgtoken': login_token,
-		}, 'POST', no_log=True)
+		}, 'POST')
 
 		data = response['login']
 
@@ -193,7 +195,7 @@ async def get_wiki_timestamp():
 		'action': 'query',
 		'meta': 'siteinfo',
 		'siprop': 'general',
-	}, no_log=True)
+	})
 	return response['query']['general']['time']
 
 
@@ -271,7 +273,7 @@ async def get_page_content(titles):
 			'prop': 'revisions',
 			'rvslots': 'main',
 			'rvprop': 'content|contentmodel',
-		}, 'POST', no_log=True)  # use POST instead of GET in case the concatenated titles blow past the size limit for GET requests
+		}, 'POST')  # use POST instead of GET in case the concatenated titles blow past the size limit for GET requests
 
 		for page in response['query']['pages']:
 			if page.get('missing'):

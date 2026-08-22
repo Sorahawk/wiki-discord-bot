@@ -5,13 +5,23 @@ class CommandsCog(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
+	# waits for any in-progress repo sync to complete
+	async def wait_for_repo_sync(self, context):
+		if var_global.REPO_LOCK.locked():
+			await context.send(BOT_VOICELINES['waiting'])
+
+		async with var_global.REPO_LOCK:
+			pass
+
 
 	# prefix commands
 
 	# pull latest code from GitHub and restart itself
 	@commands.command(name='update')
 	async def update_code(self, context):
+		await self.wait_for_repo_sync(context)
 		await context.send(BOT_VOICELINES['updating'])
+
 		subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
 		subprocess.run(['sudo', 'systemctl', 'restart', LINUX_SERVICE_NAME])
 
@@ -21,7 +31,22 @@ class CommandsCog(commands.Cog):
 	@commands.command(name='sleep')
 	async def sleep(self, context):
 		var_global.SLEEP_MODE = not var_global.SLEEP_MODE
+		if var_global.SLEEP_MODE:  # walrus operator cannot be used for module attribute
+			await self.wait_for_repo_sync(context)
+
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
+
+
+	# push page content from repo to wiki
+	@commands.command(name='push')
+	async def push(self, context):
+		await push_to_wiki(context)
+
+
+	# pull page content from wiki to repo
+	@commands.command(name='pull')
+	async def pull(self, context):
+		await pull_from_wiki(context)
 
 
 	# slash commands

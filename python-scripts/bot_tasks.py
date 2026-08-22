@@ -44,16 +44,6 @@ class TasksCog(commands.Cog):
 			await send_traceback(e)
 
 
-	# regular sync of repo by pulling content from wiki
-	@loop(hours=1)
-	async def task_sync_wiki_to_repo(self):
-		try:
-			await pull_from_wiki()
-
-		except Exception as e:
-			await send_traceback(e)
-
-
 
 async def setup(bot):
 	await bot.add_cog(TasksCog(bot))

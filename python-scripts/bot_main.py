@@ -32,6 +32,7 @@ async def on_ready():
 
 		# init async locks
 		var_global.WIKI_LOCK = asyncio.Lock()
+		var_global.REPO_LOCK = asyncio.Lock()
 
 		# sync command tree
 		await bot.load_extension('bot_commands')

@@ -11,11 +11,8 @@ LINUX_SERVICE_NAME = 'wiki-bot.service'
 # cannot use os.getcwd() because systemd service runs the script from root directory
 LINUX_ABSOLUTE_PATH = '/home/ubuntu/wiki-bot/python-scripts'
 
-# absolute path to the wiki repo checkout on the Linux VM
-WIKI_REPO_PATH = '/home/ubuntu/wiki-content'
-
-# folder within the wiki repo containing all page files
-PAGES_ROOT = 'Pages'
+# absolute path to the wiki repo folder on the Linux VM containing all page files
+REPO_PAGES_PATH = '/home/ubuntu/wiki-content/Pages'
 
 # logger name
 LOGGER_NAME = 'Wiki Bot Operations Log'
@@ -39,12 +36,44 @@ MENTAT_BASE_URL = 'https://mentat.wiki'
 # standard headers for HTTP requests
 STANDARD_HEADERS = { 'User-Agent': f'Ixian Thinking Machine/{BOT_USERNAME}' }
 
-# async lock object to prevent race condition over the session
+# async lock object to prevent race condition over authenticated wiki session
 WIKI_LOCK = None
+
+# async lock object to prevent race condition over repo state
+REPO_LOCK = None
 
 # max number of entries returned per wiki query request
 # bot accounts can go up to 500 with apihighlimits; normal accounts capped at 50
 MAX_QUERY_TITLES = 500
+
+
+
+### SYNC ###
+
+# wiki timestamp of the latest successful pull
+LATEST_TIMESTAMP = None
+
+# repo HEAD at the end of the latest successful push
+LATEST_SHA = None
+
+# marker appended to every wiki edit summary
+PUSH_MARKER = 'Push from Git'
+
+# subject line for every repo commit
+PULL_MARKER = 'Pull from Wiki'
+
+# reason recorded when the pipeline protects a MessageBundle
+MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'
+
+# content model to assign when creating a page, inferred from the file extension
+# css and javascript are lowercase, whereas Scribunto is capitalised
+CONTENT_MODELS = {
+	'.css': 'css',
+	'.js': 'javascript',
+	'.json': 'translate-messagebundle',
+	'.lua': 'Scribunto',
+	'.txt': 'wikitext',
+}
 
 
 

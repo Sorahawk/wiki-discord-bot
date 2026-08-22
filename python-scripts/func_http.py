@@ -131,7 +131,7 @@ async def refresh_tokens():
 
 
 # login to wiki
-async def wiki_login():
+async def wiki_login(retry=False):
 	async with var_global.WIKI_LOCK:
 		login_token = await get_wiki_token('login')
 
@@ -146,9 +146,19 @@ async def wiki_login():
 
 		if data['result'] == 'Success':
 			var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}")
-			await refresh_tokens()
-		else:
-			raise Exception(f"Wiki login failed: {data['result']} - {data.get('reason', 'No reason specified')}")
+			return await refresh_tokens()
+
+	# resolve errors outside the lock
+	reason = str(data.get('reason', 'No reason specified'))
+	audit_message = f"Wiki login failed: {data['result']} - {reason}"
+	var_global.OPERATION_LOGGER.warning(audit_message)
+
+	if 'BotPasswordSessionProvider' in reason:  # Cannot log in when using MediaWiki\Session\BotPasswordSessionProvider sessions.
+		await refresh_tokens()
+	elif reason == 'Unable to continue login. Your session most likely timed out.' and not retry:
+		await wiki_login(retry=True)
+	else:
+		raise Exception(audit_message)
 
 
 # check if login session is still valid

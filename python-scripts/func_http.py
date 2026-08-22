@@ -4,6 +4,7 @@ from imports import *
 # standard function for HTTP requests
 async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False):
 	session = var_global.SESSION
+	LOGGED_DATA_MAX_LEN = 500
 
 	if not payload:  # handle empty payload
 		payload = {}
@@ -18,6 +19,10 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 		titles = logged_payload['titles'].split('|')
 		if (num_titles := len(titles)) > 30:
 			logged_payload['titles'] = f'(TRUNCATED) {num_titles} page titles'
+
+	logged_payload = str(logged_payload)
+	if len(logged_payload) > LOGGED_DATA_MAX_LEN:
+		logged_payload = f'(TRUNCATED) {logged_payload[:LOGGED_DATA_MAX_LEN]}...'
 
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {logged_payload}")
 
@@ -39,11 +44,9 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	if isinstance(response, dict) and response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
 		del response['warnings']
 
-	LOGGED_RESPONSE_MAX_LEN = 500
 	logged_response = str(response.copy())
-
-	if len(logged_response) > LOGGED_RESPONSE_MAX_LEN:
-		logged_response = f'(TRUNCATED) {logged_response[:LOGGED_RESPONSE_MAX_LEN]}...'
+	if len(logged_response) > LOGGED_DATA_MAX_LEN:
+		logged_response = f'(TRUNCATED) {logged_response[:LOGGED_DATA_MAX_LEN]}...'
 
 	var_global.OPERATION_LOGGER.info(logged_response)
 	return response

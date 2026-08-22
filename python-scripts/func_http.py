@@ -401,3 +401,34 @@ async def protect_page(title, edit_level='sysop', move_level='sysop', expiry='in
 		'expiry': f'{expiry}|{expiry}',
 		'reason': reason,
 	}, 'POST', 'csrf')
+
+
+# fetches titles edited or created on the wiki since the given timestamp
+# the pipeline's own pushes are excluded, else they read as fresh wiki-side signals next cycle
+async def get_recent_changes(since_timestamp):
+	cont = {}
+	titles = set()
+
+	while True:
+		response = await wiki_request({
+			'action': 'query',
+			'list': 'recentchanges',
+			'rcstart': since_timestamp,
+			'rcdir': 'newer',
+			'rctype': 'edit|new',
+			'rcprop': 'title|user|comment',
+			'rclimit': 'max',
+			**cont
+		})
+
+		for change in response['query']['recentchanges']:
+			if change['user'] == BOT_USERNAME and PUSH_MARKER in change.get('comment', ''):
+				continue
+
+			titles.add(change['title'])
+
+		# check if there are more changes to retrieve
+		if not (cont := response.get('continue', {})):
+			break
+
+	return titles

@@ -21,17 +21,26 @@ def init_logger():
 
 # obtains full traceback of given exception and outputs to specified channel
 async def send_traceback(e, channel=None):
-	max_len_wo_backticks = 1994
-
 	full_trace = ''.join(format_exception(type(e), e, e.__traceback__))
 	var_global.OPERATION_LOGGER.error(full_trace)
 
-	channel = channel or var_global.CHANNELS.get('main')
-	if not channel:
-		return
+	channel = channel or var_global.CHANNELS['main']
+	header = f'```{type(e).__name__}```'
+	body = f'```{full_trace}```'
 
-	if len(full_trace) <= max_len_wo_backticks:
-		await channel.send(f'```{full_trace}```')
+	await send_audit_message(channel, header, body)
+
+
+# sends an audit message, offloading to a text file if it exceeds Discord's char limit
+async def send_audit_message(channel, header, body, files=None):
+	if files is None:
+		files = []
+
+	full_message = header + body
+
+	if len(full_message) <= 2000:
+		await channel.send(full_message, files=files, allowed_mentions=discord.AllowedMentions.none())
 	else:
-		error_truncated = str(e)[:max_len_wo_backticks] or type(e).__name__
-		await channel.send(f'```{error_truncated}```', file=generate_file(full_trace, 'traceback.txt'))
+		await channel.send(header, file=generate_file(full_message, 'audit_message.txt'), allowed_mentions=discord.AllowedMentions.none())
+		if files:
+			await channel.send(files=files)

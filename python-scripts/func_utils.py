@@ -35,19 +35,3 @@ async def fetch_attachments_as_files(attachments):
 			files.append(discord.File(io.BytesIO(response.content), filename=attachment.filename))
 
 	return files
-
-
-# sends an audit message, offloading to a text file if it exceeds Discord's char limit
-async def send_audit_message(channel, header, body, files=None):
-	if files is None:
-		files = []
-
-	full_message = header + body
-
-	if len(full_message) <= 2000:
-		await channel.send(full_message, files=files, allowed_mentions=discord.AllowedMentions.none())
-	else:
-		await channel.send(header, file=generate_file(full_message, 'audit_message.txt'), allowed_mentions=discord.AllowedMentions.none())
-
-		if files:
-			await channel.send(files=files)

@@ -8,12 +8,6 @@ BOT_USERNAME = 'Sorabot'
 # cannot use os.getcwd() because systemd service runs the script from root directory
 LINUX_ABSOLUTE_PATH = '/home/ubuntu/wiki-bot/python-scripts'
 
-# absolute path to the wiki repo checkout on the Linux VM
-WIKI_REPO_PATH = '/home/ubuntu/wiki-content'
-
-# folder within the wiki repo containing all page files
-PAGES_ROOT = 'Pages'
-
 # name of the bot service running on the Linux VM
 LINUX_SERVICE_NAME = 'wiki-bot.service'
 
@@ -42,40 +36,9 @@ STANDARD_HEADERS = { 'User-Agent': f'Ixian Thinking Machine/{BOT_USERNAME}' }
 # async lock object to prevent race condition over the session
 WIKI_LOCK = None
 
-# async lock object to prevent race condition over repo state
-REPO_LOCK = None
-
 # max number of entries returned per wiki query request
 # bot accounts can go up to 500 with apihighlimits; normal accounts capped at 50
-MAX_QUERY_TITLES = 100  # reduced to avoid potential issues with sending too many page titles in the request; encountered at 170
-
-
-
-### SYNC ###
-
-# wiki timestamp of the latest successful reconcile
-LAST_RECONCILE_TIMESTAMP = None
-
-# repo HEAD at the end of the latest successful reconcile
-LAST_RECONCILE_SHA = None
-
-# titles differing on both sides with no clear direction, held until manually resolved
-TRACKED_UNDECIDED = set()
-
-# titles the pipeline refused or failed to write, mapped to the reason, held until the problem is fixed
-TRACKED_BLOCKED = {}
-
-# marker appended to every sync edit summary to differentiate from all other edits
-PUSH_MARKER = 'Push from Git'
-
-# subject line for every commit written by the pipeline
-PULL_MARKER = 'Pull from Wiki'
-
-# marker that indicates an unresolved merge conflict in a repo file
-MERGE_CONFLICT_MARKER = '<<<<<<< '
-
-# reason recorded when the pipeline protects a MessageBundle
-MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'
+MAX_QUERY_TITLES = 500
 
 
 
@@ -191,13 +154,3 @@ FEED_BLACKLIST = [
 	':wastebasket:',			# page deleted
 	':lock:',					# page protection changed
 ]
-
-# content model to assign when creating a page, inferred from the file extension
-# css and javascript are lowercase, whereas Scribunto is capitalised
-CONTENT_MODELS = {
-	'.css': 'css',
-	'.js': 'javascript',
-	'.json': 'translate-messagebundle',
-	'.lua': 'Scribunto',
-	'.txt': 'wikitext',
-}

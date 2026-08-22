@@ -100,7 +100,7 @@ async def wiki_request(payload, method='GET', token_type=None, retry=False, no_l
 	if not isinstance(response, dict):
 		snippet = re.search(r'<title>(.*?)</title>', response)
 		summary = snippet.group(1) if snippet else response[:200]
-		raise Exception(f"Wiki API returned a non-JSON response:\n\n{summary}")
+		raise Exception(f"Wiki API returned a non-JSON response:\n{summary}")
 
 	# retry wiki request once if error
 	if response.get('error', {}) and not retry:
@@ -161,7 +161,7 @@ async def check_wiki_session():
 	user = response['query']['userinfo']
 
 	# if session is expired, MediaWiki returns an anonymous user
-	if user.get('anon'):
+	if user.get('anon') is not None:
 		var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login')
 		await wiki_login()
 
@@ -381,44 +381,3 @@ async def protect_page(title, edit_level='sysop', move_level='sysop', expiry='in
 		'expiry': f'{expiry}|{expiry}',
 		'reason': reason,
 	}, 'POST', 'csrf')
-
-
-# returns the wiki server's current timestamp, used to anchor the reconcile timestamp
-async def get_wiki_timestamp():
-	response = await wiki_request({
-		'action': 'query',
-		'meta': 'siteinfo',
-		'siprop': 'general',
-	}, no_log=True)
-	return response['query']['general']['time']
-
-
-# fetches titles edited or created on the wiki since the given timestamp
-# the pipeline's own pushes are excluded, else they read as fresh wiki-side signals next cycle
-async def get_recent_changes(since_timestamp):
-	cont = {}
-	titles = set()
-
-	while True:
-		response = await wiki_request({
-			'action': 'query',
-			'list': 'recentchanges',
-			'rcstart': since_timestamp,
-			'rcdir': 'newer',
-			'rctype': 'edit|new',
-			'rcprop': 'title|user|comment',
-			'rclimit': 'max',
-			**cont
-		})
-
-		for change in response['query']['recentchanges']:
-			if change['user'] == BOT_USERNAME and PUSH_MARKER in change.get('comment', ''):
-				continue
-
-			titles.add(change['title'])
-
-		# check if there are more changes to retrieve
-		if not (cont := response.get('continue', {})):
-			break
-
-	return titles

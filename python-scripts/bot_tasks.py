@@ -44,23 +44,6 @@ class TasksCog(commands.Cog):
 			await send_traceback(e)
 
 
-	# reconciles the wiki repo against the wiki in both directions
-	@loop(minutes=1)
-	async def task_sync_wiki(self):
-		if sys.platform != 'linux' or var_global.SLEEP_MODE:
-			return
-
-		if var_global.REPO_LOCK.locked():
-			var_global.OPERATION_LOGGER.warning('Sync cycle still running, skipping this tick')
-			return
-
-		try:
-			await run_sync()
-
-		except Exception as e:
-			await send_traceback(e)
-
-
 
 async def setup(bot):
 	await bot.add_cog(TasksCog(bot))

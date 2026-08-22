@@ -8,68 +8,20 @@ class CommandsCog(commands.Cog):
 
 	# prefix commands
 
-	# waits for any in-progress repo sync to complete
-	async def wait_for_repo_sync(self, context):
-		if var_global.REPO_LOCK.locked():
-			await context.send(BOT_VOICELINES['waiting'])
-
-		async with asyncio.timeout(60):
-			async with var_global.REPO_LOCK:
-				pass
-
-
 	# pull latest code from GitHub and restart itself
 	@commands.command(name='update')
 	async def update_code(self, context):
-		await self.wait_for_repo_sync(context)
 		await context.send(BOT_VOICELINES['updating'])
-
 		subprocess.run(f"cd {LINUX_ABSOLUTE_PATH} && git reset --hard HEAD && git pull", shell=True)
 		subprocess.run(['sudo', 'systemctl', 'restart', LINUX_SERVICE_NAME])
 
 
-	# toggle sleep mode which disables slash commands as well as message and reaction handlers
-	# it also disables the automatic wiki-repo syncing functionality
+	# toggle sleep mode which disables slash commands and active monitoring, like message handlers
 	# the goal is to avoid shutting down the remote instance during local testing which defeats the purpose of the update prefix command
 	@commands.command(name='sleep')
 	async def sleep(self, context):
 		var_global.SLEEP_MODE = not var_global.SLEEP_MODE
-
-		if var_global.SLEEP_MODE:
-			try:
-				await self.wait_for_repo_sync(context)
-			except Exception as e:
-				await send_traceback(e)
-
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
-
-
-	# manually trigger a full reconcile between the wiki repo and the wiki
-	@commands.command(name='sync')
-	async def sync_wiki(self, context):
-		reported = await run_sync(full_scan=True)
-		if reported is False:  # specifically check for False which indicates no report was sent
-			await context.send(BOT_VOICELINES['nothing'])
-
-
-	# common function for push and pull commands
-	async def resolve_push_pull(self, context, push_to_wiki):
-		resolved, blocked = await resolve_conflicts(push_to_wiki)
-
-		if not await report_sync([], [], [], [], blocked, resolved, context.channel):
-			await context.send(BOT_VOICELINES['nothing'])
-
-
-	# resolve tracked conflicts from repo to wiki
-	@commands.command(name='push')
-	async def push_to_wiki(self, context):
-		await self.resolve_push_pull(context, True)
-
-
-	# resolve tracked conflicts from wiki to repo
-	@commands.command(name='pull')
-	async def pull_from_wiki(self, context):
-		await self.resolve_push_pull(context, False)
 
 
 	# slash commands

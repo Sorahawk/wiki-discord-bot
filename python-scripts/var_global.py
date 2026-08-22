@@ -4,12 +4,18 @@ BOT_USERNAME = 'Sorabot'
 
 ### LINUX ###
 
+# name of the bot service running on the Linux VM
+LINUX_SERVICE_NAME = 'wiki-bot.service'
+
 # absolute path to the project folder on the Linux VM
 # cannot use os.getcwd() because systemd service runs the script from root directory
 LINUX_ABSOLUTE_PATH = '/home/ubuntu/wiki-bot/python-scripts'
 
-# name of the bot service running on the Linux VM
-LINUX_SERVICE_NAME = 'wiki-bot.service'
+# absolute path to the wiki repo checkout on the Linux VM
+WIKI_REPO_PATH = '/home/ubuntu/wiki-content'
+
+# folder within the wiki repo containing all page files
+PAGES_ROOT = 'Pages'
 
 # logger name
 LOGGER_NAME = 'Wiki Bot Operations Log'

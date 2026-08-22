@@ -21,7 +21,7 @@ class TasksCog(commands.Cog):
 				method.cancel()
 
 
-	# automatically rotate bot's Discord status
+	# rotate bot's Discord status
 	@loop(minutes=5)
 	async def task_rotate_status(self):
 		activity, activity_type = random.choice(list(BOT_ACTIVITY_STATUSES.items()))
@@ -34,11 +34,21 @@ class TasksCog(commands.Cog):
 		await self.bot.change_presence(activity=activity_status)
 
 
-	# automatically refresh wiki tokens
+	# refresh wiki tokens
 	@loop(minutes=10)
 	async def task_refresh_wiki_session(self):
 		try:
 			await check_wiki_session()
+
+		except Exception as e:
+			await send_traceback(e)
+
+
+	# regular sync of repo by pulling content from wiki
+	@loop(hours=1)
+	async def task_sync_wiki_to_repo(self):
+		try:
+			await pull_from_wiki()
 
 		except Exception as e:
 			await send_traceback(e)

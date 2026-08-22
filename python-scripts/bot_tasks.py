@@ -9,6 +9,8 @@ class TasksCog(commands.Cog):
 	# load and unload all defined tasks dynamically
 
 	async def cog_load(self):
+		await check_wiki_session()
+
 		for name in dir(self):
 			method = getattr(self, name)
 			if hasattr(method, '_loop'):

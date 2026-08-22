@@ -42,7 +42,7 @@ async def get_changed_paths(base_sha):
 	except RuntimeError:  # base_sha unreachable from HEAD, e.g. due to force-push, re-clone
 		return None
 
-	output = await git_run('diff', '--name-only', base_sha, 'HEAD', '--', '.')
+	output = await git_run('diff', '--name-only', '--relative', base_sha, 'HEAD')
 	return output.splitlines()
 
 

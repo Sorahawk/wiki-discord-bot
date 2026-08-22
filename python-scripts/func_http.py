@@ -127,7 +127,7 @@ async def get_wiki_token(token_type='csrf'):
 		'action': 'query',
 		'meta': 'tokens',
 		'type': token_type
-	})
+	}, retry=True)
 
 	tokens = response['query']['tokens']
 	return tokens if len(tokens) != 1 else tokens[f'{token_type}token']
@@ -143,30 +143,28 @@ async def refresh_tokens():
 
 # login to wiki
 async def wiki_login(retry=False):
-	async with var_global.WIKI_LOCK:
-		login_token = await get_wiki_token('login')
+	login_token = await get_wiki_token('login')
 
-		response = await wiki_request({
-			'action': 'login',
-			'lgname': var_secret.WIKI_CREDS[0],
-			'lgpassword': var_secret.WIKI_CREDS[1],
-			'lgtoken': login_token,
-		}, 'POST')
+	response = await wiki_request({
+		'action': 'login',
+		'lgname': var_secret.WIKI_CREDS[0],
+		'lgpassword': var_secret.WIKI_CREDS[1],
+		'lgtoken': login_token,
+	}, 'POST', retry=True)
 
-		data = response['login']
+	data = response['login']
 
-		if data['result'] == 'Success':
-			var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}")
-			return await refresh_tokens()
+	if data['result'] == 'Success':
+		var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}")
+		return await refresh_tokens()
 
 	# resolve errors outside the lock
 	reason = str(data.get('reason', 'No reason specified'))
+
 	audit_message = f"Wiki login failed: {data['result']} - {reason}"
 	var_global.OPERATION_LOGGER.warning(audit_message)
 
-	if 'BotPasswordSessionProvider' in reason:  # Cannot log in when using MediaWiki\Session\BotPasswordSessionProvider sessions.
-		await refresh_tokens()
-	elif reason == 'Unable to continue login. Your session most likely timed out.' and not retry:
+	if reason == 'Unable to continue login. Your session most likely timed out.' and not retry:
 		await wiki_login(retry=True)
 	else:
 		raise Exception(audit_message)
@@ -174,22 +172,20 @@ async def wiki_login(retry=False):
 
 # check if login session is still valid
 async def check_wiki_session():
-	response = await wiki_request({
-		'action': 'query',
-		'meta': 'userinfo',
-	})
+	async with var_global.WIKI_LOCK:
+		response = await wiki_request({
+			'action': 'query',
+			'meta': 'userinfo',
+		}, retry=True)
+		user = response['query']['userinfo']
 
-	user = response['query']['userinfo']
+		# if session is expired, MediaWiki returns an anonymous user
+		if user.get('anon') is None:
+			var_global.OPERATION_LOGGER.info(f"Wiki session still active as: {user['name']}")
+			return await refresh_tokens()
 
-	# if session is expired, MediaWiki returns an anonymous user
-	if user.get('anon') is not None:
 		var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login')
 		await wiki_login()
-
-	# even if session is still valid, just refresh tokens to be safe
-	else:
-		var_global.OPERATION_LOGGER.info(f"Wiki session still active as: {user['name']}")
-		await refresh_tokens()
 
 
 # returns the wiki server's current timestamp (format: 2026-08-22T07:25:22Z)

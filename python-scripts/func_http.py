@@ -10,8 +10,14 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 
 	# censor sensitive items in payload from being logged
 	logged_payload = payload.copy()
+
 	if 'lgpassword' in logged_payload:
 		logged_payload['lgpassword'] = 'CENSORED'
+
+	if 'titles' in logged_payload:
+		titles = logged_payload['titles'].split('|')
+		if (num_titles := len(titles)) > 30:
+			logged_payload['titles'] = f'TRUNCATED: {num_titles} page titles'
 
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {logged_payload}")
 

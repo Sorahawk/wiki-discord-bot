@@ -29,6 +29,8 @@ from var_secret import *
 
 from func_utils import *
 from func_http import *
+from func_git import *
 
 from bot_logging import *
 from bot_handlers import *
+from bot_sync import *

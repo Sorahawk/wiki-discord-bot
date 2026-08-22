@@ -14,6 +14,14 @@ class CommandsCog(commands.Cog):
 			pass
 
 
+	# common function for push and pull commands
+	async def resolve_push_pull(self, context, push_to_wiki):
+		resolved, blocked = await resolve_conflicts(push_to_wiki)
+
+		if not await report_sync([], [], [], [], blocked, resolved, context.channel):
+			await context.send(BOT_VOICELINES['nothing'])
+
+
 	# prefix commands
 
 	# pull latest code from GitHub and restart itself
@@ -37,16 +45,24 @@ class CommandsCog(commands.Cog):
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
 
 
-	# push page content from repo to wiki
+	# manually trigger a full reconcile between the wiki repo and the wiki
+	@commands.command(name='sync')
+	async def sync_wiki(self, context):
+		reported = await run_sync(full_scan=True)
+		if reported is False:  # specifically check for False which indicates no report was sent
+			await context.send(BOT_VOICELINES['nothing'])
+
+
+	# resolve tracked conflicts from repo to wiki
 	@commands.command(name='push')
-	async def push(self, context):
-		await push_to_wiki(context)
+	async def push_to_wiki(self, context):
+		await self.resolve_push_pull(context, True)
 
 
-	# pull page content from wiki to repo
+	# resolve tracked conflicts from wiki to repo
 	@commands.command(name='pull')
-	async def pull(self, context):
-		await pull_from_wiki(context)
+	async def pull_from_wiki(self, context):
+		await self.resolve_push_pull(context, False)
 
 
 	# slash commands

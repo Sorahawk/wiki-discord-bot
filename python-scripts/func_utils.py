@@ -40,7 +40,7 @@ async def fetch_attachments_as_files(attachments):
 # converts a repo-relative path into its corresponding wiki page title
 # the subfolder name becomes the title prefix, and loose root files get no prefix
 def resolve_title(rel_path):
-	parts = rel_path.parts[1:]
+	parts = rel_path.parts
 	prefix = f'{parts[0]}:' if len(parts) > 1 else ''
 
 	return prefix + filename_to_title(rel_path)

@@ -11,6 +11,10 @@ async def git_run(*args):
 	)
 
 	stdout, stderr = await process.communicate()
+
+	if process.returncode:
+		raise RuntimeError(f"git {' '.join(args)} failed ({process.returncode}): {stderr.decode().strip()}")
+
 	return stdout.decode().strip()
 
 
@@ -31,21 +35,21 @@ async def get_last_commit_subject(rel_path):
 
 
 # returns paths of files that changed between base_sha and HEAD
-async def get_changed_paths(base_sha, subpath):
+async def get_changed_paths(base_sha):
 	try:
 		await git_run('merge-base', '--is-ancestor', base_sha, 'HEAD')
 
 	except RuntimeError:  # base_sha unreachable from HEAD, e.g. due to force-push, re-clone
 		return None
 
-	output = await git_run('diff', '--name-only', base_sha, 'HEAD', '--', subpath)
+	output = await git_run('diff', '--name-only', base_sha, 'HEAD', '--', '.')
 	return output.splitlines()
 
 
-# stages the given subpath, commits if anything changed, and pushes
+# stages the repo, commits if anything changed, and pushes
 # returns True if a commit was made, otherwise False
-async def commit_and_push(subpath, message, branch='main'):
-	await git_run('add', subpath)
+async def commit_and_push(message, branch='main'):
+	await git_run('add', '.')
 
 	if not await git_run('diff', '--cached', '--name-only'):  # file contents are identical to HEAD e.g. intermediate edits reverted
 		return False

@@ -29,9 +29,10 @@ import var_secret
 from var_secret import *
 
 from func_utils import *
+from func_logging import *
 from func_http import *
+
 from func_git import *
 from func_sync import *
 
-from bot_logging import *
 from bot_handlers import *

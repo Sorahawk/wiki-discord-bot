@@ -91,7 +91,7 @@ async def run_sync(full_scan=False):
 		local_by_title, file_by_title = collect_local_pages(scope)
 		changed, missing = await diff_against_wiki(local_by_title)
 
-		pushed, pulled, created, undecided, blocked, resolved = [], [], [], [], [], []
+		pushed, pulled, created, undecided, resolved, blocked = [], [], [], [], [], []
 
 		# a missing page has nothing to conflict with, so it is always created
 		for title in missing:
@@ -163,7 +163,7 @@ async def run_sync(full_scan=False):
 		var_global.LATEST_SHA = head_sha
 		var_global.LATEST_TIMESTAMP = timestamp
 
-		return await report_sync(pushed, pulled, created, undecided, blocked, resolved)
+		return await report_sync(pushed, pulled, created, undecided, resolved, blocked)
 
 
 # resolves conflicted pages in the specified direction
@@ -227,8 +227,8 @@ async def resolve_conflicts(push_to_wiki):
 
 
 # reports sync activity to Discord, staying silent when there was nothing to do
-async def report_sync(pushed, pulled, created, undecided, blocked, resolved, channel=None):
-	if not (pushed or pulled or created or undecided or blocked or resolved):
+async def report_sync(pushed, pulled, created, undecided, resolved, blocked, channel=None):
+	if not (pushed or pulled or created or undecided or resolved or blocked):
 		return False
 
 	var_global.OPERATION_LOGGER.info(''.join([
@@ -252,7 +252,7 @@ async def report_sync(pushed, pulled, created, undecided, blocked, resolved, cha
 		if titles:
 			sections.append(f'### {label}:\n' + ''.join(f'\n- `{title}`' for title in titles))
 
-	for label, entries in (('Blocked', blocked), ('Conflicts Resolved', resolved)):
+	for label, entries in (('Conflicts Resolved', resolved), ('Blocked', blocked)):
 		if entries:
 			lines = ''.join(f'\n- `{title.replace(' ', '_')}` - {detail}' for title, detail in entries)
 			sections.append(f'### {label}:\n{lines}')

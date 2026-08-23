@@ -16,9 +16,12 @@ class CommandsCog(commands.Cog):
 
 	# common function for push and pull commands
 	async def resolve_push_pull(self, context, push_to_wiki):
-		resolved, blocked = await resolve_conflicts(push_to_wiki)
+		reported = await run_sync(full_scan=True)
 
-		if not await report_sync([], [], [], [], blocked, resolved, context.channel):
+		resolved, blocked = await resolve_conflicts(push_to_wiki)
+		reported_resolved = await report_sync([], [], [], [], resolved, blocked, context.channel)
+
+		if not (reported or reported_resolved):
 			await context.send(BOT_VOICELINES['nothing'])
 
 
@@ -43,14 +46,6 @@ class CommandsCog(commands.Cog):
 			await self.wait_for_repo_sync(context)
 
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
-
-
-	# manually trigger a full reconcile between the wiki repo and the wiki
-	@commands.command(name='sync')
-	async def sync_wiki(self, context):
-		reported = await run_sync(full_scan=True)
-		if reported is False:  # specifically check for False which indicates no report was sent
-			await context.send(BOT_VOICELINES['nothing'])
 
 
 	# resolve tracked conflicts from repo to wiki

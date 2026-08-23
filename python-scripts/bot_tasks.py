@@ -47,7 +47,7 @@ class TasksCog(commands.Cog):
 
 
 	# reconciles the wiki repo against the wiki in both directions
-	@loop(seconds=30)
+	@loop(seconds=SYNC_INTERVAL_SECONDS)
 	async def task_sync_wiki(self):
 		if sys.platform != 'linux' or var_global.SLEEP_MODE:
 			return
@@ -57,6 +57,12 @@ class TasksCog(commands.Cog):
 			return
 
 		try:
+			# skip the cycle if neither side has reported activity since the previous one
+			if var_global.LATEST_SHA and var_global.LATEST_TIMESTAMP and not var_global.WIKI_CHANGED_FLAG:
+				if await get_remote_head_sha() == var_global.LATEST_SHA:
+					return
+
+			var_global.WIKI_CHANGED_FLAG = False
 			await run_sync()
 
 		except Exception as e:

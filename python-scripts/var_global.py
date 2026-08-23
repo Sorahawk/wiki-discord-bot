@@ -50,6 +50,12 @@ MAX_QUERY_TITLES = 500
 
 ### SYNC ###
 
+# interval (seconds) between periodic runs of sync task
+SYNC_INTERVAL_SECONDS = 30
+
+# boolean flag used to denote wiki state as changed; flipped when Mentat messages are detected in feed channel
+WIKI_CHANGED_FLAG = False
+
 # wiki timestamp of the latest successful pull
 LATEST_TIMESTAMP = None
 

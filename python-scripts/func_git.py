@@ -23,10 +23,16 @@ async def get_head_sha():
 	return await git_run('rev-parse', 'HEAD')
 
 
+# returns the SHA origin/main currently points to, without fetching any objects
+async def get_remote_head_sha():
+	output = await git_run('ls-remote', 'origin', 'main')
+	return output.split()[0] if output else None
+
+
 # discards any local changes and hard-resets the repo to the remote branch
-async def reset_to_remote(branch='main'):
-	await git_run('fetch', 'origin', branch)
-	await git_run('reset', '--hard', f'origin/{branch}')
+async def reset_to_remote():
+	await git_run('fetch', 'origin', 'main')
+	await git_run('reset', '--hard', f'origin/main')
 
 
 # returns the subject line of the most recent commit touching the given path
@@ -48,12 +54,12 @@ async def get_changed_paths(base_sha):
 
 # stages the repo, commits if anything changed, and pushes
 # returns True if a commit was made, otherwise False
-async def commit_and_push(message, branch='main'):
+async def commit_and_push(message):
 	await git_run('add', '.')
 
 	if not await git_run('diff', '--cached', '--name-only'):  # file contents are identical to HEAD e.g. intermediate edits reverted
 		return False
 
 	await git_run('commit', '-m', message)
-	await git_run('push', 'origin', branch)
+	await git_run('push', 'origin', 'main')
 	return True

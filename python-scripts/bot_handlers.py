@@ -11,7 +11,7 @@ async def message_handler(bot, message):
 
 	# check for any special trigger phrases if bot is not mentioned
 	if response := check_replies(message, BOT_REPLIES_ALWAYS):
-		await message.channel.send(response)
+		return await message.channel.send(response)
 
 
 # handles message edits

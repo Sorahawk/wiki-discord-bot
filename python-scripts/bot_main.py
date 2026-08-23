@@ -81,7 +81,6 @@ async def on_message(message):
 			await var_global.CHANNELS['reroute'].send(output_message)
 		else:
 			await var_global.CHANNELS['reroute'].send(output_header, file=generate_file(output_message, 'output_message.txt'))
-
 		return
 
 	# only remote instance should respond to prefix commands
@@ -95,6 +94,11 @@ async def on_message(message):
 			context = await bot.get_context(message)
 			if context.valid:
 				return await bot.invoke(context)
+
+	# check if message is in feed channel from Mentat
+	if message.channel.id == CHANNEL_IDS['feed'] and message.author.id == MENTAT_BOT_ID:
+		var_global.WIKI_CHANGED_FLAG = True
+		return
 
 	# else check messages for trigger phrases
 	if not var_global.SLEEP_MODE:

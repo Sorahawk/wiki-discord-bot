@@ -73,7 +73,6 @@ async def resolve_sync_scope(full_scan):
 	repo_titles = {resolve_title(Path(path)) for path in changed_paths}
 	wiki_titles = await get_recent_changes(var_global.LATEST_TIMESTAMP)
 
-	var_global.OPERATION_LOGGER.info(f'Changed paths: {changed_paths} -> {repo_titles}')
 	return repo_titles, wiki_titles, timestamp
 
 

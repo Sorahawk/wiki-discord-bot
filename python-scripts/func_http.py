@@ -4,7 +4,7 @@ from imports import *
 # standard function for HTTP requests
 async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False):
 	session = var_global.SESSION
-	LOGGED_DATA_MAX_LEN = 500
+	LOGGED_DATA_MAX_LEN = 200
 
 	if not payload:  # handle empty payload
 		payload = {}

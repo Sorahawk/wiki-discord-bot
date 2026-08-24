@@ -161,7 +161,7 @@ async def wiki_login(retry=False):
 	reason = str(data.get('reason', 'No reason specified'))
 
 	audit_message = f"Wiki login failed: {data['result']} - {reason}"
-	var_global.OPERATION_LOGGER.warning(audit_message)
+	var_global.OPERATION_LOGGER.error(audit_message)
 
 	if reason == 'Unable to continue login. Your session most likely timed out.' and not retry:
 		await wiki_login(retry=True)
@@ -178,7 +178,7 @@ async def check_wiki_session():
 		}, retry=True)
 		user = response['query']['userinfo']
 
-		# if session is expired, MediaWiki returns an anonymous user
+		# if session is valid, anon field is not present
 		if user.get('anon') is None:
 			var_global.OPERATION_LOGGER.info(f"Wiki session still active as: {user['name']}")
 			return await refresh_tokens()

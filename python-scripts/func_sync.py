@@ -43,7 +43,7 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 
 	if response.get('error'):
 		error = response['error']
-		var_global.OPERATION_LOGGER.error(f'Failed to edit {title}: {error}')
+		var_global.OPERATION_LOGGER.warning(f'Failed to edit {title}: {error}')
 		return error.get('info') or error.get('code', 'Unknown error')
 
 	# lock main English source for all MessageBundles

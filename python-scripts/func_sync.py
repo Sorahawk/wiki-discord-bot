@@ -178,6 +178,7 @@ async def resolve_conflicts(push_to_wiki):
 			return [], []
 
 		await reset_to_remote()
+		var_global.REPO_TITLES = list_repo_titles()
 		head_sha = await get_head_sha()
 
 		local_by_title, file_by_title = collect_local_pages(set(titles))

@@ -108,7 +108,7 @@ async def reaction_handler(payload):
 	# delete page action
 	if payload.emoji.name in ACCEPTED_EMOJIS['delete']:
 		# grab page title
-		match = re.search(r'\) created \[([^\]]+)\]', content)
+		match = re.search(feed_regex_pattern('created'), content)
 		if not match:
 			return
 
@@ -123,7 +123,7 @@ async def reaction_handler(payload):
 	# rollback consecutive edits or revert image actions
 	elif payload.emoji.name in ACCEPTED_EMOJIS['rollback']:
 		if 'new version' in content.lower():
-			match = re.search(r'\) uploaded \[([^\]]+)\]', content)
+			match = re.search(feed_regex_pattern('uploaded'), content)
 			if match:
 				title = match.group(1)
 				file_title = f'File:{title}'
@@ -173,7 +173,7 @@ async def reaction_handler(payload):
 					return
 
 		# grab user name and page title
-		match = re.search(r':\[([^\]]+)\].*?\) edited \[([^\]]+)\]', content)
+		match = re.search(rf':\[([^\]]+)\].*?{feed_regex_pattern("edited")}', content)
 		if match:
 			# rollback page
 			username = match.group(1)

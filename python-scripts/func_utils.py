@@ -24,6 +24,12 @@ def format_blockquotes(text):
 	return '\n'.join(f'> {line}' for line in text.splitlines())
 
 
+# builds regex string matching a Mentat message in the Recent Changes feed channel
+# verb can be a single word e.g. `created` or a concatenation e.g. `created|edited`
+def feed_regex_pattern(verb):
+  return rf'\) (?:{verb}) \[([^\]]+)\]'
+
+
 # fetches attachments as discord.File objects before Discord purges them
 async def fetch_attachments_as_files(attachments):
 	files = []

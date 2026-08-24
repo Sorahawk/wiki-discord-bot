@@ -155,7 +155,6 @@ async def wiki_login(retry=False):
 	data = response['login']
 
 	if data['result'] == 'Success':
-		var_global.OPERATION_LOGGER.info(f"Successfully logged into Awakening Wiki as {var_secret.WIKI_CREDS[0]}")
 		return await refresh_tokens()
 
 	# resolve errors outside the lock
@@ -184,7 +183,7 @@ async def check_wiki_session():
 			var_global.OPERATION_LOGGER.info(f"Wiki session still active as: {user['name']}")
 			return await refresh_tokens()
 
-		var_global.OPERATION_LOGGER.warning('Wiki session expired; now performing re-login')
+		var_global.OPERATION_LOGGER.info('Wiki session expired; now performing re-login')
 		await wiki_login()
 
 

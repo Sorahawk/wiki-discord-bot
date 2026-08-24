@@ -36,7 +36,7 @@ async def send_audit_message(channel, header, body, files=None):
 	if files is None:
 		files = []
 
-	full_message = header + body
+	full_message = header + body if header else body
 
 	if len(full_message) <= 2000:
 		await channel.send(full_message, files=files, allowed_mentions=discord.AllowedMentions.none())

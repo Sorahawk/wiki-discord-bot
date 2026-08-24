@@ -65,20 +65,23 @@ LATEST_TIMESTAMP = None
 # repo HEAD at the end of the latest successful push
 LATEST_SHA = None
 
+# set to cache page titles that the repo tracks
+REPO_TITLES = set()
+
 # titles differing on both sides with no clear direction, held until manually resolved
 TRACKED_UNDECIDED = set()
 
 # titles the pipeline refused or failed to write, mapped to the reason, held until the problem is fixed
 TRACKED_BLOCKED = {}
 
+# marker that indicates an unresolved merge conflict in a repo file
+MERGE_CONFLICT_MARKER = '<<<<<<< '
+
 # marker appended to every wiki edit summary
 PUSH_MARKER = 'Push from Git'
 
 # subject line for every repo commit
 PULL_MARKER = 'Pull from Wiki'
-
-# marker that indicates an unresolved merge conflict in a repo file
-MERGE_CONFLICT_MARKER = '<<<<<<< '
 
 # reason recorded when the pipeline protects a MessageBundle
 MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'

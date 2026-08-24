@@ -81,6 +81,7 @@ async def run_sync(full_scan=False):
 
 	async with var_global.REPO_LOCK:
 		await reset_to_remote()
+		var_global.REPO_TITLES = list_repo_titles()
 		head_sha = await get_head_sha()
 
 		repo_titles, wiki_titles, timestamp = await resolve_sync_scope(full_scan)

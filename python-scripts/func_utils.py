@@ -60,6 +60,12 @@ def get_content_model(full_path):
 	return CONTENT_MODELS.get(full_path.suffix)
 
 
+# returns the set of page titles the repo currently tracks, without reading any file content
+def list_repo_titles():
+	repo_root = Path(REPO_PAGES_PATH)
+	return { resolve_title(full_path.relative_to(repo_root)) for full_path in repo_root.rglob('*') if full_path.is_file() }
+
+
 # walks the wiki repo and returns two dicts keyed by page title:
 # first one has corresponding file content as value
 # second one has tuple (full path, relative path) as value

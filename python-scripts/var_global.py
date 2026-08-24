@@ -20,6 +20,9 @@ LOGGER_NAME = 'Wiki Bot Operations Log'
 # logger object
 OPERATION_LOGGER = None
 
+# max length of logged payloads and responses
+LOGGED_DATA_MAX_LEN = 200
+
 
 
 ### HTTP ###

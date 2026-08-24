@@ -4,15 +4,15 @@ from imports import *
 # standard function for HTTP requests
 async def http_request(endpoint, payload=None, method='GET', headers=None, is_json=False):
 	session = var_global.SESSION
-	LOGGED_DATA_MAX_LEN = 200
 
 	if not payload:  # handle empty payload
 		payload = {}
 
+
 	# omit items in payload from logs
 	logged_payload = payload.copy()  # shallow copy; only first level
 
-	if 'lgpassword' in logged_payload:  # BotPassword
+	if 'lgpassword' in logged_payload:  # BotPassword is sensitive
 		logged_payload['lgpassword'] = '(SUPPRESSED)'
 
 	if 'titles' in logged_payload:  # get_page_content bulk titles
@@ -20,9 +20,11 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 		if (num_titles := len(titles)) > 25:
 			logged_payload['titles'] = f'(TRUNCATED) {num_titles} page titles'
 
+	# truncate overall payload if too long
 	logged_payload = str(logged_payload)
 	if len(logged_payload) > LOGGED_DATA_MAX_LEN:
 		logged_payload = f'(TRUNCATED) {logged_payload[:LOGGED_DATA_MAX_LEN]}...'
+
 
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {logged_payload}")
 
@@ -40,6 +42,7 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	else:
 		response = raw_response.text
 
+
 	# omit items in response from logs
 	logged_response = response
 	if isinstance(response, dict):
@@ -49,15 +52,14 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 		if logged_response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
 			del logged_response['warnings']
 	
-		if logged_response.get('query', {}).get('tokens'):
-			logged_response['query'] = logged_response['query'].copy()  # modifying past first level so need to copy again
-			logged_response['query']['tokens'] = '(SUPPRESSED)'
-
+		# truncate overall response if too long
 		logged_response = str(logged_response)
 		if len(logged_response) > LOGGED_DATA_MAX_LEN:
 			logged_response = f'(TRUNCATED) {logged_response[:LOGGED_DATA_MAX_LEN]}...'
 
 	var_global.OPERATION_LOGGER.info(logged_response)
+
+
 	return response
 
 

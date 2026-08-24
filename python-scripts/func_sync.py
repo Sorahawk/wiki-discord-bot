@@ -60,14 +60,12 @@ async def resolve_sync_scope(full_scan):
 	timestamp = await get_wiki_timestamp()
 
 	if full_scan or not var_global.LATEST_TIMESTAMP or not var_global.LATEST_SHA:
-		var_global.OPERATION_LOGGER.info(f'Full scan - full_scan={full_scan}, ts={var_global.LATEST_TIMESTAMP}, sha={var_global.LATEST_SHA}')
 		return None, None, timestamp
 
 	changed_paths = await get_changed_paths(var_global.LATEST_SHA)
 
 	# ancestry is broken, so the commit range is unusable and the whole tree must be compared
 	if changed_paths is None:
-		var_global.OPERATION_LOGGER.info(f'Full scan - broken ancestry from {var_global.LATEST_SHA}')
 		return None, None, timestamp
 
 	repo_titles = {resolve_title(Path(path)) for path in changed_paths}

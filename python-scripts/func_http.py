@@ -12,12 +12,12 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	# omit items in payload from logs
 	logged_payload = payload.copy()
 
-	if 'lgpassword' in logged_payload:
-		logged_payload['lgpassword'] = '(CENSORED)'
+	if 'lgpassword' in logged_payload:  # BotPassword
+		logged_payload['lgpassword'] = '(SUPPRESSED)'
 
-	if 'titles' in logged_payload:
+	if 'titles' in logged_payload:  # get_page_content bulk titles
 		titles = logged_payload['titles'].split('|')
-		if (num_titles := len(titles)) > 30:
+		if (num_titles := len(titles)) > 25:
 			logged_payload['titles'] = f'(TRUNCATED) {num_titles} page titles'
 
 	logged_payload = str(logged_payload)
@@ -40,13 +40,21 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	else:
 		response = raw_response.text
 
-	# omit harmless warning about wiki bot param
-	if isinstance(response, dict) and response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
-		del response['warnings']
+	# omit items in response from logs
+	logged_response = response
+	if isinstance(response, dict):
+		logged_response = response.copy()
 
-	logged_response = str(response.copy())
-	if len(logged_response) > LOGGED_DATA_MAX_LEN:
-		logged_response = f'(TRUNCATED) {logged_response[:LOGGED_DATA_MAX_LEN]}...'
+		# omit harmless bot warning
+		if logged_response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
+			del logged_response['warnings']
+	
+		if logged_response.get('query', {}).get('tokens'):
+			logged_response['query']['tokens'] = '(SUPPRESSED)'
+
+		logged_response = str(logged_response)
+		if len(logged_response) > LOGGED_DATA_MAX_LEN:
+			logged_response = f'(TRUNCATED) {logged_response[:LOGGED_DATA_MAX_LEN]}...'
 
 	var_global.OPERATION_LOGGER.info(logged_response)
 	return response

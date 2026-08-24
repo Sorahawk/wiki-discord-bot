@@ -10,7 +10,7 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 		payload = {}
 
 	# omit items in payload from logs
-	logged_payload = payload.copy()
+	logged_payload = payload.copy()  # shallow copy; only first level
 
 	if 'lgpassword' in logged_payload:  # BotPassword
 		logged_payload['lgpassword'] = '(SUPPRESSED)'
@@ -43,13 +43,14 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	# omit items in response from logs
 	logged_response = response
 	if isinstance(response, dict):
-		logged_response = response.copy()
+		logged_response = response.copy()  # shallow copy; only first level
 
 		# omit harmless bot warning
 		if logged_response.get('warnings', {}).get('main', {}).get('warnings') == 'Unrecognized parameter: bot.':
 			del logged_response['warnings']
 	
 		if logged_response.get('query', {}).get('tokens'):
+			logged_response['query'] = logged_response['query'].copy()  # modifying past first level so need to copy again
 			logged_response['query']['tokens'] = '(SUPPRESSED)'
 
 		logged_response = str(logged_response)

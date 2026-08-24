@@ -189,7 +189,7 @@ async def check_wiki_session():
 
 		# if session is valid, anon field is not present
 		if user.get('anon') is None:
-			var_global.OPERATION_LOGGER.info(f"Wiki session still active as: {user['name']}")
+			var_global.OPERATION_LOGGER.info(f"Wiki session still active")
 			return await refresh_tokens()
 
 		var_global.OPERATION_LOGGER.info('Wiki session expired; now performing re-login')

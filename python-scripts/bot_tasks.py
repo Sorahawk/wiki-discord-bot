@@ -37,13 +37,13 @@ class TasksCog(commands.Cog):
 
 
 	# refresh wiki tokens
-	@loop(minutes=10)
-	async def task_refresh_wiki_session(self):
-		try:
-			await check_wiki_session()
+	# @loop(minutes=10)
+	# async def task_refresh_wiki_session(self):
+	# 	try:
+	# 		await check_wiki_session()
 
-		except Exception as e:
-			await send_traceback(e)
+	# 	except Exception as e:
+	# 		await send_traceback(e)
 
 
 	# reconciles the wiki repo against the wiki in both directions

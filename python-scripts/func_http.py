@@ -18,7 +18,7 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	if 'titles' in logged_payload:  # get_page_content bulk titles
 		titles = logged_payload['titles'].split('|')
 		if (num_titles := len(titles)) > 25:
-			logged_payload['titles'] = f'(TRUNCATED) {num_titles} page titles'
+			logged_payload['titles'] = f'(TRUNCATED - {num_titles} page titles)'
 
 	# truncate overall payload if too long
 	logged_payload = str(logged_payload)

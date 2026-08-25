@@ -59,6 +59,7 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 async def resolve_sync_scope():
 	timestamp = await get_wiki_timestamp()
 
+	# tracking values uninitialised
 	if not var_global.LATEST_TIMESTAMP or not var_global.LATEST_SHA:
 		return None, None, timestamp
 

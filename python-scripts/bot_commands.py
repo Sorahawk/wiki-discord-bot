@@ -46,6 +46,22 @@ class CommandsCog(commands.Cog):
 		await context.send(BOT_VOICELINES['sleeping' if var_global.SLEEP_MODE else 'waking'])
 
 
+	# force a wiki/repo change check
+	# optionally specify `full` to also display the current outstanding backlog
+	@commands.command(name='sync')
+	async def sync(self, context, mode: str = None):
+		reported = await run_sync()
+		reported_backlog = False
+
+		if mode == 'full':
+			undecided = sorted(var_global.TRACKED_UNDECIDED)
+			blocked = sorted(var_global.TRACKED_BLOCKED.items())
+			reported_backlog = await report_sync([], [], [], undecided, [], blocked, context.channel)
+
+		if not (reported or reported_backlog):
+			await context.send(BOT_VOICELINES['nothing'])
+
+
 	# resolve tracked conflicts from repo to wiki
 	@commands.command(name='push')
 	async def push_to_wiki(self, context):

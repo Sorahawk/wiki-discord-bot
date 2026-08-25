@@ -16,8 +16,6 @@ class CommandsCog(commands.Cog):
 
 	# common function for push and pull commands
 	async def resolve_push_pull(self, context, push_to_wiki):
-		reported = await run_sync(full_scan=True)
-
 		resolved, blocked = await resolve_conflicts(push_to_wiki)
 		reported_resolved = await report_sync([], [], [], [], resolved, blocked, context.channel)
 

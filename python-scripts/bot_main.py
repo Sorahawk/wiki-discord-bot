@@ -95,14 +95,23 @@ async def on_message(message):
 			if context.valid:
 				return await bot.invoke(context)
 
-	# check if message is in feed channel from Mentat
-	if message.channel.id == CHANNEL_IDS['feed'] and message.author.id == MENTAT_BOT_ID:
-		if not var_global.WIKI_CHANGED_FLAG:
-			# only flip the boolean if the mentioned page is tracked by the repo
-			match = re.search(feed_regex_pattern('created|edited'), message.content)
+	# check if message is in wiki feed from Mentat regardless of sleep mode
+	if message.channel.id == CHANNEL_IDS['wiki'] and message.author.id == MENTAT_BOT_ID:
 
+		if not var_global.WIKI_CHANGED_FLAG:
+			match = re.search(wiki_feed_regex('created|edited'), message.content)
+
+			# only flip the boolean if the mentioned page is tracked by the repo
 			if match and match.group(1) in var_global.REPO_TITLES:
 				var_global.WIKI_CHANGED_FLAG = True
+		return
+
+	# check if message is in repo feed from webhook regardless of sleep mode
+	if message.channel.id == CHANNEL_IDS['repo'] and message.author.id == REPO_WEBHOOK_ID:
+
+		if message.embeds and not var_global.REPO_CHANGED_FLAG:
+			if ':main]' in (message.embeds[0].title or ''):
+				var_global.REPO_CHANGED_FLAG = True
 		return
 
 	# else check messages for trigger phrases

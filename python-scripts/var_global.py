@@ -56,8 +56,11 @@ MAX_QUERY_TITLES = 500
 # interval (seconds) between periodic runs of sync task
 SYNC_INTERVAL_SECONDS = 20
 
-# boolean flag used to denote wiki state as changed; flipped when Mentat messages are detected in feed channel
+# boolean flag used to denote wiki state as changed; flipped when Mentat messages are detected in wiki feed channel
 WIKI_CHANGED_FLAG = False
+
+# boolean flag used to denote repo state as changed; flipped when webhook messages are detected in repo feed channel
+REPO_CHANGED_FLAG = False
 
 # wiki timestamp of the latest successful pull
 LATEST_TIMESTAMP = None
@@ -106,7 +109,8 @@ SERVER_ID = 1204923645705855108
 # dictionary of Discord server channel IDs
 CHANNEL_IDS = {
 	'main': 1465756865127514162,	# default notifications
-	'feed': 1465745673486995642,	# Recent Changes feed
+	'wiki': 1465745673486995642,	# wiki Recent Changes
+	'repo': 1541807412451737770,	# GitHub repo webhook
 	'ongoing': 1474360466003464243,	# ongoing (claimed) Wiki Missions
 	'audit': 1499032540168589386,	# audit logs
 	'reroute': 1492574553698865373,	# reroute direct messages
@@ -126,6 +130,9 @@ ELEVATED_USER_ROLES = [
 
 # ID of Mentat companion bot
 MENTAT_BOT_ID = 1463966841914261710
+
+# ID of GitHub webhook 'user'
+REPO_WEBHOOK_ID = 1541812173859197068
 
 
 
@@ -202,8 +209,8 @@ ACCEPTED_EMOJIS = {
 	'rollback': '🔄',
 }
 
-# dictionary of blacklisted strings to prevent acting on certain pages or messages in feed channel
-FEED_BLACKLIST = [
+# dictionary of blacklisted strings to prevent acting on certain pages or messages in wiki feed channel
+WIKI_FEED_BLACKLIST = [
 	':wave:',					# user registered
 	':people_holding_hands:',	# user rights changed
 	':truck:',					# page moved

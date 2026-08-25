@@ -57,7 +57,7 @@ async def message_delete_handler(bot, message):
 	author = message.author
 
 	# ignore bot messages being deleted
-	if author == bot.user or author.id == MENTAT_BOT_ID:
+	if author == bot.user or author.id == MENTAT_BOT_ID or author.id == REPO_WEBHOOK_ID:
 		return
 
 	files = await fetch_attachments_as_files(message.attachments)
@@ -87,9 +87,9 @@ async def message_delete_handler(bot, message):
 	await send_audit_message(var_global.CHANNELS['audit'], audit_header, audit_body, files)
 
 
-# handles emoji reacts in feed channel
+# handles emoji reacts in wiki feed channel
 async def reaction_handler(payload):
-	if payload.channel_id != CHANNEL_IDS['feed']:
+	if payload.channel_id != CHANNEL_IDS['wiki']:
 		return
 
 	# verify user is authorised
@@ -97,18 +97,18 @@ async def reaction_handler(payload):
 	if not check_user_elevation(member):
 		return
 
-	message = await var_global.CHANNELS['feed'].fetch_message(payload.message_id)
+	message = await var_global.CHANNELS['wiki'].fetch_message(payload.message_id)
 	content = message.content
 
 	# ignore blacklisted messages
-	for blacklist_string in FEED_BLACKLIST:
+	for blacklist_string in WIKI_FEED_BLACKLIST:
 		if blacklist_string in content:
 			return
 
 	# delete page action
 	if payload.emoji.name in ACCEPTED_EMOJIS['delete']:
 		# grab page title
-		match = re.search(feed_regex_pattern('created'), content)
+		match = re.search(wiki_feed_regex('created'), content)
 		if not match:
 			return
 
@@ -118,12 +118,12 @@ async def reaction_handler(payload):
 		response = await delete_page(title, f"Deleted via Discord by {member.display_name}")
 
 		if response.get('error', {}).get('code') == 'missingtitle':
-			await var_global.CHANNELS['feed'].send(f"<@{member.id}>, `{title}` no longer exists, thus cannot be deleted!")
+			await var_global.CHANNELS['wiki'].send(f"<@{member.id}>, `{title}` no longer exists, thus cannot be deleted!")
 
 	# rollback consecutive edits or revert image actions
 	elif payload.emoji.name in ACCEPTED_EMOJIS['rollback']:
 		if 'new version' in content.lower():
-			match = re.search(feed_regex_pattern('uploaded'), content)
+			match = re.search(wiki_feed_regex('uploaded'), content)
 			if match:
 				title = match.group(1)
 				file_title = f'File:{title}'
@@ -145,7 +145,7 @@ async def reaction_handler(payload):
 				# revert to the previous version
 				response = await revert_image(title, to_revert, f"Reverted to previous version via Discord by {member.display_name}")
 				if response.get('error'):
-					await var_global.CHANNELS['feed'].send(error_message_base + response['error']['info'])
+					await var_global.CHANNELS['wiki'].send(error_message_base + response['error']['info'])
 					return
 
 				# fetch again to get the archivename of the target version to delete
@@ -163,17 +163,17 @@ async def reaction_handler(payload):
 				# delete the target version
 				response = await delete_page(file_title, f"Deleted target version via Discord by {member.display_name}", to_delete)
 				if response.get('error'):
-					await var_global.CHANNELS['feed'].send(error_message_base + response['error']['info'])
+					await var_global.CHANNELS['wiki'].send(error_message_base + response['error']['info'])
 					return
 
 				# delete the now-redundant duplicate version
 				response = await delete_page(file_title, f"Deleted duplicate version via Discord by {member.display_name}", to_revert)
 				if response.get('error'):
-					await var_global.CHANNELS['feed'].send(error_message_base + response['error']['info'])
+					await var_global.CHANNELS['wiki'].send(error_message_base + response['error']['info'])
 					return
 
 		# grab user name and page title
-		match = re.search(rf':\[([^\]]+)\].*?{feed_regex_pattern("edited")}', content)
+		match = re.search(rf':\[([^\]]+)\].*?{wiki_feed_regex("edited")}', content)
 		if match:
 			# rollback page
 			username = match.group(1)
@@ -182,7 +182,7 @@ async def reaction_handler(payload):
 			response = await rollback_page(title, username, f"Latest edits by {username} rolled back via Discord by {member.display_name}")
 
 			if response.get('error', {}).get('code') == 'alreadyrolled':
-				await var_global.CHANNELS['feed'].send(f"<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.")
+				await var_global.CHANNELS['wiki'].send(f"<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.")
 
 
 # checks for any in-progress wiki missions when assignee leaves the server

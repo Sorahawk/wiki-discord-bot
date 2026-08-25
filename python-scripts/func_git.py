@@ -30,12 +30,6 @@ async def get_head_sha():
 	return await git_run('rev-parse', 'HEAD')
 
 
-# returns the SHA origin/main currently points to, without fetching any objects
-async def get_remote_head_sha():
-	output = await git_run('ls-remote', 'origin', 'main')
-	return output.split()[0] if output else None
-
-
 # discards any local changes and hard-resets the repo to the remote branch
 async def reset_to_remote():
 	await git_run('fetch', 'origin', 'main')

@@ -19,7 +19,7 @@ class CommandsCog(commands.Cog):
 		resolved, blocked = await resolve_conflicts(push_to_wiki)
 		reported_resolved = await report_sync([], [], [], [], resolved, blocked, context.channel)
 
-		if not (reported or reported_resolved):
+		if not reported_resolved:
 			await context.send(BOT_VOICELINES['nothing'])
 
 

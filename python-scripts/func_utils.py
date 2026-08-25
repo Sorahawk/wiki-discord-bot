@@ -24,9 +24,9 @@ def format_blockquotes(text):
 	return '\n'.join(f'> {line}' for line in text.splitlines())
 
 
-# builds regex string matching a Mentat message in the Recent Changes feed channel
+# builds regex string matching a Mentat message in the wiki feed channel
 # verb can be a single word e.g. `created` or a concatenation e.g. `created|edited`
-def feed_regex_pattern(verb):
+def wiki_feed_regex(verb):
   return rf'\) (?:{verb}) \[([^\]]+)\]'
 
 

@@ -3,6 +3,8 @@ from imports import *
 
 # runs a git command in the wiki repo folder and returns the output
 async def git_run(*args):
+	var_global.OPERATION_LOGGER.info(f"Executing `git {' '.join(args)}` in local repo")
+
 	process = await asyncio.create_subprocess_exec(
 		'git', '-C', REPO_PAGES_PATH,
 		'-c', 'core.quotePath=false', '-c', 'gc.auto=0',

@@ -18,7 +18,10 @@ async def git_run(*args):
 		raise RuntimeError(f"git {' '.join(args)} failed ({process.returncode}): {stderr.decode().strip()}")
 
 	output = stdout.decode().strip()
-	var_global.OPERATION_LOGGER.info(output)
+
+	if output:
+		var_global.OPERATION_LOGGER.info(output)
+
 	return output
 
 

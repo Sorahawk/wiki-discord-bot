@@ -55,8 +55,8 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 			logged_response = f'(TRUNCATED) {logged_response[:LOGGED_DATA_MAX_LEN]}...'
 
 	var_global.OPERATION_LOGGER.info(logged_response)
-	return response
 
+	return response
 
 
 # mentat functions
@@ -96,7 +96,6 @@ async def abandon_mission_safely(mission):
 
 		var_global.OPERATION_LOGGER.warning(message)
 		await var_global.CHANNELS['audit'].send(message)
-
 
 
 # wiki functions

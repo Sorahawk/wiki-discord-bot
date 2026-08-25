@@ -8,7 +8,6 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	if not payload:  # handle empty payload
 		payload = {}
 
-
 	# omit items in payload from logs
 	logged_payload = payload.copy()  # shallow copy; only first level
 
@@ -24,7 +23,6 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	logged_payload = str(logged_payload)
 	if len(logged_payload) > LOGGED_DATA_MAX_LEN:
 		logged_payload = f'(TRUNCATED) {logged_payload[:LOGGED_DATA_MAX_LEN]}...'
-
 
 	var_global.OPERATION_LOGGER.info(f"Making {method} request to {endpoint} with payload {logged_payload}")
 
@@ -42,7 +40,6 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	else:
 		response = raw_response.text
 
-
 	# omit items in response from logs
 	logged_response = response
 	if isinstance(response, dict):
@@ -58,8 +55,6 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 			logged_response = f'(TRUNCATED) {logged_response[:LOGGED_DATA_MAX_LEN]}...'
 
 	var_global.OPERATION_LOGGER.info(logged_response)
-
-
 	return response
 
 

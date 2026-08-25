@@ -3,7 +3,7 @@ from imports import *
 
 # runs a git command in the wiki repo folder and returns the output
 async def git_run(*args):
-	var_global.OPERATION_LOGGER.info(f"Executing `git {' '.join(args)}` in local repo")
+	var_global.OPERATION_LOGGER.info(f"Executing in local repo: git {' '.join(args)}")
 
 	process = await asyncio.create_subprocess_exec(
 		'git', '-C', REPO_PAGES_PATH,
@@ -17,7 +17,9 @@ async def git_run(*args):
 	if process.returncode:
 		raise RuntimeError(f"git {' '.join(args)} failed ({process.returncode}): {stderr.decode().strip()}")
 
-	return stdout.decode().strip()
+	output = stdout.decode().strip()
+	var_global.OPERATION_LOGGER.info(output)
+	return output
 
 
 # returns the full SHA of the current head

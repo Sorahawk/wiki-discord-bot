@@ -56,10 +56,10 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 
 # determines which titles changed on each side this cycle
 # returns (repo titles, wiki titles, timestamp); None for both sets means compare everything
-async def resolve_sync_scope(full_scan):
+async def resolve_sync_scope():
 	timestamp = await get_wiki_timestamp()
 
-	if full_scan or not var_global.LATEST_TIMESTAMP or not var_global.LATEST_SHA:
+	if not var_global.LATEST_TIMESTAMP or not var_global.LATEST_SHA:
 		return None, None, timestamp
 
 	changed_paths = await get_changed_paths(var_global.LATEST_SHA)
@@ -76,7 +76,7 @@ async def resolve_sync_scope(full_scan):
 
 # reconciles the wiki repo against the wiki in both directions; the side that changed this cycle wins
 # if both changed, or neither did, the page is held as undecided
-async def run_sync(full_scan=False):
+async def run_sync():
 	var_global.OPERATION_LOGGER.info(f'Latest timestamp: {var_global.LATEST_TIMESTAMP} | Latest SHA: {var_global.LATEST_SHA}')
 
 	async with var_global.REPO_LOCK:
@@ -84,7 +84,7 @@ async def run_sync(full_scan=False):
 		var_global.REPO_TITLES = list_repo_titles()
 		head_sha = await get_head_sha()
 
-		repo_titles, wiki_titles, timestamp = await resolve_sync_scope(full_scan)
+		repo_titles, wiki_titles, timestamp = await resolve_sync_scope()
 		scope = None if repo_titles is None else repo_titles | wiki_titles | var_global.TRACKED_UNDECIDED | var_global.TRACKED_BLOCKED.keys()
 
 		local_by_title, file_by_title = collect_local_pages(scope)
@@ -148,11 +148,6 @@ async def run_sync(full_scan=False):
 			if title not in changed and title not in missing_set:
 				var_global.TRACKED_UNDECIDED.discard(title)
 				var_global.TRACKED_BLOCKED.pop(title, None)
-
-		# a full scan is the only way to see the whole outstanding set, so list it in full
-		if full_scan:
-			undecided = sorted(var_global.TRACKED_UNDECIDED)
-			blocked = sorted(var_global.TRACKED_BLOCKED.items())
 
 		# re-read HEAD only when a pull commit moved it, so it stays out of the next diff
 		if pulled:

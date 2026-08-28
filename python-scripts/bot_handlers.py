@@ -67,7 +67,7 @@ async def message_delete_handler(bot, message):
 
 	# check audit log to find the deleter, might take a while to appear
 	# self-deletions don't appear in the log
-	await asyncio.sleep(2)
+	await asyncio.sleep(5)
 
 	async for entry in message.guild.audit_logs(action=discord.AuditLogAction.message_delete, limit=3):
 		if entry.target.id == author.id and entry.extra.channel.id == message.channel.id:

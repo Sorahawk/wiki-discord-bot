@@ -108,9 +108,12 @@ async def on_message(message):
 
 	# check if message is in repo feed from webhook regardless of sleep mode
 	if message.channel.id == CHANNEL_IDS['repo'] and message.author.id == REPO_WEBHOOK_ID:
-
 		if message.embeds and not var_global.REPO_CHANGED_FLAG:
-			if ':main]' in (message.embeds[0].title or ''):
+			embed = message.embeds[0]
+			title = embed.title or ''
+			description = embed.description or ''
+
+			if ':main]' in title and PULL_MARKER not in description:
 				var_global.REPO_CHANGED_FLAG = True
 		return
 

@@ -36,6 +36,9 @@ async def diff_against_wiki(local_by_title):
 
 # pushes local content to the wiki, and protects the page if it is a MessageBundle
 async def push_page(title, content, full_path, rel_path, head_sha):
+	if not content.strip():
+		return 'Local content is blank'
+
 	commit_subject = await get_last_commit_subject(rel_path)
 	summary = f'{commit_subject} ({PUSH_MARKER} - {head_sha[:7]})'
 

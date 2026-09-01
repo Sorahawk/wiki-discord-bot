@@ -168,11 +168,7 @@ async def run_sync():
 # returns two lists: the titles written, and the titles still held
 async def resolve_conflicts(push_to_wiki):
 	async with var_global.REPO_LOCK:
-		if push_to_wiki:
-			titles = sorted(var_global.TRACKED_UNDECIDED | var_global.TRACKED_BLOCKED.keys())
-		else:
-			titles = sorted(var_global.TRACKED_UNDECIDED)
-
+		titles = sorted(var_global.TRACKED_UNDECIDED | var_global.TRACKED_BLOCKED.keys())
 		if not titles:
 			return [], []
 

@@ -433,7 +433,7 @@ async def get_recent_changes(since_timestamp):
 		})
 
 		for change in response['query']['recentchanges']:
-			if change['user'] == BOT_USERNAME and PUSH_MARKER in change.get('comment', ''):
+			if PUSH_MARKER in change.get('comment', ''):
 				continue
 
 			titles.add(change['title'])

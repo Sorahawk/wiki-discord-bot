@@ -1,7 +1,4 @@
 
-BOT_USERNAME = 'Sorabot'
-
-
 ### LINUX ###
 
 # name of the bot service running on the Linux VM
@@ -37,7 +34,7 @@ WIKI_BASE_URL = 'https://awakening.wiki/api.php'
 MENTAT_BASE_URL = 'https://mentat.wiki'
 
 # standard headers for HTTP requests
-STANDARD_HEADERS = { 'User-Agent': f'Ixian Thinking Machine/{BOT_USERNAME}' }
+STANDARD_HEADERS = { 'User-Agent': 'Ixian Thinking Machine/Sorabot' }
 
 # async lock object to prevent race condition over authenticated wiki session
 WIKI_LOCK = None

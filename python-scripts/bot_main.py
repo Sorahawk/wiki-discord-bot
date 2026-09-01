@@ -99,10 +99,11 @@ async def on_message(message):
 	if message.channel.id == CHANNEL_IDS['wiki'] and message.author.id == MENTAT_BOT_ID:
 
 		if not var_global.WIKI_CHANGED_FLAG:
-			match = re.search(wiki_feed_regex('created|edited'), message.content)
+			content = message.content
+			match = re.search(wiki_feed_regex('created|edited'), content)
 
 			# only flip the boolean if the mentioned page is tracked by the repo
-			if match and match.group(1) in var_global.REPO_TITLES:
+			if match and match.group(1) in var_global.REPO_TITLES and PUSH_MARKER not in content:
 				var_global.WIKI_CHANGED_FLAG = True
 		return
 

@@ -180,7 +180,6 @@ async def resolve_conflicts(push_to_wiki):
 		side = resolution_label(push_to_wiki)
 		resolved, blocked = [], []
 
-		# can attempt to push blocked pages again
 		if push_to_wiki:
 			for title, local_content in local_by_title.items():
 				full_path, rel_path = file_by_title[title]
@@ -189,6 +188,7 @@ async def resolve_conflicts(push_to_wiki):
 					block_title(title, 'Unresolved merge markers', blocked)
 					continue
 
+				# can attempt to push blocked pages again
 				if error := await push_page(title, local_content, full_path, rel_path, head_sha):
 					block_title(title, error, blocked)
 					continue

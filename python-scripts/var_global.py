@@ -177,7 +177,7 @@ BOT_REPLIES_ALWAYS = [
 		],
 		(
 			"## Steps for Image Cropping\n\n"
-			"1. You MUST take your images in the Customization Menu!\n\n."
+			"1. You MUST take your images in the Customization Menu!\n\n"
 			"2. Use any photo-editing software. If in doubt, try [GIMP](<https://www.gimp.org/>), which can be downloaded for free.\n\n"
 			"3. Do not worry about the image dimensions yet. For now, just crop the TOP and BOTTOM of the image ONLY. Refer to the example image, if necessary.\n\n"
 			"4. Scale the image height to 1150px, making sure you LOCK the aspect ratio. Remember, you can scale the image UP as well; your screen resolution does NOT matter.\n\n"

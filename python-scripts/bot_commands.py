@@ -90,7 +90,7 @@ class CommandsCog(commands.Cog):
 			reply = f"There is no Wiki Mission with ID {mission_id}."
 
 		# make sure mission is active and claimed
-		elif status == 'accepted':
+		elif status in ['accepted', 'submitted']:
 
 			if action == 'abandon':
 				reply = f"User <@{mission['assignee']}> has been removed from Wiki Mission {mission_id}."

@@ -46,6 +46,8 @@ REPO_LOCK = None
 # bot accounts can go up to 500 with apihighlimits; normal accounts capped at 50
 MAX_QUERY_TITLES = 500
 
+# time period (cutimecond) for Special:CheckUser API endpoint
+CHECKUSER_PERIOD = '-1 year'
 
 
 ### SYNC ###

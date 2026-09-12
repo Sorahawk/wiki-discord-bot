@@ -84,12 +84,13 @@ class CommandsCog(commands.Cog):
 		await interaction.response.defer(ephemeral=True)
 
 		mission = await get_mission(mission_id)
+		status = mission.get('status')
 
 		if mission.get('error') == 'Mission not found':
 			reply = f"There is no Wiki Mission with ID {mission_id}."
 
 		# make sure mission is active and claimed
-		elif mission.get('status') == 'accepted':
+		elif status in ['accepted', 'submitted']:
 
 			if action == 'abandon':
 				reply = f"User <@{mission['assignee']}> has been removed from Wiki Mission {mission_id}."
@@ -99,7 +100,7 @@ class CommandsCog(commands.Cog):
 			await mentat_request(f'/api/v1/missions/{mission_id}/{action}', 'PUT')
 
 		else:
-			reply = f"Wiki Mission {mission_id} is not in progress."
+			reply = f"Wiki Mission {mission_id} is not in progress: {status}"
 
 		await interaction.followup.send(reply)
 

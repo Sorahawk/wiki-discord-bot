@@ -4,7 +4,7 @@
   </a>
   <h3 align="center">Dune: Awakening Community Wiki - Tamzin Flaxenraad Bot</h3>
   <p align="center">
-    A Discord bot to provider staff of Dune: Awakening Community Wiki with QoL services.
+    A Discord bot to provide QoL services to the staff of the Dune: Awakening Wiki.
   </p>
 </div>
 

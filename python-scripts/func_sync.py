@@ -135,7 +135,7 @@ async def run_sync():
 				full_path.write_text(live_content, encoding='utf-8')
 
 				comment = live_by_title[title][2] or 'No edit summary'
-				await commit_page(rel_path, f'{comment} ({PULL_MARKER})')
+				await commit_page(rel_path, f'({PULL_MARKER}) {comment}')
 
 				pulled.append(title)
 
@@ -211,7 +211,7 @@ async def resolve_conflicts(push_to_wiki):
 				full_path.write_text(live_content, encoding='utf-8')
 
 				comment = live_by_title[title][2] or 'No edit summary'
-				await commit_page(rel_path, f'{comment} ({PULL_MARKER})')
+				await commit_page(rel_path, f'({PULL_MARKER}) {comment}')
 
 				resolved.append((title, side))
 				var_global.TRACKED_BLOCKED.pop(title, None)

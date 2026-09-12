@@ -275,15 +275,16 @@ async def get_page_content(titles):
 			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
 			'prop': 'revisions',
 			'rvslots': 'main',
-			'rvprop': 'content|contentmodel',
+			'rvprop': 'content|contentmodel|comment',
 		}, 'POST')  # use POST instead of GET in case the concatenated titles blow past the size limit for GET requests
 
 		for page in response['query']['pages']:
 			if page.get('missing'):
-				results[page['title']] = (None, None)
+				results[page['title']] = (None, None, None)
 			else:
-				slot = page['revisions'][0]['slots']['main']
-				results[page['title']] = (slot['content'], slot['contentmodel'])
+				revision = page['revisions'][0]
+				slot = revision['slots']['main']
+				results[page['title']] = (slot['content'], slot['contentmodel'], revision.get('comment', ''))
 
 	return results
 

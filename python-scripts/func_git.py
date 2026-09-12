@@ -53,14 +53,17 @@ async def get_changed_paths(base_sha):
 	return output.splitlines()
 
 
-# stages the repo, commits if anything changed, and pushes
-# returns True if a commit was made, otherwise False
-async def commit_and_push(message):
-	await git_run('add', '.')
+# stages and commits a single file with the given message; returns True if a commit was made
+async def commit_page(rel_path, message):
+	await git_run('add', str(rel_path))
 
 	if not await git_run('diff', '--cached', '--name-only'):  # file contents are identical to HEAD e.g. intermediate edits reverted
 		return False
 
 	await git_run('commit', '-m', message)
-	await git_run('push', 'origin', 'main')
 	return True
+
+
+# pushes any local commits to the remote branch
+async def push_commits():
+	await git_run('push', 'origin', 'main')

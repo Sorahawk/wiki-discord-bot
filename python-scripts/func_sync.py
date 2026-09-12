@@ -16,9 +16,6 @@ def block_title(title, reason, blocked):
 
 
 # fetches live content for the specified titles and compares against local
-# returns two items:
-# a dict keyed by title, with corresponding value being a tuple (local content, live content)
-# and a list of titles with no matching live page
 async def diff_against_wiki(local_by_title):
 	live_by_title = await get_page_content(list(local_by_title))
 	changed, missing = {}, []
@@ -31,7 +28,7 @@ async def diff_against_wiki(local_by_title):
 		elif live_content != local_content:
 			changed[title] = (local_content, live_content)
 
-	return changed, missing
+	return changed, missing, live_by_title
 
 
 # pushes local content to the wiki, and protects the page if it is a MessageBundle
@@ -74,7 +71,6 @@ async def resolve_sync_scope():
 
 	repo_titles = {resolve_title(Path(path)) for path in changed_paths}
 	wiki_titles = await get_recent_changes(var_global.LATEST_TIMESTAMP)
-
 	return repo_titles, wiki_titles, timestamp
 
 
@@ -92,7 +88,7 @@ async def run_sync():
 		scope = None if repo_titles is None else repo_titles | wiki_titles | var_global.TRACKED_UNDECIDED | var_global.TRACKED_BLOCKED.keys()
 
 		local_by_title, file_by_title = collect_local_pages(scope)
-		changed, missing = await diff_against_wiki(local_by_title)
+		changed, missing, live_by_title = await diff_against_wiki(local_by_title)
 
 		pushed, pulled, created, undecided, resolved, blocked = [], [], [], [], [], []
 
@@ -137,6 +133,10 @@ async def run_sync():
 
 			else:
 				full_path.write_text(live_content, encoding='utf-8')
+
+				comment = live_by_title[title][2] or 'No edit summary'
+				await commit_page(rel_path, f'{comment} ({PULL_MARKER})')
+
 				pulled.append(title)
 
 			# the write succeeded, so whatever was holding this title is cleared
@@ -155,12 +155,11 @@ async def run_sync():
 
 		# re-read HEAD only when a pull commit moved it, so it stays out of the next diff
 		if pulled:
-			await commit_and_push(f'{PULL_MARKER} ({len(pulled)} pages)')
+			await push_commits()
 			head_sha = await get_head_sha()
 
 		var_global.LATEST_SHA = head_sha
 		var_global.LATEST_TIMESTAMP = timestamp
-
 		return await report_sync(pushed, pulled, created, undecided, resolved, blocked)
 
 
@@ -198,26 +197,30 @@ async def resolve_conflicts(push_to_wiki):
 				var_global.TRACKED_UNDECIDED.discard(title)
 
 		else:
-			live_by_title = await get_page_content(list(local_by_title))
+			pull_titles = {title for title in local_by_title if (title in var_global.TRACKED_UNDECIDED) or (not local_by_title[title].strip())}
+			live_by_title = await get_page_content(list(pull_titles))
 
-			for title in local_by_title:
+			for title in pull_titles:
 				live_content = live_by_title[title][0]
 
 				# nothing to pull, so the title stays held until the repo side is pushed or fixed
 				if live_content is None:
 					continue
 
-				file_by_title[title][0].write_text(live_content, encoding='utf-8')
+				full_path, rel_path = file_by_title[title]
+				full_path.write_text(live_content, encoding='utf-8')
+
+				comment = live_by_title[title][2] or 'No edit summary'
+				await commit_page(rel_path, f'{comment} ({PULL_MARKER})')
 
 				resolved.append((title, side))
 				var_global.TRACKED_BLOCKED.pop(title, None)
 				var_global.TRACKED_UNDECIDED.discard(title)
 
 			if resolved:
-				await commit_and_push(f'{PULL_MARKER} ({len(resolved)} pages)')
+				await push_commits()
 
 		var_global.LATEST_SHA = await get_head_sha()
-
 		return resolved, blocked
 
 

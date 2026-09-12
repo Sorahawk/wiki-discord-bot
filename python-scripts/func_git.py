@@ -60,7 +60,7 @@ async def commit_page(rel_path, message):
 	if not await git_run('diff', '--cached', '--name-only'):  # file contents are identical to HEAD e.g. intermediate edits reverted
 		return False
 
-	await git_run('commit', '-m', message)
+	await git_run('commit', '-m', f'{message} - {rel_path}')
 	return True
 
 

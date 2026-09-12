@@ -36,6 +36,8 @@ async def diff_against_wiki(local_by_title):
 async def write_page(title, live_content, full_path, rel_path, live_by_title):
 	full_path.write_text(live_content, encoding='utf-8')
 	comment = live_by_title[title][2] or 'No edit summary'
+
+	# place pull marker at the front of the message to ensure it isn't truncated in the Discord embed message
 	return await commit_page(rel_path, f'({PULL_MARKER}) {comment}')
 
 

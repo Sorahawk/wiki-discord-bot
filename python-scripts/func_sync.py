@@ -6,14 +6,6 @@ def resolution_label(from_repo):
 	return f'Overwritten by {"Repo" if from_repo else "Wiki"}'
 
 
-# writes live wiki content to local repo
-# returns True if content was changed and a commit was made
-async def write_page(title, live_content, full_path, rel_path, live_by_title):
-	full_path.write_text(live_content, encoding='utf-8')
-	comment = live_by_title[title][2] or 'No edit summary'
-	return await commit_page(rel_path, f'({PULL_MARKER}) {comment}')
-
-
 # holds a title until the underlying problem is fixed, recording it only on the first occurrence
 def block_title(title, reason, blocked):
 	if title not in var_global.TRACKED_BLOCKED:
@@ -37,6 +29,14 @@ async def diff_against_wiki(local_by_title):
 			changed[title] = (local_content, live_content)
 
 	return changed, missing, live_by_title
+
+
+# writes live wiki content to local repo
+# returns True if content was changed and a commit was made
+async def write_page(title, live_content, full_path, rel_path, live_by_title):
+	full_path.write_text(live_content, encoding='utf-8')
+	comment = live_by_title[title][2] or 'No edit summary'
+	return await commit_page(rel_path, f'({PULL_MARKER}) {comment}')
 
 
 # pushes local content to the wiki, and protects the page if it is a MessageBundle

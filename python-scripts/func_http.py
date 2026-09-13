@@ -446,19 +446,3 @@ async def get_recent_changes(since_timestamp):
 			break
 
 	return titles
-
-
-# retrieves all IP addresses tied to a user
-async def get_user_ips(username, reason=''):
-	response = await wiki_request({
-		'action': 'query',
-		'list': 'checkuser',
-		'curequest': 'userips',
-		'cutarget': username,
-		'cureason': reason,
-		'cutimecond': CHECKUSER_PERIOD,
-		'culimit': 'max',
-		'cutoken': var_secret.WIKI_TOKENS['csrf'],
-	}, 'POST')
-
-	return response['query']['checkuser']

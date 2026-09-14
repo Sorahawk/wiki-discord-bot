@@ -185,19 +185,16 @@ async def reaction_handler(payload):
 				await var_global.CHANNELS['wiki'].send(f"<@{member.id}>, unable to rollback `{title}`! Page may have already been rolled back, or latest edit was not made by {username}.")
 
 
-# checks for any in-progress wiki missions when assignee leaves the server
+# handles members leaving server
 async def removed_member_handler(bot, user_id):
 	# fetch user info because raw event only returns user ID
 	user = await bot.fetch_user(user_id)
 
 	# log event
-	message = f"<@{user_id}> left the server - `{user_id}`  `@{user.name}`  `({user.display_name})`"
-
+	avatar_url = user.display_avatar.with_size(128).url
+	message = f"<@{user_id}> left the server[:]({avatar_url}) `{user_id}`  `@{user.name}`  `({user.display_name})`"
 	var_global.OPERATION_LOGGER.info(message)
 	await var_global.CHANNELS['audit'].send(message)
-
-	avatar_url = user.display_avatar.with_size(128).url
-	await var_global.CHANNELS['audit'].send(avatar_url)
 
 	# check if user has any accepted missions, and abandon them
 	missions = await mentat_request('/api/v1/missions', filters={

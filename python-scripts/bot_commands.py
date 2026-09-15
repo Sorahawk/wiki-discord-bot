@@ -140,15 +140,16 @@ class CommandsCog(commands.Cog):
 			mission_id = re.search(r'\[(\d+)\]', embed.title).group(1)
 
 			# check if user is still in the server
-			try:
-				assignee = embed.fields[-1].value
-				assignee_id = int(re.search(r'<@(\d+)>', assignee).group(1))
-				await interaction.guild.fetch_member(assignee_id)
+			assignee = re.search(r'<@(\d+)>', embed.fields[-1].value)
+			if assignee:  # wiki-only users will not match
+				try:
+					assignee_id = int(assignee.group(1))
+					await interaction.guild.fetch_member(assignee_id)
 
-			except discord.errors.NotFound:
-				await abandon_mission(mission_id)
-				var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: User no longer in server')
-				continue
+				except discord.errors.NotFound:
+					await abandon_mission(mission_id)
+					var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: User no longer in server')
+					continue
 
 			# check if mission has been claimed for longer than 2 weeks
 			two_weeks = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(weeks=2)

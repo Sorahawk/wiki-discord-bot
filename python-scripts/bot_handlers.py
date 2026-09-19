@@ -143,7 +143,7 @@ async def reaction_handler(payload):
 				error_message_base = f"<@{member.id}>, error occurred during process of reverting `File:{title}`: "
 
 				# revert to the previous version
-				response = await revert_image(title, to_revert, f"Reverted to previous version via Discord by {member.display_name}")
+				response = await revert_image(title, to_revert)
 				if response.get('error'):
 					await var_global.CHANNELS['wiki'].send(error_message_base + response['error']['info'])
 					return

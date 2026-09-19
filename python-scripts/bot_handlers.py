@@ -125,8 +125,8 @@ async def reaction_handler(payload):
 		if 'new version' in content.lower():
 			match = re.search(wiki_feed_regex('uploaded'), content)
 			if match:
-				file_title = f'File:{match.group(1)}'
-				response = await revert_image(file_title, member.display_name)
+				title = match.group(1)
+				response = await revert_image(title, member.display_name)
 
 		# grab user name and page title
 		match = re.search(rf':\[([^\]]+)\].*?{wiki_feed_regex("edited")}', content)

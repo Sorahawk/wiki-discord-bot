@@ -203,7 +203,7 @@ BOT_REPLIES_MENTIONED = [
 	(["hello"], "You again, what now?"),
 	(["who are you"], "I am the fifth son of Graf Heino Flaxenraad of the Alpha Hydrae Flaxenraads, Imperial Treasurer in service of our glorious Emperor."),
 	(["thufir"], f"Greetings, <@{MENTAT_BOT_ID}> Hawat, House Atreides' Master of Assassins."),
-	(["i don't know what you're asking!"], "Didn't ask a thing."),
+	(["i don't know what you're asking"], "Didn't ask a thing."),
 	(["tax"], "Taxes? His Imperial Highness has no want or need for your Solari. Now, leave me be, you nitwit."),
 	(["solari", "coin", "credit"], "Your Solari is worthless here, peasant. Go about your own business and stop bothering me."),
 	(["ecolog", "planetolog"], "Cyprian Io is our esteemed Imperial Planetologist right here on Arrakis."),

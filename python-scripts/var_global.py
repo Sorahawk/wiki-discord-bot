@@ -176,13 +176,24 @@ BOT_REPLIES_ALWAYS = [
 			"incorrect image w:h ratio. required ratio: 1:2.3",
 		],
 		(
-			"## Steps for Image Cropping\n\n"
+			"## Steps for Image Cropping\n"
 			"1. You MUST take your images in the Customization Menu!\n\n"
 			"2. Use any photo-editing software. If in doubt, try [GIMP](<https://www.gimp.org/>), which can be downloaded for free.\n\n"
 			"3. Do not worry about the image dimensions yet. For now, just crop the TOP and BOTTOM of the image ONLY. Refer to the example image, if necessary.\n\n"
 			"4. Scale the image height to 1150px, making sure you LOCK the aspect ratio. Remember, you can scale the image UP as well; your screen resolution does NOT matter.\n\n"
 			"5. Crop the sides down to 500px.\n\n"
 			"**Your images should look something like below**[.](https://media.awakening.wiki/wiki/1/17/Executor_Torso.png) Check out our [Photobox Guide](<https://awakening.wiki/Wiki:Photobox_Guide>) for more info."
+		)
+	),
+	(
+		[
+			"photo tips",
+		],
+		(
+			"## In-Game Photography Tips\n"
+			"- Turn off your HUD using `End` / `F11` / `F6`\n"
+			"- Crouch with your back against a wall/obstacle/vehicle, or hang on a wall, to hide your character from the camera."
+			"- Try not to take photos while in a vehicle. It takes up majority of the visual space, so the focus on the object is not clear."
 		)
 	)
 ]

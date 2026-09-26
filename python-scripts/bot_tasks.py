@@ -61,7 +61,7 @@ class TasksCog(commands.Cog):
 
 
 	# verify page protection
-	@loop(hours=1)
+	@loop(minutes=1)
 	async def task_protect_pages(self):
 		if sys.platform != 'linux' or var_global.SLEEP_MODE:
 			return

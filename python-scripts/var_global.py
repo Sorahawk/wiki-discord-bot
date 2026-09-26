@@ -83,8 +83,8 @@ PUSH_MARKER = 'Push from Git'
 # subject line for every repo commit
 PULL_MARKER = 'Pull from Wiki'
 
-# reason recorded when the pipeline protects a MessageBundle
-MB_PROTECTION_MSG = 'MessageBundle auto-protection: English source anchors page links and module relations'
+# reason recorded when the pipeline auto-protects a page
+PAGE_PROTECTION_MSG = 'Auto-protection: Page managed via Git repo'
 
 # content model to assign when creating a page, inferred from the file extension
 # css and javascript are lowercase, whereas Scribunto is capitalised

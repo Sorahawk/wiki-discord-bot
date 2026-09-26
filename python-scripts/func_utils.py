@@ -30,6 +30,19 @@ def wiki_feed_regex(verb):
   return rf'\) (?:{verb}) \[([^\]]+)\]'
 
 
+# determines whether a title should be edit-protected based on prefix rules
+# root pages (no prefix) are main content pages, kept editable
+# Module data files are kept editable, but their /doc subpages are protected
+def should_protect_page(title):
+	if ':' not in title:
+		return False
+
+	if '/data/' in title:
+		return title.endswith('/doc')
+
+	return True
+
+
 # fetches attachments as discord.File objects before Discord purges them
 async def fetch_attachments_as_files(attachments):
 	files = []

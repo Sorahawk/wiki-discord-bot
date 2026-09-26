@@ -41,7 +41,7 @@ async def write_page(title, live_content, full_path, rel_path, live_by_title):
 	return await commit_page(rel_path, f'({PULL_MARKER}) {comment}')
 
 
-# pushes local content to the wiki, and protects the page if it is a MessageBundle
+# pushes local content to the wiki
 async def push_page(title, content, full_path, rel_path, head_sha):
 	if not content.strip():
 		return 'Local content is blank'
@@ -55,13 +55,6 @@ async def push_page(title, content, full_path, rel_path, head_sha):
 		error = response['error']
 		var_global.OPERATION_LOGGER.warning(f'Failed to edit {title}: {error}')
 		return error.get('info') or error.get('code', 'Unknown error')
-
-	# lock main English source for all MessageBundles
-	if title.startswith('MessageBundle:'):
-		protection = await get_protection(title)
-
-		if not any(entry['type'] == 'edit' for entry in protection):
-			await protect_page(title, reason=MB_PROTECTION_MSG)
 
 
 # determines which titles changed on each side this cycle

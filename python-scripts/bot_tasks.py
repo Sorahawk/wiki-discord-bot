@@ -61,18 +61,19 @@ class TasksCog(commands.Cog):
 
 
 	# verify page protection
-	@loop(minutes=30)
+	@loop(hours=1)
 	async def task_protect_pages(self):
 		if sys.platform != 'linux' or var_global.SLEEP_MODE:
 			return
 
+		if not var_global.REPO_TITLES:
+			return
+
 		try:
-			for title in var_global.REPO_TITLES:
-				if not should_protect_page(title):
-					continue
+			titles_to_check = [title for title in var_global.REPO_TITLES if should_protect_page(title)]
+			protection_by_title = await get_protection(titles_to_check)
 
-				protection = await get_protection(title)
-
+			for title, protection in protection_by_title.items():
 				if not any(entry['type'] == 'edit' for entry in protection):
 					await protect_page(title, reason=PAGE_PROTECTION_MSG)
 					var_global.OPERATION_LOGGER.info(f'Protected: {title}')

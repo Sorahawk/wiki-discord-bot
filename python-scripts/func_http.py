@@ -14,7 +14,7 @@ async def http_request(endpoint, payload=None, method='GET', headers=None, is_js
 	if 'lgpassword' in logged_payload:  # BotPassword is sensitive
 		logged_payload['lgpassword'] = '(SUPPRESSED)'
 
-	if 'titles' in logged_payload:  # get_page_content bulk titles
+	if 'titles' in logged_payload:  # batched titles
 		titles = logged_payload['titles'].split('|')
 		if (num_titles := len(titles)) > 25:
 			logged_payload['titles'] = f'(TRUNCATED - {num_titles} page titles)'
@@ -308,6 +308,40 @@ async def edit_page(title, content, reason='', nocreate=False, content_model=Non
 	return await wiki_request(payload, 'POST', 'csrf')
 
 
+# API call to check protection levels for one or more titles
+# accepts a single title string or a list of titles
+# returns a dict keyed by page title, with corresponding value being the protection list
+async def get_protection(titles):
+	if isinstance(titles, str):
+		titles = [titles]
+
+	results = {}
+
+	for i in range(0, len(titles), MAX_QUERY_TITLES):
+		response = await wiki_request({
+			'action': 'query',
+			'titles': '|'.join(titles[i:i + MAX_QUERY_TITLES]),
+			'prop': 'info',
+			'inprop': 'protection',
+		}, 'POST')
+
+		for page in response['query']['pages']:
+			results[page['title']] = page.get('protection', [])
+
+	return results
+
+
+# API call to protect a page
+async def protect_page(title, edit_level='sysop', move_level='sysop', expiry='infinite', reason=''):
+	return await wiki_request({
+		'action': 'protect',
+		'title': title,
+		'protections': f'edit={edit_level}|move={move_level}',
+		'expiry': f'{expiry}|{expiry}',
+		'reason': reason,
+	}, 'POST', 'csrf')
+
+
 # API call to move a page
 async def move_page(old_title, new_title, reason='', noredirect=True):
 	payload = {
@@ -352,29 +386,6 @@ async def revert_image(title, archive_name, reason=''):
 		'filename': title,
 		'archivename': archive_name,
 		'comment': reason
-	}, 'POST', 'csrf')
-
-
-# API call to check a page's current protection levels
-async def get_protection(title):
-	response = await wiki_request({
-		'action': 'query',
-		'titles': title,
-		'prop': 'info',
-		'inprop': 'protection',
-	})
-
-	return response['query']['pages'][0].get('protection', [])
-
-
-# API call to protect a page
-async def protect_page(title, edit_level='sysop', move_level='sysop', expiry='infinite', reason=''):
-	return await wiki_request({
-		'action': 'protect',
-		'title': title,
-		'protections': f'edit={edit_level}|move={move_level}',
-		'expiry': f'{expiry}|{expiry}',
-		'reason': reason,
 	}, 'POST', 'csrf')
 
 

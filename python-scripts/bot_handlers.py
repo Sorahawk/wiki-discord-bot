@@ -123,7 +123,7 @@ async def reaction_handler(payload):
 	# rollback consecutive edits or revert image actions
 	elif payload.emoji.name in ACCEPTED_EMOJIS['rollback']:
 		if 'new version' in content.lower():
-			match = re.search(wiki_feed_regex('uploaded'), content)
+			match = re.search(wiki_feed_regex('uploaded new version of'), content)
 			if match:
 				title = match.group(1)
 				file_title = f'File:{title}'

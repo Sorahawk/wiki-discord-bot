@@ -27,7 +27,7 @@ def format_blockquotes(text):
 # builds regex string matching a Mentat message in the wiki feed channel
 # verb can be a single word e.g. `created` or a concatenation e.g. `created|edited`
 def wiki_feed_regex(verb):
-  return rf'\) (?:{verb}) \[([^\]]+)\]'
+	return rf'\) (?:{verb})\s+\[([^\]]+)\]'
 
 
 # determines whether a title should be edit-protected based on prefix rules

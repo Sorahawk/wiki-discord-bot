@@ -151,13 +151,14 @@ class CommandsCog(commands.Cog):
 					var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: User no longer in server')
 					continue
 
-			# check if mission has been claimed for longer than 2 weeks
-			two_weeks = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(weeks=2)
-			if embed.timestamp < two_weeks:
+			# check if mission has been claimed for longer than threshold
+			weeks = 1
+			threshold = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(weeks=weeks)
+			if embed.timestamp < threshold:
 				await abandon_mission(mission_id)
 				var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: Overtime')
 
-		await interaction.followup.send(f"Wiki Missions with absent assignees (i.e. left the server or MIA >2 weeks) have been force-abandoned.")
+		await interaction.followup.send(f"Wiki Missions with absent assignees (i.e. left the server or MIA >{weeks} weeks) have been force-abandoned.")
 
 
 

@@ -191,7 +191,8 @@ BOT_REPLIES_ALWAYS = [
 		],
 		(
 			"## In-Game Photography Tips\n"
-			"- Turn off your HUD using `End` / `F11` / `F6`\n"
+			"- PC: Turn off your HUD using `End` / `F11` / `F6`\n"
+			"- Console: Turn on Dynamic HUD in settings, then crop the compass bar out of the image afterwards.\n"
 			"- Crouch with your back against a wall/obstacle/vehicle, or hang on a wall, to hide your character from the camera.\n"
 			"- Try not to take photos while in a vehicle. It takes up majority of the visual space, so the focus on the object is not clear.\n"
 		)

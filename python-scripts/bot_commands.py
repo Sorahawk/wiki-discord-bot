@@ -180,8 +180,8 @@ class CommandsCog(commands.Cog):
 			discord_id = discord_user.id
 		else:
 			# lookup Wiki account
-			urlsafe_name = parse.quote(wiki_username[:1].upper() + wiki_username[1:].replace(' ', '_'))  # ensure first letter of input is raised, matching wiki username behaviour
-			response = await mentat_request(f'/api/v1/wiki_users/{parse.quote(urlsafe_name.replace(' ', '_'))}', payload={ 'wiki_id': 2 })
+			urlsafe_name = parse.quote(wiki_username[:1].upper() + wiki_username[1:].replace(' ', '_'))  # ensure first letter of username input is raised, since first letter of wiki usernames MUST be upper no matter what
+			response = await mentat_request(f'/api/v1/wiki_users/{urlsafe_name}', payload={ 'wiki_id': 2 })  # wiki_id=2 passed in via payload as it was being stripped when specified directly in the URL
 
 			# invalid user will either result in { "error": null } or error code 500 which returns an HTML page
 			if not isinstance(response, dict) or 'username' not in response:

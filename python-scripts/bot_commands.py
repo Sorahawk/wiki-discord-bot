@@ -180,7 +180,8 @@ class CommandsCog(commands.Cog):
 			discord_id = discord_user.id
 		else:
 			# lookup Wiki account
-			response = await mentat_request(f'/api/v1/wiki_users/{parse.quote(wiki_username)}?wiki_id=2')
+			urlsafe_name = parse.quote(wiki_username[:1].upper() + wiki_username[1:].replace(' ', '_'))  # ensure first letter of input is raised, matching wiki username behaviour
+			response = await mentat_request(f'/api/v1/wiki_users/{parse.quote(urlsafe_name.replace(' ', '_'))}?wiki_id=2')
 
 			# invalid user will either result in { "error": null } or error code 500 which returns an HTML page
 			if not isinstance(response, dict) or 'username' not in response:
@@ -197,26 +198,27 @@ class CommandsCog(commands.Cog):
 		# lookup Discord account
 		response = await mentat_request(f'/api/v1/users/{discord_id}')
 
-		# if somehow invalid ID or unknown user (not in server)
-		if 'wiki_users' not in response:
-			await interaction.followup.send(f"Invalid Discord user specified: `@{discord_username}` <@{discord_id}>.")
+		# if unknown user (not in server)
+		if not isinstance(response, dict) or 'wiki_users' not in response:
+			await interaction.followup.send(f"Unknown Discord user: `@{discord_username}` <@{discord_id}>.")
 			return
 
 		wiki_users = response.get('wiki_users')
 
 		# no Wiki accounts linked
 		if not wiki_users:
-			await interaction.followup.send(f"Specified Discord user not linked to any Wiki account: `@{discord_username}` <@{discord_id}>.")
+			await interaction.followup.send(f"Discord user <@{discord_id}> not linked to any Wiki account.",allowed_mentions=discord.AllowedMentions.none())
 			return
 
 		# display Discord user with associated Wiki account(s)
 		output = [f"**Discord:** `@{discord_username}` <@{discord_id}>\n\n**Wiki:**"]
 
 		for user in wiki_users:
-			contributions = f'{user['wiki']}/Special:Contributions/{user['username']}'
+			urlsafe_name = parse.quote(user['username'].replace(' ', '_'))
+			contributions = f"{user['wiki']}/Special:Contributions/{urlsafe_name}"
 			output.append(f"- [{user['username']}](<{contributions}>)")
 
-		await interaction.followup.send('\n'.join(output))
+		await interaction.followup.send('\n'.join(output), allowed_mentions=discord.AllowedMentions.none())
 
 
 

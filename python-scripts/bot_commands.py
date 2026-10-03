@@ -186,12 +186,12 @@ class CommandsCog(commands.Cog):
 
 			# invalid user will either result in { "error": null } or error code 500 which returns an HTML page
 			if not isinstance(response, dict) or 'username' not in response:
-				await interaction.followup.send(f"Invalid Wiki account specified: `{wiki_username}`.")
+				await interaction.followup.send(f"Invalid Wiki account `{wiki_username}` specified.")
 				return
 
 			# no Discord user linked
 			if not (discord_id := response.get('discord_user_id')):
-				await interaction.followup.send(f"Specified Wiki account not linked to any Discord user: `{wiki_username}`.")
+				await interaction.followup.send(f"Specified Wiki account `{wiki_username}` not linked to any Discord user.")
 				return
 
 			discord_username = response.get('discord_username')
@@ -208,7 +208,7 @@ class CommandsCog(commands.Cog):
 
 		# no Wiki accounts linked
 		if not wiki_users:
-			await interaction.followup.send(f"Discord user <@{discord_id}> not linked to any Wiki account.", allowed_mentions=discord.AllowedMentions.none())
+			await interaction.followup.send(f"Discord user `@{discord_username}` <@{discord_id}> not linked to any Wiki account.", allowed_mentions=discord.AllowedMentions.none())
 			return
 
 		# display Discord user with associated Wiki account(s)

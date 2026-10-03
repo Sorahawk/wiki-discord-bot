@@ -5,8 +5,6 @@ async def main():
 	await setup()
 
 	# insert adhoc code BELOW
-	response = await wiki_request({}, 'GET', token_type=None)
-	print(json.dumps(response, indent=4))
 
 
 

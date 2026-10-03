@@ -165,15 +165,16 @@ class CommandsCog(commands.Cog):
 	@app_commands.default_permissions(manage_messages=True)
 	@app_commands.guilds(SERVER_ID)
 	async def lookup_user(self, interaction: discord.Interaction, discord_user: discord.User = None, wiki_username: str = None):
-		await interaction.response.defer()
 
 		# ensure one and only one input is specified
 		if discord_user and wiki_username:
-			await interaction.followup.send("Do not specify both `discord_user` and `wiki_username` simultaneously.")
+			await interaction.response.send_message("Do not specify both `discord_user` and `wiki_username` simultaneously.", ephemeral=True)
 			return
 		elif not discord_user and not wiki_username:
-			await interaction.followup.send("Either `discord_user` or `wiki_username` must be specified.")
+			await interaction.response.send_message("Either `discord_user` or `wiki_username` must be specified.", ephemeral=True)
 			return
+
+		await interaction.response.defer()
 
 		if discord_user:
 			discord_username = discord_user.name
@@ -207,7 +208,7 @@ class CommandsCog(commands.Cog):
 
 		# no Wiki accounts linked
 		if not wiki_users:
-			await interaction.followup.send(f"Discord user <@{discord_id}> not linked to any Wiki account.",allowed_mentions=discord.AllowedMentions.none())
+			await interaction.followup.send(f"Discord user <@{discord_id}> not linked to any Wiki account.", allowed_mentions=discord.AllowedMentions.none())
 			return
 
 		# display Discord user with associated Wiki account(s)

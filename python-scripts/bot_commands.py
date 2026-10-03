@@ -148,7 +148,7 @@ class CommandsCog(commands.Cog):
 
 				except discord.errors.NotFound:
 					await abandon_mission(mission_id)
-					var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: User no longer in server')
+					var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: User no longer in server.')
 					continue
 
 			# check if mission has been claimed for longer than threshold
@@ -156,9 +156,67 @@ class CommandsCog(commands.Cog):
 			threshold = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(weeks=weeks)
 			if embed.timestamp < threshold:
 				await abandon_mission(mission_id)
-				var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: Overtime')
+				var_global.OPERATION_LOGGER.info(f'Wiki Mission {mission_id} attached to User <@{assignee_id}> force-abandoned: Overtime.')
 
 		await interaction.followup.send(f"Wiki Missions with absent assignees (i.e. left the server or MIA >{weeks} weeks) have been force-abandoned.")
+
+
+	@app_commands.command(name='lookup_user', description='Finds the linked Discord and Wiki accounts of a specified user')
+	@app_commands.default_permissions(manage_messages=True)
+	@app_commands.guilds(SERVER_ID)
+	async def lookup_user(self, interaction: discord.Interaction, discord_user: discord.User = None, wiki_username: str = None):
+		await interaction.response.defer()
+
+		# ensure one and only one input is specified
+		if discord_user and wiki_username:
+			await interaction.followup.send("Do not specify both `discord_user` and `wiki_username` simultaneously.")
+			return
+		elif not discord_user and not wiki_username:
+			await interaction.followup.send("Either `discord_user` or `wiki_username` must be specified.")
+			return
+
+		if discord_user:
+			discord_username = discord_user.name
+			discord_id = discord_user.id
+		else:
+			# lookup Wiki account
+			response = await mentat_request(f'/api/v1/wiki_users/{parse.quote(wiki_username)}?wiki_id=2')
+
+			# invalid user will either result in { "error": null } or error code 500 which returns an HTML page
+			if not isinstance(response, dict) or 'username' not in response:
+				await interaction.followup.send(f"Invalid Wiki account specified: `{wiki_username}`.")
+				return
+
+			# no Discord user linked
+			if not (discord_id := response.get('discord_user_id')):
+				await interaction.followup.send(f"Specified Wiki account not linked to any Discord user: `{wiki_username}`.")
+				return
+
+			discord_username = response.get('discord_username')
+
+		# lookup Discord account
+		response = await mentat_request(f'/api/v1/users/{discord_id}')
+
+		# if somehow invalid ID or unknown user (not in server)
+		if 'wiki_users' not in response:
+			await interaction.followup.send(f"Invalid Discord user specified: `@{discord_username}` <@{discord_id}>.")
+			return
+
+		wiki_users = response.get('wiki_users')
+
+		# no Wiki accounts linked
+		if not wiki_users:
+			await interaction.followup.send(f"Specified Discord user not linked to any Wiki account: `@{discord_username}` <@{discord_id}>.")
+			return
+
+		# display Discord user with associated Wiki account(s)
+		output = [f"**Discord:** `@{discord_username}` <@{discord_id}>\n\n**Wiki:**"]
+
+		for user in wiki_users:
+			contributions = f'{user['wiki']}/Special:Contributions/{user['username']}'
+			output.append(f"- [{user['username']}](<{contributions}>)")
+
+		await interaction.followup.send('\n'.join(output))
 
 
 

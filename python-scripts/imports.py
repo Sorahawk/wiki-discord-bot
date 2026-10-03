@@ -11,6 +11,7 @@ import asyncio
 import datetime
 import subprocess
 
+from urllib import parse
 from pathlib import Path
 from httpx import AsyncClient
 from traceback import format_exception

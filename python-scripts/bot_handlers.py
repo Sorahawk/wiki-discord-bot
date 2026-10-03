@@ -143,8 +143,8 @@ async def reaction_handler(payload):
 
 			# revert to the previous version
 			response = await revert_image(title, to_revert, f"Reverted to previous version via Discord by {member.display_name}")
-			if response.get('error'):
-				await var_global.CHANNELS['wiki'].send(error_message_base + response['error']['info'])
+			if (error := response.get('error')):
+				await var_global.CHANNELS['wiki'].send(error_message_base + error['info'])
 				return
 
 			# fetch again to get the archivename of the target version to delete
@@ -161,14 +161,14 @@ async def reaction_handler(payload):
 
 			# delete the target version
 			response = await delete_page(file_title, f"Deleted target version via Discord by {member.display_name}", to_delete)
-			if response.get('error'):
-				await var_global.CHANNELS['wiki'].send(error_message_base + response['error']['info'])
+			if (error := response.get('error')):
+				await var_global.CHANNELS['wiki'].send(error_message_base + error['info'])
 				return
 
 			# delete the now-redundant duplicate version
 			response = await delete_page(file_title, f"Deleted duplicate version via Discord by {member.display_name}", to_revert)
-			if response.get('error'):
-				await var_global.CHANNELS['wiki'].send(error_message_base + response['error']['info'])
+			if (error := response.get('error')):
+				await var_global.CHANNELS['wiki'].send(error_message_base + error['info'])
 
 		else:
 			# grab user name and page title

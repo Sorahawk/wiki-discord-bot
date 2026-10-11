@@ -34,9 +34,10 @@ def wiki_feed_regex(verb):
 # root pages (no prefix) are main content pages, kept editable
 # Module data files are kept editable, but their /doc subpages are protected
 def should_protect_page(title):
-	if ':' not in title:
+	if not title.startswith('Module:'):
 		return False
 
+	# module data files are kept editable, but their /doc subpages are protected
 	if '/data/' in title:
 		return title.endswith('/doc')
 

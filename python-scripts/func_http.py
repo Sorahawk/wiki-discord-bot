@@ -240,7 +240,7 @@ async def list_category_members(category, namespace=None):
 		'cmtitle': f'Category:{category}',
 		'cmlimit': 'max',
 	}
-	if namespace:
+	if namespace is not None:
 		payload['cmnamespace'] = namespace
 
 	titles = []
